@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://bva81yxej6n30"]
+
+[ext_resource type="Script" uid="uid://vc7bqpc44q0k" path="res://canvas_layer.gd" id="1_fsodk"]
+[ext_resource type="Texture2D" uid="uid://bj8rmgsll4hbw" path="res://Botones_Iconos/UI_buttons16x16.png" id="2_meyst"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_r8vn4"]
+load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_efpmu"]
+atlas = SubResource("CompressedTexture2D_r8vn4")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_7r3rc"]
+load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_inhk5"]
+atlas = SubResource("CompressedTexture2D_7r3rc")
+region = Rect2(112, 0, 16, 16)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_6wdpw"]
+load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxqt3"]
+atlas = SubResource("CompressedTexture2D_6wdpw")
+region = Rect2(96, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_28j5k"]
+atlas = ExtResource("2_meyst")
+region = Rect2(80, 0, 16, 16)
+
+[node name="Botones" type="CanvasLayer" unique_id=619180748]
+script = ExtResource("1_fsodk")
+
+[node name="Control" type="Control" parent="." unique_id=2057887903]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="up" type="TouchScreenButton" parent="Control" unique_id=1735474108]
+position = Vector2(101.00001, 499.00003)
+scale = Vector2(3.312501, 3.312501)
+texture_normal = SubResource("AtlasTexture_efpmu")
+action = "up"
+
+[node name="left" type="TouchScreenButton" parent="Control" unique_id=2126671617]
+position = Vector2(48, 553)
+scale = Vector2(3.312501, 3.312501)
+texture_normal = SubResource("AtlasTexture_inhk5")
+action = "left"
+
+[node name="down" type="TouchScreenButton" parent="Control" unique_id=1583554741]
+position = Vector2(101, 606)
+scale = Vector2(3.312501, 3.312501)
+texture_normal = SubResource("AtlasTexture_yxqt3")
+action = "down"
+
+[node name="right" type="TouchScreenButton" parent="Control" unique_id=868176499]
+position = Vector2(154, 553)
+scale = Vector2(3.312501, 3.312501)
+texture_normal = SubResource("AtlasTexture_28j5k")
+action = "right"
+
+[connection signal="pressed" from="Control/up" to="." method="_on_up_pressed"]
+[connection signal="released" from="Control/up" to="." method="_on_up_released"]
+[connection signal="pressed" from="Control/left" to="." method="_on_left_pressed"]
+[connection signal="released" from="Control/left" to="." method="_on_left_released"]
+[connection signal="pressed" from="Control/down" to="." method="_on_down_pressed"]
+[connection signal="released" from="Control/down" to="." method="_on_down_released"]
+[connection signal="pressed" from="Control/right" to="." method="_on_right_pressed"]
+[connection signal="released" from="Control/right" to="." method="_on_right_released"]

@@ -1,0 +1,22 @@
+# --- Godot 4+ específicas ---
+.godot/
+/android/
+*.translation
+
+# --- Binarios y Exportaciones ---
+*.apk
+*.aab
+*.exe
+*.zip
+*.dmg
+*.pck
+
+# --- Seguridad y Firmas (Lo que platicamos) ---
+*.keystore
+*.jks
+!debug.keystore # Solo si decides que el debug SÍ se suba, pero mejor déjalo fuera
+
+# --- Archivos de Sistema/Editor ---
+.DS_Store
+Thumbs.db
+*.tmp
