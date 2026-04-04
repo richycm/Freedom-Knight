@@ -34,31 +34,32 @@ script = ExtResource("1_fsodk")
 [node name="Control" type="Control" parent="." unique_id=2057887903]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-size_flags_horizontal = 3
-metadata/_edit_use_anchors_ = true
+offset_left = -37.000008
+offset_top = -246.0
+offset_right = 2.9999924
+offset_bottom = -206.0
+scale = Vector2(1.5, 1.5)
 
 [node name="up" type="TouchScreenButton" parent="Control" unique_id=1735474108]
-position = Vector2(101.00001, 499.00003)
+position = Vector2(158, 418)
 scale = Vector2(3.312501, 3.312501)
 texture_normal = SubResource("AtlasTexture_efpmu")
 action = "up"
 
 [node name="left" type="TouchScreenButton" parent="Control" unique_id=2126671617]
-position = Vector2(48, 553)
+position = Vector2(104.99999, 472)
 scale = Vector2(3.312501, 3.312501)
 texture_normal = SubResource("AtlasTexture_inhk5")
 action = "left"
 
 [node name="down" type="TouchScreenButton" parent="Control" unique_id=1583554741]
-position = Vector2(101, 606)
+position = Vector2(158, 525)
 scale = Vector2(3.312501, 3.312501)
 texture_normal = SubResource("AtlasTexture_yxqt3")
 action = "down"
 
 [node name="right" type="TouchScreenButton" parent="Control" unique_id=868176499]
-position = Vector2(154, 553)
+position = Vector2(211, 472)
 scale = Vector2(3.312501, 3.312501)
 texture_normal = SubResource("AtlasTexture_28j5k")
 action = "right"
