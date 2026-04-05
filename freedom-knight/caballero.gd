@@ -1,34 +1,44 @@
 extends CharacterBody2D
 
-@export var speed: float = 200.0 # 400 suele ser muy rápido para sprites RPG
+@export var speed: float = 200.0
 
-# Referencia al nodo de animación
-@onready var sprite = $AnimatedSprite
-# Variable para guardar la última dirección (por defecto hacia abajo)
-var last_direction = "down"
+# Esta línea es la clave: busca CUALQUIER nodo que sea un AnimatedSprite2D
+# así no importa si se llama "AnimatedSprite2D", "Sprite" o "CaballeroAnim"
+@onready var sprite = find_child("*", true) as AnimatedSprite2D
+
+var last_direction: String = "down"
 
 func _physics_process(_delta: float) -> void:
-	# 1. Obtener dirección
+	# 1. Movimiento
 	var direction := Input.get_vector("left", "right", "up", "down")
-	
-	# 2. Aplicar movimiento
 	velocity = direction * speed
 	move_and_slide()
 	
-	# 3. Gestionar Animaciones
-	update_animations(direction)
+	# 2. Animaciones (Solo si encontró el nodo sprite)
+	if sprite:
+		update_animations(direction)
+	else:
+		print("ERROR: ¡No tienes un nodo AnimatedSprite2D dentro de Caballero!")
 
 func update_animations(direction: Vector2):
 	if direction != Vector2.ZERO:
-		# El personaje se está moviendo
-		if abs(direction.x) > abs(direction.y):
-			# Movimiento horizontal predominante
+		# Prioridad horizontal para las diagonales
+		if direction.x != 0:
 			last_direction = "right" if direction.x > 0 else "left"
 		else:
-			# Movimiento vertical predominante
 			last_direction = "down" if direction.y > 0 else "up"
 		
-		sprite.play("move_" + last_direction)
+		# Intentar reproducir animación de movimiento
+		_play_if_exists("move_" + last_direction)
 	else:
-		# El personaje está quieto
-		sprite.play("idle_" + last_direction)
+		# Intentar reproducir animación de idle
+		_play_if_exists("idle_" + last_direction)
+
+# Función de seguridad para que el juego no se cierre si falta una animación
+func _play_if_exists(anim_name: String):
+	if sprite.sprite_frames.has_animation(anim_name):
+		sprite.play(anim_name)
+	else:
+		# Si no existe la animación, al menos imprime un aviso en la consola
+		# pero NO detiene el juego.
+		print("Aviso: Falta la animación: ", anim_name)
