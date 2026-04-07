@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ck8ujptm757mk"
-path="res://.godot/imported/Izquierda.png-33ba3aae20ce10a5d6eb5c0b678ee195.ctex"
+uid="uid://dbpupwn8bmvia"
+path="res://.godot/imported/golpe derecha.png-8156492c4627423ffb8b35e7df5abafa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://SpritesPersonajes/CaballeroSprites/Izquierda.png"
-dest_files=["res://.godot/imported/Izquierda.png-33ba3aae20ce10a5d6eb5c0b678ee195.ctex"]
+source_file="res://SpritesPersonajes/CaballeroSprites/golpe derecha.png"
+dest_files=["res://.godot/imported/golpe derecha.png-8156492c4627423ffb8b35e7df5abafa.ctex"]
 
 [params]
 

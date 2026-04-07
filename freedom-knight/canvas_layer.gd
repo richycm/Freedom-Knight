@@ -25,3 +25,12 @@ func _on_left_pressed() -> void:
 
 func _on_left_released() -> void:
 	$Control/left.modulate = Color(1, 1, 1)
+
+
+
+
+func _on_attack_pressed() -> void:
+	$Control/attack.modulate = Color(0.7, 0.7, 0.7)
+
+func _on_attack_released() -> void:
+	$Control/attack.modulate = Color(1, 1, 1)

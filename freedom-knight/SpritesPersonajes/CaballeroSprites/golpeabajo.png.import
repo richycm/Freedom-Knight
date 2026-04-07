@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ck8ujptm757mk"
-path="res://.godot/imported/Izquierda.png-33ba3aae20ce10a5d6eb5c0b678ee195.ctex"
+uid="uid://bklw2myeprw8r"
+path="res://.godot/imported/golpeabajo.png-9af95e3fe705e109a19225eb5fe6e17a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://SpritesPersonajes/CaballeroSprites/Izquierda.png"
-dest_files=["res://.godot/imported/Izquierda.png-33ba3aae20ce10a5d6eb5c0b678ee195.ctex"]
+source_file="res://SpritesPersonajes/CaballeroSprites/golpeabajo.png"
+dest_files=["res://.godot/imported/golpeabajo.png-9af95e3fe705e109a19225eb5fe6e17a.ctex"]
 
 [params]
 
