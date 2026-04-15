@@ -1,10 +1,13 @@
 [gd_scene format=3 uid="uid://lold1tn7ikc8"]
 
 [ext_resource type="PackedScene" uid="uid://wdapvdeahtr8" path="res://caballero.tscn" id="1_4g1vm"]
+[ext_resource type="PackedScene" uid="uid://blg5ae8e677t1" path="res://caballero_malo.tscn" id="1_lqagn"]
 [ext_resource type="PackedScene" uid="uid://bva81yxej6n30" path="res://Botones.tscn" id="2_lqagn"]
 
 [node name="EscenarioPruebas" type="Node2D" unique_id=1162748324]
 
 [node name="Caballero" parent="." unique_id=470449425 instance=ExtResource("1_4g1vm")]
+
+[node name="CaballeroMalo" parent="." unique_id=1378590200 instance=ExtResource("1_lqagn")]
 
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("2_lqagn")]
