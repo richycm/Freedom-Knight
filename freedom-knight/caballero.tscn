@@ -1348,7 +1348,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_b85wf"]
-size = Vector2(109.09375, 195.65625)
+size = Vector2(46, 39)
 
 [node name="Caballero" type="CharacterBody2D" unique_id=470449425]
 position = Vector2(143, 22)
@@ -1363,5 +1363,5 @@ autoplay = "idle_down"
 frame_progress = 0.43413582
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1917436634]
-position = Vector2(5.453125, 120.171875)
+position = Vector2(9, 129.5)
 shape = SubResource("RectangleShape2D_b85wf")
