@@ -153,10 +153,12 @@ animations = [{
 radius = 80.00625
 
 [node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
+y_sort_enabled = true
 position = Vector2(458, 331)
 script = ExtResource("1_unrqf")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=1231386101]
+y_sort_enabled = true
 position = Vector2(0, -50)
 scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_7y38a")

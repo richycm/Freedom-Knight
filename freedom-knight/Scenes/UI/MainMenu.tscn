@@ -12,6 +12,7 @@ shadow_size = 10
 [sub_resource type="FontVariation" id="FontVariation_370kx"]
 
 [node name="MainMenu" type="Control" unique_id=495987933]
+layout_direction = 1
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,10 +32,11 @@ offset_bottom = 676.0
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=2093977395]
 layout_mode = 0
-offset_right = 1201.0
-offset_bottom = 674.0
+offset_right = 1933.0
+offset_bottom = 1200.0
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=234791680]
+layout_direction = 4
 layout_mode = 0
 offset_right = 1200.0
 offset_bottom = 675.0

@@ -153,7 +153,8 @@ animations = [{
 size = Vector2(121.99997, 124)
 
 [node name="Caballero" type="CharacterBody2D" unique_id=470449425]
-position = Vector2(612, 313)
+y_sort_enabled = true
+position = Vector2(613, 313)
 script = ExtResource("1_b85wf")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=144203630]
