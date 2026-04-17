@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Freedom Knight"
-run/main_scene="uid://lold1tn7ikc8"
+run/main_scene="uid://ccduinat2mb81"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 

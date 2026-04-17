@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://ccduinat2mb81"]
+
+[ext_resource type="AudioStream" uid="uid://d0flxjrb4wjfp" path="res://Sonidos/Musica/1 - El inicio.wav" id="1_g18y6"]
+[ext_resource type="Script" uid="uid://cvy5x6qiqadqh" path="res://Scripts/MainMenu.gd" id="1_mjmdf"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_mjmdf"]
+font_size = 50
+font_color = Color(0, 0, 0, 1)
+outline_color = Color(1, 0.05882353, 0.05882353, 1)
+shadow_size = 10
+
+[sub_resource type="FontVariation" id="FontVariation_370kx"]
+
+[node name="MainMenu" type="Control" unique_id=495987933]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1200.0
+offset_bottom = -675.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mjmdf")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=130237341]
+layout_mode = 0
+offset_left = 3.0
+offset_top = -1.0
+offset_right = 1202.0
+offset_bottom = 676.0
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=2093977395]
+layout_mode = 0
+offset_right = 1201.0
+offset_bottom = 674.0
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=234791680]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 675.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1059427336]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer" unique_id=53526222]
+layout_mode = 2
+text = "Freedom Knight"
+label_settings = SubResource("LabelSettings_mjmdf")
+
+[node name="nuevapartida" type="Button" parent="CenterContainer/VBoxContainer" unique_id=352912138]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+theme_override_fonts/font = SubResource("FontVariation_370kx")
+theme_override_font_sizes/font_size = 30
+text = "Nueva partida"
+
+[node name="continuar" type="Button" parent="CenterContainer/VBoxContainer" unique_id=780204600]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Continuar"
+
+[node name="prueba" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1043415265]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Prueba"
+
+[node name="opciones" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1314360635]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Opciones"
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=1717811268]
+stream = ExtResource("1_g18y6")
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/prueba" to="." method="_on_prueba_pressed"]
+[connection signal="finished" from="MusicPlayer" to="." method="_on_music_player_finished"]
