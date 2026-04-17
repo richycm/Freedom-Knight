@@ -24,7 +24,7 @@ func _on_exit_button_pressed():
 	get_tree().quit()
 
 func _on_prueba_pressed() -> void:
-	get_tree().change_scene_to_file("res://escenario_pruebas.tscn")
+	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/escenario_pruebas.tscn")
 
 
 func _on_music_player_finished() -> void:

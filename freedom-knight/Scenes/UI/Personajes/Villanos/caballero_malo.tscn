@@ -1,0 +1,172 @@
+[gd_scene format=3 uid="uid://blg5ae8e677t1"]
+
+[ext_resource type="Script" uid="uid://1pwlu0kuy58y" path="res://Scenes/UI/Personajes/Villanos/caballero_malo.gd" id="1_unrqf"]
+[ext_resource type="Texture2D" uid="uid://xj6ym6f17gr7" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Attack1.png" id="2_1r5sp"]
+[ext_resource type="Texture2D" uid="uid://2by2qofmstr7" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Idle.png" id="3_qeogi"]
+[ext_resource type="Texture2D" uid="uid://14j6twr5apwq" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Run.png" id="4_pqs3m"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qmjme"]
+atlas = ExtResource("2_1r5sp")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8duxc"]
+atlas = ExtResource("2_1r5sp")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2xp7t"]
+atlas = ExtResource("2_1r5sp")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_614yc"]
+atlas = ExtResource("2_1r5sp")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_48i2v"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jlge8"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rycge"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_87rfi"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1duo1"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oqs0i"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tcrp7"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v71b4"]
+atlas = ExtResource("3_qeogi")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8srh6"]
+atlas = ExtResource("4_pqs3m")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e81y2"]
+atlas = ExtResource("4_pqs3m")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2pwy7"]
+atlas = ExtResource("4_pqs3m")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7vktd"]
+atlas = ExtResource("4_pqs3m")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_auso3"]
+atlas = ExtResource("4_pqs3m")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lsnx0"]
+atlas = ExtResource("4_pqs3m")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7y38a"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qmjme")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8duxc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2xp7t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_614yc")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 44.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_48i2v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jlge8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rycge")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_87rfi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1duo1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oqs0i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tcrp7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v71b4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8srh6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e81y2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2pwy7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7vktd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_auso3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lsnx0")
+}],
+"loop": true,
+"name": &"move",
+"speed": 16.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_unrqf"]
+radius = 80.00625
+
+[node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
+position = Vector2(458, 331)
+script = ExtResource("1_unrqf")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=1231386101]
+position = Vector2(0, -50)
+scale = Vector2(1.342, 1.354)
+sprite_frames = SubResource("SpriteFrames_7y38a")
+animation = &"move"
+autoplay = "idle"
+frame_progress = 0.38769484
+
+[node name="RangoAtaque" type="Area2D" parent="." unique_id=1380102314]
+position = Vector2(-8.167999, -122.01601)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RangoAtaque" unique_id=1067833171]
+position = Vector2(8.167999, 47.016006)
+shape = SubResource("CircleShape2D_unrqf")
