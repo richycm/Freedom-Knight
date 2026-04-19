@@ -47,24 +47,40 @@ func _on_enemigo_murio(_pos):
 
 func _spawnear_oleada():
 	if not enemigo_scene or not zona_spawn: return
-	if not is_instance_valid(player) or player.is_dead: return # No spawn si moriste
+	if not is_instance_valid(player) or player.is_dead: return 
 
-	var rect = zona_spawn.get_global_rect()
+	# Usamos la posición global y el tamaño para estar 100% seguros
+	var spawn_pos = zona_spawn.global_position
+	var spawn_size = zona_spawn.size * zona_spawn.scale # Multiplicamos por escala por si acaso
 
 	for i in range(cantidad_a_spawnear):
 		var nuevo = enemigo_scene.instantiate()
 		
-		# Spawn aleatorio dentro del ColorRect
-		var px = randf_range(rect.position.x, rect.end.x)
-		var py = randf_range(rect.position.y, rect.end.y)
+		var posicion_final = Vector2.ZERO
+		var encontrado = false
 		
-		# Evitar que aparezcan justo encima del jugador (un poco de espacio)
-		var pos_final = Vector2(px, py)
-		if pos_final.distance_to(player.global_position) < 100:
-			pos_final += Vector2(150, 150) # Desplazarlo si está muy cerca
+		# Intentamos hasta 15 veces buscar un sitio libre
+		for intento in range(15):
+			var px = randf_range(spawn_pos.x, spawn_pos.x + spawn_size.x)
+			var py = randf_range(spawn_pos.y, spawn_pos.y + spawn_size.y)
+			var candidata = Vector2(px, py)
+			
+			# Verificamos que no esté pegado al jugador
+			if candidata.distance_to(player.global_position) > 180:
+				posicion_final = candidata
+				encontrado = true
+				break
+		
+		# Si después de 15 intentos no encontró lugar lejos (raro), 
+		# lo forzamos a una esquina del cuadro para que no spawnee en tu cara
+		if not encontrado:
+			posicion_final = spawn_pos + Vector2(20, 20) 
 
-		nuevo.global_position = pos_final
+		nuevo.global_position = posicion_final
 		nuevo.poder_ataque = fuerza_actual_enemigo
-		nuevo.murio.connect(_on_enemigo_murio)
+		
+		# Conectar señal de muerte
+		if nuevo.has_signal("murio"):
+			nuevo.murio.connect(_on_enemigo_murio)
 		
 		add_child(nuevo)
