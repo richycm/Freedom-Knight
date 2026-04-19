@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://1pwlu0kuy58y" path="res://Scenes/UI/Personajes/Villanos/caballero_malo.gd" id="1_unrqf"]
 [ext_resource type="Texture2D" uid="uid://xj6ym6f17gr7" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Attack1.png" id="2_1r5sp"]
+[ext_resource type="Texture2D" uid="uid://clin7tqv0wrj" path="res://Scenes/Efectos/Explosion_02.png" id="3_pqs3m"]
 [ext_resource type="Texture2D" uid="uid://2by2qofmstr7" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Idle.png" id="3_qeogi"]
 [ext_resource type="Texture2D" uid="uid://14j6twr5apwq" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Run.png" id="4_pqs3m"]
 
@@ -20,6 +21,46 @@ region = Rect2(384, 0, 192, 192)
 [sub_resource type="AtlasTexture" id="AtlasTexture_614yc"]
 atlas = ExtResource("2_1r5sp")
 region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_erfo7"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sjmdj"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ma4x"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4iphq"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mtdur"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8nr3x"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xf8r3"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3r207"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sd30g"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(1536, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6jadg"]
+atlas = ExtResource("3_pqs3m")
+region = Rect2(1728, 0, 192, 192)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_48i2v"]
 atlas = ExtResource("3_qeogi")
@@ -94,7 +135,42 @@ animations = [{
 }],
 "loop": true,
 "name": &"attack",
-"speed": 44.0
+"speed": 15.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_erfo7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sjmdj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ma4x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4iphq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mtdur")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8nr3x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xf8r3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3r207")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sd30g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6jadg")
+}],
+"loop": true,
+"name": &"death",
+"speed": 24.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -149,12 +225,16 @@ animations = [{
 "speed": 16.0
 }]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_1r5sp"]
+radius = 68.007355
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_unrqf"]
 radius = 80.00625
 
 [node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
 y_sort_enabled = true
 position = Vector2(458, 331)
+collision_layer = 4
 script = ExtResource("1_unrqf")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=1231386101]
@@ -162,13 +242,22 @@ y_sort_enabled = true
 position = Vector2(0, -50)
 scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_7y38a")
-animation = &"move"
+animation = &"idle"
 autoplay = "idle"
-frame_progress = 0.38769484
+frame_progress = 0.64237994
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=559062799]
+position = Vector2(0, -53)
+shape = SubResource("CircleShape2D_1r5sp")
 
 [node name="RangoAtaque" type="Area2D" parent="." unique_id=1380102314]
+visible = false
 position = Vector2(-8.167999, -122.01601)
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoAtaque" unique_id=1067833171]
 position = Vector2(8.167999, 47.016006)
 shape = SubResource("CircleShape2D_unrqf")
+
+[connection signal="body_entered" from="RangoAtaque" to="." method="_on_rango_ataque_body_entered"]
