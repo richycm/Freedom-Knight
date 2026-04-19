@@ -1,32 +1,9 @@
 [gd_scene format=3 uid="uid://bva81yxej6n30"]
 
 [ext_resource type="Script" uid="uid://vc7bqpc44q0k" path="res://Scenes/UI/canvas_layer.gd" id="1_fsodk"]
-[ext_resource type="Texture2D" uid="uid://bj8rmgsll4hbw" path="res://Botones_Iconos/UI_buttons16x16.png" id="2_meyst"]
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_r8vn4"]
-load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_efpmu"]
-atlas = SubResource("CompressedTexture2D_r8vn4")
-region = Rect2(64, 0, 16, 16)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_7r3rc"]
-load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_inhk5"]
-atlas = SubResource("CompressedTexture2D_7r3rc")
-region = Rect2(112, 0, 16, 16)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_6wdpw"]
-load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_yxqt3"]
-atlas = SubResource("CompressedTexture2D_6wdpw")
-region = Rect2(96, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_28j5k"]
-atlas = ExtResource("2_meyst")
-region = Rect2(80, 0, 16, 16)
+[ext_resource type="Script" uid="uid://dtjrbl05phbyo" path="res://Scenes/UI/virtual_joystick.gd" id="2_qsnex"]
+[ext_resource type="Texture2D" uid="uid://cswdg2n1ywqrj" path="res://Scenes/UI/Joistick/joyring.png" id="3_yqa16"]
+[ext_resource type="Texture2D" uid="uid://g24w1h8gbb7u" path="res://Scenes/UI/Joistick/joyknobpng.png" id="4_3yh78"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_fsodk"]
 load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
@@ -47,43 +24,25 @@ offset_right = 2.9999924
 offset_bottom = -206.0
 scale = Vector2(1.5, 1.5)
 
-[node name="up" type="TouchScreenButton" parent="Control" unique_id=1735474108]
-position = Vector2(158, 418)
-scale = Vector2(3.312501, 3.312501)
-texture_normal = SubResource("AtlasTexture_efpmu")
-action = "up"
-
-[node name="left" type="TouchScreenButton" parent="Control" unique_id=2126671617]
-position = Vector2(104.99999, 472)
-scale = Vector2(3.312501, 3.312501)
-texture_normal = SubResource("AtlasTexture_inhk5")
-action = "left"
-
-[node name="down" type="TouchScreenButton" parent="Control" unique_id=1583554741]
-position = Vector2(158, 525)
-scale = Vector2(3.312501, 3.312501)
-texture_normal = SubResource("AtlasTexture_yxqt3")
-action = "down"
-
-[node name="right" type="TouchScreenButton" parent="Control" unique_id=868176499]
-position = Vector2(211, 472)
-scale = Vector2(3.312501, 3.312501)
-texture_normal = SubResource("AtlasTexture_28j5k")
-action = "right"
-
 [node name="attack" type="TouchScreenButton" parent="Control" unique_id=1881671234]
 position = Vector2(590.00006, 482.66666)
 scale = Vector2(5.000001, 4.8958344)
 texture_normal = SubResource("AtlasTexture_meyst")
 action = "attack"
 
-[connection signal="pressed" from="Control/up" to="." method="_on_up_pressed"]
-[connection signal="released" from="Control/up" to="." method="_on_up_released"]
-[connection signal="pressed" from="Control/left" to="." method="_on_left_pressed"]
-[connection signal="released" from="Control/left" to="." method="_on_left_released"]
-[connection signal="pressed" from="Control/down" to="." method="_on_down_pressed"]
-[connection signal="released" from="Control/down" to="." method="_on_down_released"]
-[connection signal="pressed" from="Control/right" to="." method="_on_right_pressed"]
-[connection signal="released" from="Control/right" to="." method="_on_right_released"]
+[node name="VirtualJoystick" type="Node2D" parent="Control" unique_id=1111716673]
+position = Vector2(153.33333, 513.3333)
+script = ExtResource("2_qsnex")
+
+[node name="Base" type="Sprite2D" parent="Control/VirtualJoystick" unique_id=481487367]
+position = Vector2(-0.6666667, -8)
+scale = Vector2(0.0767795, 0.0767795)
+texture = ExtResource("3_yqa16")
+
+[node name="Palo" type="TouchScreenButton" parent="Control/VirtualJoystick" unique_id=1500518910]
+position = Vector2(-27.333334, -34.666668)
+scale = Vector2(0.027777776, 0.027777776)
+texture_normal = ExtResource("4_3yh78")
+
 [connection signal="pressed" from="Control/attack" to="." method="_on_attack_pressed"]
 [connection signal="released" from="Control/attack" to="." method="_on_attack_released"]

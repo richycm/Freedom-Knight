@@ -746,7 +746,6 @@ size = Vector2(130, 939.5)
 y_sort_enabled = true
 position = Vector2(391, 289)
 script = ExtResource("1_k7j0i")
-enemigo_scene = ExtResource("3_yx73p")
 metadata/_edit_horizontal_guides_ = [788.0]
 
 [node name="TileMap" type="TileMapLayer" parent="." unique_id=395535077]
@@ -764,10 +763,10 @@ position = Vector2(639, -73)
 position = Vector2(238, 42)
 
 [node name="ZonaSpawn" type="ColorRect" parent="." unique_id=212657518]
-offset_left = -266.0
-offset_top = -364.0
-offset_right = 1043.0
-offset_bottom = 346.0
+offset_left = -258.0
+offset_top = -316.0
+offset_right = 1051.0
+offset_bottom = 394.0
 color = Color(0.9527964, 1.0000322, 0.93705106, 0.20392157)
 
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("2_yx73p")]

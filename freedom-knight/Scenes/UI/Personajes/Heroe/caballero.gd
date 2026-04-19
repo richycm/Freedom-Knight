@@ -24,15 +24,27 @@ func _ready() -> void:
 	hitbox.monitoring = false
 
 func _physics_process(_delta: float) -> void:
-	# Si está muerto, no procesamos ni movimiento ni inputs
+	# 1. Si está muerto, nada de esto importa
 	if is_dead:
 		return
 
-	var direction := Input.get_vector("left", "right", "up", "down")
+	# 2. OBTENER DIRECCIÓN (Joystick o Teclado)
+	var direction = Vector2.ZERO
+	var ui = get_tree().current_scene.find_child("Botones", true) # Busca tu CanvasLayer
 	
+	if ui and ui.direccion != Vector2.ZERO:
+		# Si el Joystick se está moviendo, mandan los dedos
+		direction = ui.direccion
+	else:
+		# Si no, mantenemos el teclado por si acaso (muy útil para testear en PC)
+		direction = Input.get_vector("left", "right", "up", "down")
+	
+	# 3. LÓGICA DE ATAQUE
+	# Seguimos permitiendo la tecla Espacio O el botón táctil que ya configuraste
 	if Input.is_action_just_pressed("attack") and not is_attacking:
 		_execute_attack()
 
+	# 4. MOVIMIENTO FÍSICO
 	if is_attacking:
 		velocity = Vector2.ZERO
 	else:
@@ -40,8 +52,11 @@ func _physics_process(_delta: float) -> void:
 	
 	move_and_slide()
 	
+	# 5. ANIMACIONES
 	if not is_attacking:
 		_update_animations(direction)
+		
+
 
 func _update_animations(direction: Vector2) -> void:
 	if direction == Vector2.ZERO:
