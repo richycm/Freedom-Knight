@@ -233,13 +233,12 @@ radius = 80.00625
 
 [node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
 y_sort_enabled = true
-position = Vector2(458, 331)
 collision_layer = 4
 script = ExtResource("1_unrqf")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=1231386101]
 y_sort_enabled = true
-position = Vector2(0, -50)
+position = Vector2(5, 5)
 scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_7y38a")
 animation = &"idle"
@@ -247,17 +246,15 @@ autoplay = "idle"
 frame_progress = 0.64237994
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=559062799]
-position = Vector2(0, -53)
 shape = SubResource("CircleShape2D_1r5sp")
 
 [node name="RangoAtaque" type="Area2D" parent="." unique_id=1380102314]
-visible = false
 position = Vector2(-8.167999, -122.01601)
 collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoAtaque" unique_id=1067833171]
-position = Vector2(8.167999, 47.016006)
+position = Vector2(10.167999, 118.01601)
 shape = SubResource("CircleShape2D_unrqf")
 
 [connection signal="body_entered" from="RangoAtaque" to="." method="_on_rango_ataque_body_entered"]

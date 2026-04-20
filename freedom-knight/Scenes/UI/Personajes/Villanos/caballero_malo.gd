@@ -140,6 +140,10 @@ func _efecto_dano() -> void:
 	flash_tween.tween_property(sprite, "modulate", Color.WHITE, 0.2)
 
 func _on_rango_ataque_body_entered(body: Node2D) -> void:
-	if is_dead or is_spawning or body == self: return
-	if body.has_method("recibir_dano"):
-		body.recibir_dano(poder_ataque)
+	if is_dead or is_spawning: return
+	
+	# --- LA MAGIA ESTÁ AQUÍ ---
+	# Preguntamos: ¿El cuerpo que acabo de tocar es el jugador?
+	if body == player:
+		if body.has_method("recibir_dano"):
+			body.recibir_dano(poder_ataque)

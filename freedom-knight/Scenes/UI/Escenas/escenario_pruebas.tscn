@@ -731,16 +731,16 @@ texture_region_size = Vector2i(32, 32)
 sources/2 = SubResource("TileSetAtlasSource_k7j0i")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nyo0t"]
-size = Vector2(135, 1284)
+size = Vector2(1780, 1284)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k7j0i"]
-size = Vector2(1653, 213)
+size = Vector2(4478, 1163)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fdknx"]
-size = Vector2(1810, 168)
+size = Vector2(4866, 1338)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oeggp"]
-size = Vector2(130, 939.5)
+size = Vector2(1452, 939.5)
 
 [node name="EscenarioPruebas" type="Node2D" unique_id=1162748324]
 y_sort_enabled = true
@@ -762,29 +762,28 @@ position = Vector2(639, -73)
 [node name="Caballero" parent="." unique_id=470449425 instance=ExtResource("1_rqu3x")]
 position = Vector2(238, 42)
 
-[node name="ZonaSpawn" type="ColorRect" parent="." unique_id=212657518]
-offset_left = -258.0
-offset_top = -316.0
-offset_right = 1051.0
-offset_bottom = 394.0
-color = Color(0.9527964, 1.0000322, 0.93705106, 0.20392157)
-
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("2_yx73p")]
 
 [node name="LimitesMapa" type="StaticBody2D" parent="." unique_id=653108889]
 
 [node name="izquierda" type="CollisionShape2D" parent="LimitesMapa" unique_id=834468936]
-position = Vector2(-406.5, 77)
+position = Vector2(-1229, 77)
 shape = SubResource("RectangleShape2D_nyo0t")
 
 [node name="derecha" type="CollisionShape2D" parent="LimitesMapa" unique_id=274670261]
-position = Vector2(490.5, 602.5)
+position = Vector2(450, 1077.5)
 shape = SubResource("RectangleShape2D_k7j0i")
 
 [node name="arriba" type="CollisionShape2D" parent="LimitesMapa" unique_id=1376789214]
-position = Vector2(427, -468)
+position = Vector2(240, -1106)
 shape = SubResource("RectangleShape2D_fdknx")
 
 [node name="abajo" type="CollisionShape2D" parent="LimitesMapa" unique_id=1110436681]
-position = Vector2(1273, 72.25)
+position = Vector2(1923, 24)
 shape = SubResource("RectangleShape2D_oeggp")
+
+[node name="PuntoA" type="Marker2D" parent="." unique_id=821617664]
+position = Vector2(-207, -277)
+
+[node name="PuntoB" type="Marker2D" parent="." unique_id=1310447721]
+position = Vector2(1070, 381)

@@ -233,33 +233,28 @@ radius = 95.047356
 
 [node name="Caballero" type="CharacterBody2D" unique_id=470449425]
 y_sort_enabled = true
-position = Vector2(613, 313)
 collision_layer = 2
 script = ExtResource("1_b85wf")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=144203630]
-position = Vector2(0, -47)
+position = Vector2(-1, 3.0000038)
 scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_lybl4")
-animation = &"death"
+animation = &"idle"
 autoplay = "idle"
-frame_progress = 0.9777147
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1917436634]
-position = Vector2(0, -62)
 shape = SubResource("RectangleShape2D_b85wf")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1585368044]
-visible = false
 position_smoothing_enabled = true
 
 [node name="HitboxEspada" type="Area2D" parent="." unique_id=1300779017]
-visible = false
 collision_layer = 0
 collision_mask = 4
 
 [node name="HitboxEspada" type="CollisionShape2D" parent="HitboxEspada" unique_id=1285407075]
-position = Vector2(0, -40)
+position = Vector2(-2, 0)
 shape = SubResource("CircleShape2D_ev73a")
 
 [connection signal="body_entered" from="HitboxEspada" to="." method="_on_hitbox_espada_body_entered"]
