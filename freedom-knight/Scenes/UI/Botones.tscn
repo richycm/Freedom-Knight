@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://bva81yxej6n30"]
+
+[ext_resource type="Script" uid="uid://vc7bqpc44q0k" path="res://Scenes/UI/canvas_layer.gd" id="1_fsodk"]
+[ext_resource type="Script" uid="uid://dtjrbl05phbyo" path="res://Scenes/UI/virtual_joystick.gd" id="2_qsnex"]
+[ext_resource type="Texture2D" uid="uid://cswdg2n1ywqrj" path="res://Scenes/UI/Joistick/joyring.png" id="3_yqa16"]
+[ext_resource type="Texture2D" uid="uid://g24w1h8gbb7u" path="res://Scenes/UI/Joistick/joyknobpng.png" id="4_3yh78"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_fsodk"]
+load_path = "res://.godot/imported/UI_buttons16x16.png-6d0805d0edfae6ae84a1d8d52f668b1f.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meyst"]
+atlas = SubResource("CompressedTexture2D_fsodk")
+region = Rect2(128, 0, 32, 16)
+
+[node name="Botones" type="CanvasLayer" unique_id=619180748]
+script = ExtResource("1_fsodk")
+
+[node name="Control" type="Control" parent="." unique_id=2057887903]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -37.000008
+offset_top = -246.0
+offset_right = 2.9999924
+offset_bottom = -206.0
+scale = Vector2(1.5, 1.5)
+
+[node name="attack" type="TouchScreenButton" parent="Control" unique_id=1881671234]
+position = Vector2(590.00006, 482.66666)
+scale = Vector2(5.000001, 4.8958344)
+texture_normal = SubResource("AtlasTexture_meyst")
+action = "attack"
+
+[node name="VirtualJoystick" type="Node2D" parent="Control" unique_id=1111716673]
+position = Vector2(153.33333, 513.3333)
+script = ExtResource("2_qsnex")
+
+[node name="Base" type="Sprite2D" parent="Control/VirtualJoystick" unique_id=481487367]
+position = Vector2(-0.6666667, -8)
+scale = Vector2(0.0767795, 0.0767795)
+texture = ExtResource("3_yqa16")
+
+[node name="Palo" type="TouchScreenButton" parent="Control/VirtualJoystick" unique_id=1500518910]
+position = Vector2(-27.333334, -34.666668)
+scale = Vector2(0.027777776, 0.027777776)
+texture_normal = ExtResource("4_3yh78")
+
+[connection signal="pressed" from="Control/attack" to="." method="_on_attack_pressed"]
+[connection signal="released" from="Control/attack" to="." method="_on_attack_released"]
