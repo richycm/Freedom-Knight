@@ -23,9 +23,21 @@ func _on_exit_button_pressed():
 	# Cierra la ventana del juego
 	get_tree().quit()
 
-func _on_prueba_pressed() -> void:
+func _on_music_player_finished() -> void:
+	$MusicPlayer.play()
+
+func _on_texture_button_pressed_prueba() -> void:
+	print("CLICK")
+	music_player.stop()
 	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/escenario_pruebas.tscn")
 
 
-func _on_music_player_finished() -> void:
-	$MusicPlayer.play()
+func _on_texture_button_pressed_nuevojuego() -> void:
+	pass # Replace with function body.
+
+func _on_texture_button_pressed_continuarjuego() -> void:
+	pass # Replace with function body.
+
+
+func _on_texture_button_pressed_configuracion() -> void:
+	pass # Replace with function body.
