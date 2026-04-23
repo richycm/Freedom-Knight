@@ -158,13 +158,15 @@ mouse_filter = 2
 
 [node name="TextureButton" type="TextureButton" parent="ControlNG" unique_id=1551787423]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 43.0
-offset_top = 415.0
-offset_right = -790.0
-offset_bottom = -189.0
+anchors_preset = -1
+anchor_left = 0.036000002
+anchor_top = 0.615
+anchor_right = 0.342
+anchor_bottom = 0.72
+offset_left = -0.20000076
+offset_top = -0.125
+offset_right = -0.4000244
+offset_bottom = -3.0517578e-05
 grow_horizontal = 2
 grow_vertical = 2
 texture_normal = ExtResource("4_t6w0q")
@@ -259,10 +261,11 @@ vertical_alignment = 1
 
 [node name="ControlC" type="Control" parent="." unique_id=1982593694]
 layout_mode = 1
-anchors_preset = 15
+anchor_left = -0.027
 anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
+anchor_bottom = 1.041
+offset_left = 32.4
+offset_bottom = -27.674988
 grow_vertical = 2
 mouse_filter = 2
 

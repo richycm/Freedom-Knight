@@ -33,7 +33,8 @@ func _on_texture_button_pressed_prueba() -> void:
 
 
 func _on_texture_button_pressed_nuevojuego() -> void:
-	pass # Replace with function body.
+	music_player.stop()
+	get_tree().change_scene_to_file("res://Scenes/Cinematica/C1_inicio.tscn")
 
 func _on_texture_button_pressed_continuarjuego() -> void:
 	pass # Replace with function body.
