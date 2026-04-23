@@ -1,17 +1,27 @@
-extends Node2D # O Node2D, dependiendo de cómo lo muevas
+extends Node2D 
 
 @export var velocidad: float = 200.0
 
-func _physics_process(_delta):
+# Usamos @onready para asegurar que el nodo esté listo antes de usarlo.
+# ¡IMPORTANTE!: Cambia "Sprite2D" por el nombre real de tu nodo de imagen.
+@onready var sprite = $Sprite2D 
+
+func _physics_process(delta: float) -> void:
+	# 1. Obtener dirección
 	var direccion = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	
-	if direccion.x != 0:
-		$Sprite2D.flip_h = direccion.x < 0
+	# 2. Voltear el sprite según la dirección
+	if direccion.x != 0 and sprite != null:
+		sprite.flip_h = direccion.x < 0
+		
+	# 3. Mover el personaje (indispensable en Node2D)
+	# Multiplicamos por delta para que el movimiento sea fluido y no dependa de los FPS
+	position += direccion * velocidad * delta
 
 func _ready() -> void:
-	pass # Replace with function body.
+	# Verificación de seguridad para que no crashee si el nombre está mal
+	if sprite == null:
+		print("ERROR: No se encontró el nodo del Sprite. Revisa el nombre en el script.")
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass

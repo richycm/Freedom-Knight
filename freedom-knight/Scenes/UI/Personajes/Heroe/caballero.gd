@@ -22,6 +22,12 @@ var is_dead: bool = false
 func _ready() -> void:
 	salud_actual = vida_maxima
 	hitbox.monitoring = false
+	
+	# --- LO NUEVO 1: Pintar los corazones al iniciar el nivel ---
+	await get_tree().process_frame 
+	var ui = get_tree().current_scene.find_child("Botones", true) 
+	if ui and ui.has_method("actualizar_vidas"):
+		ui.actualizar_vidas(salud_actual)
 
 func _physics_process(_delta: float) -> void:
 	# 1. Si está muerto, nada de esto importa
@@ -55,8 +61,6 @@ func _physics_process(_delta: float) -> void:
 	# 5. ANIMACIONES
 	if not is_attacking:
 		_update_animations(direction)
-		
-
 
 func _update_animations(direction: Vector2) -> void:
 	if direction == Vector2.ZERO:
@@ -89,7 +93,15 @@ func recibir_dano(cantidad: int) -> void:
 		return
 
 	salud_actual -= cantidad
+	
+	# --- LO NUEVO 2: Evitar que la vida baje de cero y avisar a los botones ---
+	salud_actual = clampi(salud_actual, 0, vida_maxima)
+	
 	_efecto_dano()
+	
+	var ui = get_tree().current_scene.find_child("Botones", true)
+	if ui and ui.has_method("actualizar_vidas"):
+		ui.actualizar_vidas(salud_actual)
 	
 	if salud_actual <= 0:
 		_morir()

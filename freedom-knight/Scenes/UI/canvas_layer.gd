@@ -1,48 +1,65 @@
 extends CanvasLayer
 
+# --- REFERENCIA A LOS CORAZONES ---
+@onready var contenedor_corazones = $BarraVidas
+
+# --- RUTAS EXACTAS DE TUS IMÁGENES ---
+var tex_lleno = preload("res://Scenes/Efectos/corazon uno.png")
+var tex_mitad = preload("res://Scenes/Efectos/Corazon medio.png")
+var tex_vacio = preload("res://Scenes/Efectos/corazon vacio.png")
+
+# --- NODOS DEL JOYSTICK ---
 @onready var palo = $Control/VirtualJoystick/Palo
 @onready var base = $Control/VirtualJoystick/Base
 
-# --- CONFIGURACIÓN ---
+# --- CONFIGURACIÓN JOYSTICK ---
 var radio = 60.0 
 var direccion = Vector2.ZERO
 var dragging = false
-
-# EL SECRETO MULTITOUCH: Guardar qué dedo específico está usando el joystick
 var touch_index: int = -1 
-
-# Tus coordenadas exactas de centrado
 var centro_palo = Vector2(-27.333, -34.667)
 
 func _ready() -> void:
-	# Colocamos el palo en su centro real al iniciar
-	palo.position = centro_palo
+	if palo:
+		palo.position = centro_palo
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		if event.pressed and not dragging:
-			# Calculamos distancia al centro de la base
 			var dist = base.global_position.distance_to(event.position)
 			if dist < radio * 2:
 				dragging = true
-				touch_index = event.index # Guardamos el ID de este dedo específico
+				touch_index = event.index 
 				
-		# Solo soltamos el joystick SI el dedo que se levanta es el nuestro
 		elif not event.pressed and event.index == touch_index:
 			dragging = false
-			touch_index = -1 # Borramos la memoria del dedo
+			touch_index = -1 
 			direccion = Vector2.ZERO
 			var tween = create_tween()
 			tween.tween_property(palo, "position", centro_palo, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-	# Solo movemos el palo si el dedo que se arrastra es el que lo agarró
 	if event is InputEventScreenDrag and dragging and event.index == touch_index:
 		var centro_global = base.global_position
 		var vector = event.position - centro_global
 		var vector_limitado = vector.limit_length(radio)
 		
-		# Aplicamos el movimiento sumando tu offset para que no se desplace
 		palo.position = centro_palo + vector_limitado
-		
-		# Guardamos la dirección para el caballero
 		direccion = vector_limitado.normalized()
+
+# --- SISTEMA DE ACTUALIZACIÓN DE VIDA ---
+func actualizar_vidas(salud: int) -> void:
+	if not contenedor_corazones:
+		return
+		
+	var corazones = contenedor_corazones.get_children()
+	
+	for i in range(corazones.size()):
+		var corazon = corazones[i]
+		var valor_minimo = i * 2 
+		
+		if salud >= valor_minimo + 2:
+			corazon.texture = tex_lleno
+		elif salud >= valor_minimo + 1:
+			corazon.texture = tex_mitad
+		else:
+			corazon.texture = tex_vacio
