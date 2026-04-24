@@ -27,6 +27,7 @@ radius = 50.01
 
 [node name="Monje_NPC" type="StaticBody2D" unique_id=1857534556]
 script = ExtResource("1_xfxrk")
+puntos_salud = 1
 
 [node name="sprite_visual" type="AnimatedSprite2D" parent="." unique_id=407052682]
 position = Vector2(1, 0)

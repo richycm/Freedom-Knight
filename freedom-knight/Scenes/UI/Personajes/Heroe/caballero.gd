@@ -145,3 +145,25 @@ func _on_hitbox_espada_body_entered(body: Node2D) -> void:
 		return
 	if body.has_method("recibir_dano"):
 		body.recibir_dano(poder_ataque)
+
+# --- SISTEMA DE CURACIÓN ---
+
+func curar(cantidad: int) -> void:
+	if is_dead or salud_actual >= vida_maxima:
+		return
+
+	salud_actual += cantidad
+	salud_actual = clampi(salud_actual, 0, vida_maxima) # No pasar del máximo
+	
+	_efecto_curacion()
+	
+	# Actualizamos los corazones en la UI
+	var ui = get_tree().current_scene.find_child("Botones", true)
+	if ui and ui.has_method("actualizar_vidas"):
+		ui.actualizar_vidas(salud_actual)
+
+func _efecto_curacion() -> void:
+	# El caballero parpadea en verde
+	sprite.modulate = Color.GREEN
+	await get_tree().create_timer(0.3).timeout
+	sprite.modulate = Color.WHITE

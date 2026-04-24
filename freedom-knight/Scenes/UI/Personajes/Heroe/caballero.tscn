@@ -231,7 +231,7 @@ size = Vector2(121.99997, 124)
 [sub_resource type="CircleShape2D" id="CircleShape2D_ev73a"]
 radius = 95.047356
 
-[node name="Caballero" type="CharacterBody2D" unique_id=470449425]
+[node name="Caballero" type="CharacterBody2D" unique_id=470449425 groups=["jugador"]]
 y_sort_enabled = true
 collision_layer = 2
 script = ExtResource("1_b85wf")
