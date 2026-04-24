@@ -4,19 +4,54 @@
 [ext_resource type="Script" uid="uid://c81d4llg28d8r" path="res://Scenes/UI/Personajes/NPC/monje_npc.gd" id="1_xfxrk"]
 [ext_resource type="Texture2D" uid="uid://hguhs7hhnyal" path="res://Scenes/nube_dialogo.png" id="3_2h0mb"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_xfxrk"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_2h0mb"]
 atlas = ExtResource("1_6kxkd")
 region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lqb1m"]
+atlas = ExtResource("1_6kxkd")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k31qn"]
+atlas = ExtResource("1_6kxkd")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ux1vw"]
+atlas = ExtResource("1_6kxkd")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5wyec"]
+atlas = ExtResource("1_6kxkd")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5t2mh"]
+atlas = ExtResource("1_6kxkd")
+region = Rect2(960, 0, 192, 192)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_2h0mb"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_xfxrk")
+"texture": SubResource("AtlasTexture_2h0mb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lqb1m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k31qn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ux1vw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5wyec")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5t2mh")
 }],
 "loop": true,
 "name": &"idle",
-"speed": 5.0
+"speed": 18.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lqb1m"]
@@ -34,6 +69,7 @@ position = Vector2(1, 0)
 scale = Vector2(0.8741319, 1)
 sprite_frames = SubResource("SpriteFrames_2h0mb")
 animation = &"idle"
+frame_progress = 0.78646314
 
 [node name="colision_monje" type="CollisionShape2D" parent="." unique_id=1514081317]
 position = Vector2(1, 6)
@@ -53,8 +89,8 @@ position = Vector2(25, -40)
 [node name="GloboDialogo" type="NinePatchRect" parent="." unique_id=120131247]
 offset_left = 56.0
 offset_top = -74.0
-offset_right = 184.0
-offset_bottom = -33.0
+offset_right = 272.0
+offset_bottom = 1.0
 texture = ExtResource("3_2h0mb")
 region_rect = Rect2(210.83336, 66.16667, 347.3333, 212.66667)
 

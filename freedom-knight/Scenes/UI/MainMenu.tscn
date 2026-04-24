@@ -147,7 +147,7 @@ stretch_mode = 6
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=1717811268]
 stream = ExtResource("1_g18y6")
 
-[node name="ControlNG" type="Control" parent="." unique_id=215323741]
+[node name="NuevaPartida" type="Control" parent="." unique_id=215323741]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,7 +156,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TextureButton" type="TextureButton" parent="ControlNG" unique_id=1551787423]
+[node name="TextureButton" type="TextureButton" parent="NuevaPartida" unique_id=1551787423]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.036000002
@@ -173,7 +173,7 @@ texture_normal = ExtResource("4_t6w0q")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="ControlNG/TextureButton" unique_id=2115521111]
+[node name="Label" type="Label" parent="NuevaPartida/TextureButton" unique_id=2115521111]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -187,7 +187,7 @@ label_settings = SubResource("LabelSettings_k8um8")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ControlCG" type="Control" parent="." unique_id=724229344]
+[node name="ContinuarPartida" type="Control" parent="." unique_id=724229344]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -196,7 +196,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TextureButton" type="TextureButton" parent="ControlCG" unique_id=200004281]
+[node name="TextureButton" type="TextureButton" parent="ContinuarPartida" unique_id=200004281]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -211,7 +211,7 @@ texture_normal = ExtResource("4_t6w0q")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="ControlCG/TextureButton" unique_id=334751582]
+[node name="Label" type="Label" parent="ContinuarPartida/TextureButton" unique_id=334751582]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -223,7 +223,7 @@ label_settings = SubResource("LabelSettings_744d7")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ControlP" type="Control" parent="." unique_id=569866290]
+[node name="Prueba" type="Control" parent="." unique_id=569866290]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -232,7 +232,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TextureButton" type="TextureButton" parent="ControlP" unique_id=1889254159]
+[node name="TextureButton" type="TextureButton" parent="Prueba" unique_id=1889254159]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -247,7 +247,7 @@ texture_normal = ExtResource("4_t6w0q")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="ControlP/TextureButton" unique_id=1050785378]
+[node name="Label" type="Label" parent="Prueba/TextureButton" unique_id=1050785378]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -259,7 +259,7 @@ label_settings = SubResource("LabelSettings_ynupv")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ControlC" type="Control" parent="." unique_id=1982593694]
+[node name="Configuracion" type="Control" parent="." unique_id=1982593694]
 layout_mode = 1
 anchor_left = -0.027
 anchor_right = 1.0
@@ -269,7 +269,7 @@ offset_bottom = -27.674988
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TextureButton" type="TextureButton" parent="ControlC" unique_id=256408056]
+[node name="TextureButton" type="TextureButton" parent="Configuracion" unique_id=256408056]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -284,7 +284,7 @@ texture_normal = ExtResource("4_t6w0q")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="ControlC/TextureButton" unique_id=1805433273]
+[node name="Label" type="Label" parent="Configuracion/TextureButton" unique_id=1805433273]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -297,9 +297,9 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [connection signal="finished" from="MusicPlayer" to="." method="_on_music_player_finished"]
-[connection signal="pressed" from="ControlNG/TextureButton" to="." method="_on_texture_button_pressed"]
-[connection signal="pressed" from="ControlNG/TextureButton" to="." method="_on_texture_button_pressed_nuevojuego"]
-[connection signal="pressed" from="ControlCG/TextureButton" to="." method="_on_texture_button_pressed_continuarjuego"]
-[connection signal="pressed" from="ControlP/TextureButton" to="." method="_on_texture_button_pressed"]
-[connection signal="pressed" from="ControlP/TextureButton" to="." method="_on_texture_button_pressed_prueba"]
-[connection signal="pressed" from="ControlC/TextureButton" to="." method="_on_texture_button_pressed_configuracion"]
+[connection signal="pressed" from="NuevaPartida/TextureButton" to="." method="_on_texture_button_pressed"]
+[connection signal="pressed" from="NuevaPartida/TextureButton" to="." method="_on_texture_button_pressed_nuevojuego"]
+[connection signal="pressed" from="ContinuarPartida/TextureButton" to="." method="_on_texture_button_pressed_continuarjuego"]
+[connection signal="pressed" from="Prueba/TextureButton" to="." method="_on_texture_button_pressed"]
+[connection signal="pressed" from="Prueba/TextureButton" to="." method="_on_texture_button_pressed_prueba"]
+[connection signal="pressed" from="Configuracion/TextureButton" to="." method="_on_texture_button_pressed_configuracion"]

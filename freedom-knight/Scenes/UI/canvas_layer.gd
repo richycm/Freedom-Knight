@@ -2,7 +2,9 @@ extends CanvasLayer
 
 # --- REFERENCIAS ---
 @onready var contenedor_corazones = $BarraVidas
-@onready var controles_tactiles = $Control # Nodo que agrupa Joystick y Botón Attack
+@onready var controles_tactiles = $Control
+@onready var boton_attack = $Control/attack  # Asegúrate de que la ruta sea correcta
+@onready var boton_interact = $Control/interact # Asegúrate de que la ruta sea correcta
 
 # --- RUTAS DE IMÁGENES ---
 var tex_lleno = preload("res://Scenes/Efectos/corazon uno.png")
@@ -22,30 +24,38 @@ func _ready() -> void:
 	if palo:
 		palo.position = centro_palo
 	
-	# Al inicio mostramos los botones por si acaso
+	# Forzamos que siempre sea visible al iniciar
 	controles_tactiles.show()
 
-func _input(event: InputEvent) -> void:
-	# 1. DETECTAR TIPO DE ENTRADA PARA MOSTRAR/OCULTAR UI
+func _process(_delta: float) -> void:
+	# 1. FEEDBACK VISUAL DE BOTONES (Teclado/Control -> Pantalla)
+	# Si se presiona la acción, cambiamos el color o estado del botón táctil
+	_actualizar_feedback_boton(boton_attack, "attack")
+	_actualizar_feedback_boton(boton_interact, "interact")
 	
-	# Si toca la pantalla (Touch), mostramos los controles
-	if event is InputEventScreenTouch or event is InputEventScreenDrag:
-		if not controles_tactiles.visible:
-			controles_tactiles.show()
-	
-	# Si presiona una tecla o mueve un stick de mando, los ocultamos
-	elif event is InputEventKey or event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		# Filtramos un poco el movimiento del Joypad para que no se oculte por error 
-		# si el stick tiene un poquito de "drift"
-		if event is InputEventJoypadMotion and abs(event.axis_value) < 0.2:
-			return
-			
-		if controles_tactiles.visible:
-			controles_tactiles.hide()
+	# 2. FEEDBACK VISUAL DEL JOYSTICK
+	# Si el jugador se mueve con WASD o el Stick del mando, movemos el "palo" visual
+	if not dragging:
+		# --- EL CAMBIO ESTÁ AQUÍ ---
+		# Usamos "left", "right", "up", "down" (igual que en tu Caballero)
+		var input_dir = Input.get_vector("left", "right", "up", "down")
+		
+		if input_dir != Vector2.ZERO:
+			palo.position = centro_palo + (input_dir * (radio * 0.8)) # Se mueve visualmente
+		else:
+			palo.position = centro_palo
 
-	# 2. LÓGICA DEL JOYSTICK (Solo si la UI es visible)
-	if controles_tactiles.visible:
-		_procesar_joystick(event)
+func _actualizar_feedback_boton(boton: TouchScreenButton, accion: String):
+	if boton:
+		if Input.is_action_pressed(accion):
+			boton.modulate = Color(0.5, 0.5, 0.5, 1) # Se oscurece al pulsarlo (feedback)
+		else:
+			boton.modulate = Color(1, 1, 1, 1) # Color normal
+
+func _input(event: InputEvent) -> void:
+	# ANULADO: Ya no ocultamos nada. 
+	# Los controles táctiles siempre procesan el joystick si hay toque.
+	_procesar_joystick(event)
 
 func _procesar_joystick(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
@@ -70,16 +80,21 @@ func _procesar_joystick(event: InputEvent) -> void:
 		palo.position = centro_palo + vector_limitado
 		direccion = vector_limitado.normalized()
 
-# --- SISTEMA DE CORAZONES (Siempre visible) ---
+# --- SISTEMA DE CORAZONES ---
 func actualizar_vidas(salud: int) -> void:
 	if not contenedor_corazones: return
 	var corazones = contenedor_corazones.get_children()
+	
 	for i in range(corazones.size()):
 		var corazon = corazones[i]
-		var valor_minimo = i * 2 
-		if salud >= valor_minimo + 2:
+		# Cada corazón 'i' representa un rango de 2 puntos
+		# Corazón 0: vida 1-2
+		# Corazón 1: vida 3-4...
+		var valor_base = i * 2 
+		
+		if salud >= valor_base + 2:
 			corazon.texture = tex_lleno
-		elif salud >= valor_minimo + 1:
+		elif salud >= valor_base + 1:
 			corazon.texture = tex_mitad
 		else:
 			corazon.texture = tex_vacio
