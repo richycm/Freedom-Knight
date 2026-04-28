@@ -9,7 +9,7 @@ const ANIM_DEATH = "death" # Nueva constante para la muerte
 @export var speed: float = 200.0
 
 @export_group("Combate")
-@export var vida_maxima: int = 10
+@export var vida_maxima: int = 10 # <-- MANTENEMOS TUS 10 DE VIDA ESTRICTOS
 @export var poder_ataque: int = 2
 var salud_actual: int
 
@@ -22,6 +22,10 @@ var is_dead: bool = false
 func _ready() -> void:
 	salud_actual = vida_maxima
 	hitbox.monitoring = false
+	
+	# Pintar los corazones al iniciar el nivel
+	await get_tree().process_frame 
+	actualizar_ui_corazones()
 
 func _physics_process(_delta: float) -> void:
 	# 1. Si está muerto, nada de esto importa
@@ -32,7 +36,7 @@ func _physics_process(_delta: float) -> void:
 	var direction = Vector2.ZERO
 	var ui = get_tree().current_scene.find_child("Botones", true) # Busca tu CanvasLayer
 	
-	if ui and ui.direccion != Vector2.ZERO:
+	if ui and "direccion" in ui and ui.direccion != Vector2.ZERO:
 		# Si el Joystick se está moviendo, mandan los dedos
 		direction = ui.direccion
 	else:
@@ -55,8 +59,6 @@ func _physics_process(_delta: float) -> void:
 	# 5. ANIMACIONES
 	if not is_attacking:
 		_update_animations(direction)
-		
-
 
 func _update_animations(direction: Vector2) -> void:
 	if direction == Vector2.ZERO:
@@ -89,7 +91,12 @@ func recibir_dano(cantidad: int) -> void:
 		return
 
 	salud_actual -= cantidad
+	
+	# Evitar que la vida baje de cero o suba del máximo
+	salud_actual = clampi(salud_actual, 0, vida_maxima)
+	
 	_efecto_dano()
+	actualizar_ui_corazones()
 	
 	if salud_actual <= 0:
 		_morir()
@@ -113,7 +120,7 @@ func _morir() -> void:
 	# 4. Esperar a que termine la animación de muerte
 	await sprite.animation_finished
 	
-	# 5. Opcional: Una pequeña pausa dramática de 1 segundo antes del cambio
+	# 5. Opcional: Una pequeña pausa dramática antes del cambio
 	await get_tree().create_timer(0.5).timeout
 	
 	# 6. Cambiar a la escena del menú principal
@@ -133,3 +140,29 @@ func _on_hitbox_espada_body_entered(body: Node2D) -> void:
 		return
 	if body.has_method("recibir_dano"):
 		body.recibir_dano(poder_ataque)
+
+# --- SISTEMA DE CURACIÓN ---
+
+func curar(cantidad: int) -> void:
+	if is_dead or salud_actual >= vida_maxima:
+		print("[SISTEMA] No se puede curar (Muerto o vida llena)")
+		return
+
+	salud_actual += cantidad
+	salud_actual = clampi(salud_actual, 0, vida_maxima) # No pasar del máximo
+	
+	_efecto_curacion()
+	actualizar_ui_corazones()
+
+func _efecto_curacion() -> void:
+	# El caballero parpadea en verde
+	sprite.modulate = Color.GREEN
+	await get_tree().create_timer(0.3).timeout
+	sprite.modulate = Color.WHITE
+
+# --- FUNCION EXTRA DE LIMPIEZA ---
+# Llamamos a esta función para no repetir el código de buscar los botones
+func actualizar_ui_corazones() -> void:
+	var ui = get_tree().current_scene.find_child("Botones", true)
+	if ui and ui.has_method("actualizar_vidas"):
+		ui.actualizar_vidas(salud_actual)

@@ -231,10 +231,18 @@ radius = 68.007355
 [sub_resource type="CircleShape2D" id="CircleShape2D_unrqf"]
 radius = 80.00625
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_qeogi"]
+radius = 220.0
+
 [node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
 y_sort_enabled = true
 collision_layer = 4
 script = ExtResource("1_unrqf")
+speed = null
+stop_distance = null
+attack_cooldown = null
+vida_maxima = null
+poder_ataque = null
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=1231386101]
 y_sort_enabled = true
@@ -256,5 +264,10 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoAtaque" unique_id=1067833171]
 position = Vector2(10.167999, 118.01601)
 shape = SubResource("CircleShape2D_unrqf")
+
+[node name="RangoVision" type="Area2D" parent="." unique_id=1790744427]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=973061070]
+shape = SubResource("CircleShape2D_qeogi")
 
 [connection signal="body_entered" from="RangoAtaque" to="." method="_on_rango_ataque_body_entered"]
