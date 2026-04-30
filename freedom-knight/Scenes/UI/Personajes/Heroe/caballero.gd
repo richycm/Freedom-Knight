@@ -3,13 +3,13 @@ extends CharacterBody2D
 const ANIM_IDLE = "idle"
 const ANIM_MOVE = "move"
 const ANIM_ATTACK = "attack"
-const ANIM_DEATH = "death" # Nueva constante para la muerte
+const ANIM_DEATH = "death" 
 
 @export_group("Movimiento")
 @export var speed: float = 200.0
 
 @export_group("Combate")
-@export var vida_maxima: int = 10 # <-- MANTENEMOS TUS 10 DE VIDA ESTRICTOS
+@export var vida_maxima: int = 10 
 @export var poder_ataque: int = 2
 var salud_actual: int
 
@@ -28,27 +28,20 @@ func _ready() -> void:
 	actualizar_ui_corazones()
 
 func _physics_process(_delta: float) -> void:
-	# 1. Si está muerto, nada de esto importa
 	if is_dead:
 		return
 
-	# 2. OBTENER DIRECCIÓN (Joystick o Teclado)
 	var direction = Vector2.ZERO
-	var ui = get_tree().current_scene.find_child("Botones", true) # Busca tu CanvasLayer
+	var ui = get_tree().current_scene.find_child("Botones", true)
 	
 	if ui and "direccion" in ui and ui.direccion != Vector2.ZERO:
-		# Si el Joystick se está moviendo, mandan los dedos
 		direction = ui.direccion
 	else:
-		# Si no, mantenemos el teclado por si acaso (muy útil para testear en PC)
 		direction = Input.get_vector("left", "right", "up", "down")
 	
-	# 3. LÓGICA DE ATAQUE
-	# Seguimos permitiendo la tecla Espacio O el botón táctil que ya configuraste
 	if Input.is_action_just_pressed("attack") and not is_attacking:
 		_execute_attack()
 
-	# 4. MOVIMIENTO FÍSICO
 	if is_attacking:
 		velocity = Vector2.ZERO
 	else:
@@ -56,7 +49,6 @@ func _physics_process(_delta: float) -> void:
 	
 	move_and_slide()
 	
-	# 5. ANIMACIONES
 	if not is_attacking:
 		_update_animations(direction)
 
@@ -91,8 +83,6 @@ func recibir_dano(cantidad: int) -> void:
 		return
 
 	salud_actual -= cantidad
-	
-	# Evitar que la vida baje de cero o suba del máximo
 	salud_actual = clampi(salud_actual, 0, vida_maxima)
 	
 	_efecto_dano()
@@ -105,35 +95,26 @@ func _morir() -> void:
 	is_dead = true
 	print("[SISTEMA] Caballero caído. Regresando al menú...")
 	
-	# 1. Detenemos cualquier movimiento residual
 	velocity = Vector2.ZERO
-	
-	# 2. Desactivamos colisiones y ataque
 	set_collision_layer_value(2, false)
 	set_collision_mask_value(1, false) 
 	hitbox.monitoring = false
 	
-	# 3. Reproducir animación de muerte (sin loop)
 	sprite.sprite_frames.set_animation_loop(ANIM_DEATH, false)
 	sprite.play(ANIM_DEATH)
 
-	# 4. Esperar a que termine la animación de muerte
 	await sprite.animation_finished
-	
-	# 5. Opcional: Una pequeña pausa dramática antes del cambio
 	await get_tree().create_timer(0.5).timeout
 	
-	# 6. Cambiar a la escena del menú principal
 	get_tree().change_scene_to_file("res://Scenes/UI/MainMenu.tscn")
 
 func _efecto_dano() -> void:
-	# Si muere, lo dejamos en un tono gris o rojo tenue, si no, vuelve a blanco
 	sprite.modulate = Color.RED
 	await get_tree().create_timer(0.2).timeout
 	if not is_dead:
 		sprite.modulate = Color.WHITE
 	else:
-		sprite.modulate = Color(0.5, 0.5, 0.5) # Efecto de "cuerpo inerte"
+		sprite.modulate = Color(0.5, 0.5, 0.5)
 
 func _on_hitbox_espada_body_entered(body: Node2D) -> void:
 	if body == self:
@@ -145,23 +126,19 @@ func _on_hitbox_espada_body_entered(body: Node2D) -> void:
 
 func curar(cantidad: int) -> void:
 	if is_dead or salud_actual >= vida_maxima:
-		print("[SISTEMA] No se puede curar (Muerto o vida llena)")
 		return
 
 	salud_actual += cantidad
-	salud_actual = clampi(salud_actual, 0, vida_maxima) # No pasar del máximo
+	salud_actual = clampi(salud_actual, 0, vida_maxima) 
 	
 	_efecto_curacion()
 	actualizar_ui_corazones()
 
 func _efecto_curacion() -> void:
-	# El caballero parpadea en verde
 	sprite.modulate = Color.GREEN
 	await get_tree().create_timer(0.3).timeout
 	sprite.modulate = Color.WHITE
 
-# --- FUNCION EXTRA DE LIMPIEZA ---
-# Llamamos a esta función para no repetir el código de buscar los botones
 func actualizar_ui_corazones() -> void:
 	var ui = get_tree().current_scene.find_child("Botones", true)
 	if ui and ui.has_method("actualizar_vidas"):
