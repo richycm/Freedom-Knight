@@ -249,11 +249,11 @@ shape = SubResource("RectangleShape2D_b85wf")
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1585368044]
 position_smoothing_enabled = true
 
-[node name="HitboxEspada" type="Area2D" parent="." unique_id=1300779017]
+[node name="HitboxEspada" type="Area2D" parent="." unique_id=1300779017 groups=["jugador"]]
 collision_layer = 0
-collision_mask = 4
+collision_mask = 2
 
-[node name="HitboxEspada" type="CollisionShape2D" parent="HitboxEspada" unique_id=1285407075]
+[node name="HitboxEspada" type="CollisionShape2D" parent="HitboxEspada" unique_id=1285407075 groups=["jugador"]]
 position = Vector2(-2, 0)
 shape = SubResource("CircleShape2D_ev73a")
 

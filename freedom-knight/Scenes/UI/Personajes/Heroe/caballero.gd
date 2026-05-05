@@ -11,6 +11,8 @@ const ANIM_DEATH = "death"
 @export_group("Combate")
 @export var vida_maxima: int = 10 
 @export var poder_ataque: int = 2
+@export var fuerza: int = 0  
+var dano_base: int = 2       
 var salud_actual: int
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite
@@ -20,6 +22,7 @@ var is_attacking: bool = false
 var is_dead: bool = false 
 
 func _ready() -> void:
+	add_to_group("jugador") 
 	salud_actual = vida_maxima
 	hitbox.monitoring = false
 	
@@ -143,3 +146,21 @@ func actualizar_ui_corazones() -> void:
 	var ui = get_tree().current_scene.find_child("Botones", true)
 	if ui and ui.has_method("actualizar_vidas"):
 		ui.actualizar_vidas(salud_actual)
+
+# --- SISTEMA DE PROGRESO ---
+
+func mejorar_fuerza(cantidad: int) -> void:
+	# 1. Sumamos los puntos al Caballero
+	fuerza += cantidad
+	
+	# 2. REGLA: Cada 3 puntos de fuerza subimos 1 de daño (antes era cada 10, era muy lento)
+	poder_ataque = dano_base + floor(fuerza / 3.0)
+	
+	print("[SISTEMA] Fuerza Total: ", fuerza, " | Daño Actual: ", poder_ataque)
+
+	# 3. SINCRONIZACIÓN: Avisamos al script del escenario (Dificultad)
+	var escenario = get_tree().current_scene
+	if "fuerza" in escenario:
+		escenario.fuerza = self.fuerza
+		print("[CONEXIÓN] Estadísticas sincronizadas con el Escenario")
+	
