@@ -1,0 +1,131 @@
+[gd_scene format=3 uid="uid://d1glj1hsfno74"]
+
+[ext_resource type="Texture2D" uid="uid://3l41pusd84bh" path="res://Botones_Iconos/FKmenubtn.png" id="1_0c3un"]
+[ext_resource type="Script" uid="uid://81odn6871h2k" path="res://Scenes/UI/MenuPausa.gd" id="1_g024y"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_g024y"]
+font_size = 50
+
+[sub_resource type="LabelSettings" id="LabelSettings_fr288"]
+font_size = 50
+
+[node name="MenuPausa" type="Control" unique_id=1129640808]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_g024y")
+metadata/_edit_use_anchors_ = true
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=515746549]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(18.892157, 18.892157, 18.892157, 0.13333334)
+metadata/_edit_use_anchors_ = true
+
+[node name="Regresar" type="Control" parent="." unique_id=1948341825]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="TextureButton" type="TextureButton" parent="Regresar" unique_id=1630061044]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.8283333
+anchor_bottom = 0.18666667
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("1_0c3un")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="Regresar" unique_id=153751360]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Salir" type="Control" parent="." unique_id=299909978]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="TextureButton" type="TextureButton" parent="Salir" unique_id=1176551476]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.58
+anchor_top = 0.20888889
+anchor_right = 0.97583336
+anchor_bottom = 0.36740744
+offset_bottom = -3.0517578e-05
+texture_normal = ExtResource("1_0c3un")
+ignore_texture_size = true
+stretch_mode = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="Salir/TextureButton" unique_id=81309238]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Salir"
+label_settings = SubResource("LabelSettings_g024y")
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Guardar" type="Control" parent="." unique_id=173662254]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="TextureButton" type="TextureButton" parent="Guardar" unique_id=1559349151]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.58
+anchor_top = 0.026666667
+anchor_right = 0.975
+anchor_bottom = 0.18666668
+texture_normal = ExtResource("1_0c3un")
+ignore_texture_size = true
+stretch_mode = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="Guardar/TextureButton" unique_id=1207448263]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Guardar"
+label_settings = SubResource("LabelSettings_fr288")
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[connection signal="pressed" from="Salir/TextureButton" to="." method="_on_texture_button_pressed_salir"]

@@ -5,6 +5,9 @@ extends CanvasLayer
 @onready var controles_tactiles = $Control
 @onready var boton_attack = $Control/attack  # Asegúrate de que la ruta sea correcta
 @onready var boton_interact = $Control/interact # Asegúrate de que la ruta sea correcta
+@onready var boton_menu = $Control/menu
+var escena_menu = preload("res://Scenes/UI/MenuPausa.tscn")
+var menu_pausa = null
 
 # --- RUTAS DE IMÁGENES ---
 var tex_lleno = preload("res://Scenes/Efectos/corazon uno.png")
@@ -26,6 +29,13 @@ func _ready() -> void:
 	
 	# Forzamos que siempre sea visible al iniciar
 	controles_tactiles.show()
+	
+	menu_pausa = escena_menu.instantiate()
+	self.call_deferred("add_child", menu_pausa)
+	menu_pausa.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	menu_pausa.hide()
+	menu_pausa.z_index = 999
+
 
 func _process(_delta: float) -> void:
 	# 1. FEEDBACK VISUAL DE BOTONES (Teclado/Control -> Pantalla)
@@ -97,4 +107,19 @@ func actualizar_vidas(salud: int) -> void:
 		elif salud >= valor_base + 1:
 			corazon.texture = tex_mitad
 		else:
-			corazon.texture = tex_vacio
+			corazon.texture = tex_vacio	
+
+
+func _on_resume_pressed():
+	menu_pausa.hide()
+	get_tree().paused = false	
+
+
+func _on_menu_pressed() -> void:
+	if get_tree().paused:
+		menu_pausa.hide()
+		get_tree().paused = false
+	else:
+		menu_pausa.show()
+		await get_tree().process_frame
+		get_tree().paused = true

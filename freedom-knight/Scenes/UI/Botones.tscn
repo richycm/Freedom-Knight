@@ -17,6 +17,10 @@ region = Rect2(895.81335, 0.038403034, 367.0675, 416.67126)
 atlas = ExtResource("2_yqa16")
 region = Rect2(21.85614, 3.9301605, 377.27173, 411.56915)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_yqa16"]
+atlas = ExtResource("2_yqa16")
+region = Rect2(472.91364, 5.434227, 360.64746, 410.92914)
+
 [node name="Botones" type="CanvasLayer" unique_id=619180748]
 script = ExtResource("1_fsodk")
 
@@ -40,6 +44,12 @@ position = Vector2(592.66675, 460.00006)
 scale = Vector2(0.2528736, 0.24760537)
 texture_normal = SubResource("AtlasTexture_3yh78")
 action = "attack"
+
+[node name="menu" type="TouchScreenButton" parent="Control" unique_id=400980928]
+process_mode = 3
+position = Vector2(28, 165.33333)
+scale = Vector2(0.2666666, 0.24878053)
+texture_normal = SubResource("AtlasTexture_yqa16")
 
 [node name="VirtualJoystick" type="Node2D" parent="Control" unique_id=1111716673]
 position = Vector2(153.33333, 513.3333)
@@ -97,3 +107,4 @@ stretch_mode = 4
 [connection signal="released" from="Control/interact" to="." method="_on_interact_released"]
 [connection signal="pressed" from="Control/attack" to="." method="_on_attack_pressed"]
 [connection signal="released" from="Control/attack" to="." method="_on_attack_released"]
+[connection signal="pressed" from="Control/menu" to="." method="_on_menu_pressed"]

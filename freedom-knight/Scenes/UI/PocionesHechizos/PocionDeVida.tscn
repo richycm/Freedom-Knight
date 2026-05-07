@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://5p01sfw7pu66"]
+
+[ext_resource type="Script" uid="uid://be3tq5kqtpaaj" path="res://Scenes/UI/PocionesHechizos/pocion_de_vida.gd" id="1_q4ne4"]
+[ext_resource type="Texture2D" uid="uid://djacuqyvdda21" path="res://SpritesDelJuego/Pociones/PocionDeVida.png" id="2_o8dgm"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5t1wa"]
+radius = 34.058773
+
+[node name="PocionDeVida" type="Area2D" unique_id=2034774386]
+collision_mask = 3
+script = ExtResource("1_q4ne4")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=39041723]
+position = Vector2(-1.9073486e-06, 0)
+scale = Vector2(0.18611112, 0.18611112)
+texture = ExtResource("2_o8dgm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1525155727]
+shape = SubResource("CircleShape2D_5t1wa")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

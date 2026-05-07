@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://dm6gfu00kgj7h"]
+
+[ext_resource type="Texture2D" uid="uid://3l0q56o04j0n" path="res://Scenes/UI/saco_box/saco_boxeo.png" id="1_sccjg"]
+[ext_resource type="Script" uid="uid://d3gx3462iak2u" path="res://Scenes/UI/saco_box/saco_boxeo.gd" id="1_uimpc"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_uimpc"]
+radius = 99.0
+height = 532.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_dq2rq"]
+radius = 99.0
+height = 528.0
+
+[node name="SacoBoxeo" type="StaticBody2D" unique_id=998762272]
+scale = Vector2(0.25, 0.25)
+collision_layer = 2
+script = ExtResource("1_uimpc")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=342533954]
+texture = ExtResource("1_sccjg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1279506924]
+position = Vector2(2, -29)
+shape = SubResource("CapsuleShape2D_uimpc")
+
+[node name="HurtboxSaco" type="Area2D" parent="." unique_id=2038149871]
+position = Vector2(261, 414)
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxSaco" unique_id=312195852]
+position = Vector2(-259, -441)
+shape = SubResource("CapsuleShape2D_dq2rq")
