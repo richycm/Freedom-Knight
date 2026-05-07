@@ -37,11 +37,7 @@ func _ready() -> void:
 		rango_ataque.body_entered.connect(_on_rango_ataque_body_entered)
 	rango_ataque.monitoring = false
 	
-	# Colisiones: Solo choca con el mapa (Capa 1)
-	set_collision_layer_value(1, false)
-	set_collision_layer_value(2, true)
-	set_collision_mask_value(1, true) 
-	set_collision_mask_value(2, false)
+	# ELIMINAMOS LAS LÍNEAS DE SET_COLLISION PARA QUE RESPETE EL INSPECTOR
 	
 	if player:
 		_actualizar_orientacion(global_position.direction_to(player.global_position))
@@ -125,6 +121,7 @@ func _morir() -> void:
 	
 	murio.emit(global_position)
 	
+	# Aquí sí es válido apagarlas por código porque el enemigo ya murió
 	set_collision_layer_value(2, false)
 	set_collision_mask_value(1, false)
 	rango_ataque.set_deferred("monitoring", false)
@@ -142,8 +139,6 @@ func _efecto_dano() -> void:
 func _on_rango_ataque_body_entered(body: Node2D) -> void:
 	if is_dead or is_spawning: return
 	
-	# --- LA MAGIA ESTÁ AQUÍ ---
-	# Preguntamos: ¿El cuerpo que acabo de tocar es el jugador?
 	if body == player:
 		if body.has_method("recibir_dano"):
 			body.recibir_dano(poder_ataque)

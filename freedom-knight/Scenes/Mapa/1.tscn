@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://xhomn4qlq1ge" path="res://SpritesDelJuego/Edificios/Archery.png" id="12_rxpwl"]
 [ext_resource type="Texture2D" uid="uid://di3ydybf6q1h0" path="res://SpritesDelJuego/Edificios/Barracks.png" id="13_w135r"]
 [ext_resource type="Texture2D" uid="uid://bb54c4xlokkr3" path="res://SpritesDelJuego/Edificios/Castle.png" id="14_uiuxx"]
-[ext_resource type="PackedScene" uid="uid://blg5ae8e677t1" path="res://Scenes/UI/Personajes/Villanos/caballero_malo.tscn" id="15_tnuh6"]
+[ext_resource type="PackedScene" uid="uid://blg5ae8e677t1" path="res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn" id="15_tnuh6"]
 [ext_resource type="Texture2D" uid="uid://dmm4f0swuhcvg" path="res://SpritesDelJuego/Edificios/House1.png" id="15_yqccj"]
 [ext_resource type="Texture2D" uid="uid://7rvf66jy5shl" path="res://SpritesDelJuego/Edificios/House2.png" id="16_tnuh6"]
 [ext_resource type="Texture2D" uid="uid://dqagud4e5ievv" path="res://SpritesDelJuego/Edificios/House3.png" id="17_y0bwr"]

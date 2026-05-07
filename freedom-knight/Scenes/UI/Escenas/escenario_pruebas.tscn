@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dlnd2lkei82u5" path="res://SpritesDelJuego/Terreno/Shadow.png" id="3_oeggp"]
 [ext_resource type="PackedScene" uid="uid://dsvyk2txtpc3j" path="res://Scenes/UI/Personajes/NPC/monje_npc.tscn" id="6_fdknx"]
 [ext_resource type="PackedScene" uid="uid://dm6gfu00kgj7h" path="res://Scenes/UI/saco_box/saco_boxeo.tscn" id="7_oeggp"]
+[ext_resource type="PackedScene" uid="uid://cxmwyq8xwrjk0" path="res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn" id="8_ui1ag"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdknx"]
 texture = ExtResource("2_fdknx")
@@ -128,7 +129,7 @@ position = Vector2(240, -1122)
 shape = SubResource("RectangleShape2D_fdknx")
 
 [node name="abajo" type="CollisionShape2D" parent="LimitesMapa" unique_id=1110436681]
-position = Vector2(402, 1022)
+position = Vector2(405, 864)
 shape = SubResource("RectangleShape2D_oeggp")
 
 [node name="PuntoA" type="Marker2D" parent="." unique_id=821617664]
@@ -142,3 +143,6 @@ position = Vector2(-168, -176)
 
 [node name="SacoBoxeo" parent="." unique_id=998762272 instance=ExtResource("7_oeggp")]
 position = Vector2(-161, 52)
+
+[node name="Arquero" parent="." unique_id=1378590200 instance=ExtResource("8_ui1ag")]
+position = Vector2(875, -121)

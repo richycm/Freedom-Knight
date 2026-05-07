@@ -24,7 +24,10 @@ var is_dead: bool = false
 func _ready() -> void:
 	add_to_group("jugador") 
 	salud_actual = vida_maxima
+	
+	# Apagamos directamente el monitoring, y diferimos el monitorable
 	hitbox.monitoring = false
+	hitbox.set_deferred("monitorable", false)
 	
 	# Pintar los corazones al iniciar el nivel
 	await get_tree().process_frame 
@@ -73,10 +76,16 @@ func _execute_attack() -> void:
 	sprite.sprite_frames.set_animation_loop(ANIM_ATTACK, false)
 	sprite.play(ANIM_ATTACK)
 	
+	# ¡INSTANTÁNEO! Encendemos la detección de golpes para dañar al arquero
 	hitbox.monitoring = true
+	# Diferimos el monitorable para que funcione el parry con la flecha
+	hitbox.set_deferred("monitorable", true)
+	
 	await sprite.animation_finished
 	
+	# Apagamos ambas al terminar
 	hitbox.monitoring = false
+	hitbox.set_deferred("monitorable", false)
 	is_attacking = false
 
 # --- SISTEMA DE DAÑO ---
@@ -101,7 +110,9 @@ func _morir() -> void:
 	velocity = Vector2.ZERO
 	set_collision_layer_value(2, false)
 	set_collision_mask_value(1, false) 
-	hitbox.monitoring = false
+	
+	hitbox.set_deferred("monitoring", false)
+	hitbox.set_deferred("monitorable", false)
 	
 	sprite.sprite_frames.set_animation_loop(ANIM_DEATH, false)
 	sprite.play(ANIM_DEATH)
@@ -150,17 +161,11 @@ func actualizar_ui_corazones() -> void:
 # --- SISTEMA DE PROGRESO ---
 
 func mejorar_fuerza(cantidad: int) -> void:
-	# 1. Sumamos los puntos al Caballero
 	fuerza += cantidad
-	
-	# 2. REGLA: Cada 3 puntos de fuerza subimos 1 de daño (antes era cada 10, era muy lento)
 	poder_ataque = dano_base + floor(fuerza / 3.0)
-	
 	print("[SISTEMA] Fuerza Total: ", fuerza, " | Daño Actual: ", poder_ataque)
 
-	# 3. SINCRONIZACIÓN: Avisamos al script del escenario (Dificultad)
 	var escenario = get_tree().current_scene
 	if "fuerza" in escenario:
 		escenario.fuerza = self.fuerza
 		print("[CONEXIÓN] Estadísticas sincronizadas con el Escenario")
-	

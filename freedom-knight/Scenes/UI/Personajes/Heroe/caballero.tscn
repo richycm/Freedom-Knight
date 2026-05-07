@@ -233,7 +233,7 @@ radius = 95.047356
 
 [node name="Caballero" type="CharacterBody2D" unique_id=470449425 groups=["jugador"]]
 y_sort_enabled = true
-collision_layer = 2
+collision_mask = 0
 script = ExtResource("1_b85wf")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=144203630]
