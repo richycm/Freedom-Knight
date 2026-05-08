@@ -133,7 +133,7 @@ position = Vector2(405, 864)
 shape = SubResource("RectangleShape2D_oeggp")
 
 [node name="PuntoA" type="Marker2D" parent="." unique_id=821617664]
-position = Vector2(-71, -211)
+position = Vector2(-63, -211)
 
 [node name="PuntoB" type="Marker2D" parent="." unique_id=1310447721]
 position = Vector2(1070, 381)
