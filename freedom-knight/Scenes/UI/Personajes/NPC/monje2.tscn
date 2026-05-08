@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://ustdp3bae0k5"]
+
+[ext_resource type="Texture2D" uid="uid://cjpqa03d1dx6w" path="res://SpritesDelJuego/MonjeSprites/Idle.png" id="1_2t63i"]
+[ext_resource type="Texture2D" uid="uid://hguhs7hhnyal" path="res://Scenes/nube_dialogo.png" id="2_1jflv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2h0mb"]
+atlas = ExtResource("1_2t63i")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lqb1m"]
+atlas = ExtResource("1_2t63i")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k31qn"]
+atlas = ExtResource("1_2t63i")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ux1vw"]
+atlas = ExtResource("1_2t63i")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5wyec"]
+atlas = ExtResource("1_2t63i")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5t2mh"]
+atlas = ExtResource("1_2t63i")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fh80t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2h0mb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lqb1m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k31qn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ux1vw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5wyec")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5t2mh")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 18.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sclcf"]
+size = Vector2(45, 66)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2tv6i"]
+radius = 31.016125
+
+[node name="Monje2" type="StaticBody2D" unique_id=1080574383]
+
+[node name="sprite_visual" type="AnimatedSprite2D" parent="." unique_id=910205644]
+position = Vector2(1, 0)
+scale = Vector2(0.8741319, 1)
+sprite_frames = SubResource("SpriteFrames_fh80t")
+animation = &"idle"
+flip_h = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1695846162]
+position = Vector2(1.5, 2)
+shape = SubResource("RectangleShape2D_sclcf")
+
+[node name="Zona" type="Area2D" parent="." unique_id=49092860]
+
+[node name="Interaccion" type="CollisionShape2D" parent="Zona" unique_id=1397810369]
+shape = SubResource("CircleShape2D_2tv6i")
+
+[node name="GloboDialogo" type="NinePatchRect" parent="." unique_id=383767274]
+offset_left = -11.0
+offset_top = -95.0
+offset_right = 205.0
+offset_bottom = -20.0
+texture = ExtResource("2_1jflv")
+region_rect = Rect2(210.83336, 66.16667, 347.3333, 212.66667)
+
+[node name="TextoDialogo" type="Label" parent="GloboDialogo" unique_id=1599965729]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_right = 1.0
+grow_horizontal = 2
+grow_vertical = 2

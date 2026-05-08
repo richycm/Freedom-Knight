@@ -15,7 +15,8 @@
 [ext_resource type="Texture2D" uid="uid://du0irjto4lysv" path="res://SpritesDelJuego/Edificios/Casadestruida.png" id="12_8cbb7"]
 [ext_resource type="Texture2D" uid="uid://rts3etg8tc5l" path="res://SpritesDelJuego/Edificios/Casadestruida2.png" id="13_kd5mr"]
 [ext_resource type="Texture2D" uid="uid://dh25flk5h5tt6" path="res://SpritesDelJuego/Edificios/Casadestruida3.png" id="14_8lmcl"]
-[ext_resource type="PackedScene" uid="uid://blg5ae8e677t1" path="res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn" id="15_tnuh6"]
+[ext_resource type="PackedScene" uid="uid://de3o516tbdsp8" path="res://Scenes/UI/Personajes/Villanos/CaballeroMaloH/Hcaballero_malo.tscn" id="17_8lmcl"]
+[ext_resource type="PackedScene" uid="uid://ustdp3bae0k5" path="res://Scenes/UI/Personajes/NPC/monje2.tscn" id="18_8lmcl"]
 [ext_resource type="Texture2D" uid="uid://di3qilmk2tol0" path="res://SpritesDelJuego/Arboles/Wood Resource.png" id="23_yqccj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0gxex"]
@@ -13329,9 +13330,16 @@ polygon = PackedVector2Array(2692, 867, 2675, 763, 2760, 685, 2828, 687, 2908, 7
 z_index = 2
 position = Vector2(289, 274)
 collision_mask = 1
+speed = 500.0
 
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("4_0gxex")]
 
-[node name="CaballeroMalo" parent="." unique_id=1378590200 instance=ExtResource("15_tnuh6")]
+[node name="CaballeroMalo" parent="." unique_id=1378590200 instance=ExtResource("17_8lmcl")]
 z_index = 2
-position = Vector2(2582, 1637)
+position = Vector2(2564, 1497)
+
+[node name="Monje2" parent="." unique_id=1080574383 instance=ExtResource("18_8lmcl")]
+z_index = 2
+position = Vector2(3905, 1058)
+collision_layer = 0
+collision_mask = 0
