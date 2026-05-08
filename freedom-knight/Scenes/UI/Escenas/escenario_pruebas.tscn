@@ -110,25 +110,34 @@ tile_map_data = PackedByteArray("AAD0//f/AQACAAMAAAD0//j/AQACAAQAAAD1//f/AQADAAM
 tile_set = SubResource("TileSet_oeggp")
 
 [node name="Caballero" parent="." unique_id=470449425 instance=ExtResource("1_rqu3x")]
+z_index = 1
 position = Vector2(238, 42)
+collision_mask = 1
 
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("2_yx73p")]
 
 [node name="LimitesMapa" type="StaticBody2D" parent="." unique_id=653108889]
+z_index = 1
+collision_layer = 3
+collision_mask = 3
 
 [node name="izquierda" type="CollisionShape2D" parent="LimitesMapa" unique_id=834468936]
+z_index = 1
 position = Vector2(-1482.5, 70)
 shape = SubResource("RectangleShape2D_nyo0t")
 
 [node name="derecha" type="CollisionShape2D" parent="LimitesMapa" unique_id=274670261]
+z_index = 1
 position = Vector2(2120.5, -8)
 shape = SubResource("RectangleShape2D_k7j0i")
 
 [node name="arriba" type="CollisionShape2D" parent="LimitesMapa" unique_id=1376789214]
+z_index = 1
 position = Vector2(240, -1122)
 shape = SubResource("RectangleShape2D_fdknx")
 
 [node name="abajo" type="CollisionShape2D" parent="LimitesMapa" unique_id=1110436681]
+z_index = 1
 position = Vector2(405, 864)
 shape = SubResource("RectangleShape2D_oeggp")
 
