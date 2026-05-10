@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://dh25flk5h5tt6" path="res://SpritesDelJuego/Edificios/Casadestruida3.png" id="14_8lmcl"]
 [ext_resource type="PackedScene" uid="uid://de3o516tbdsp8" path="res://Scenes/UI/Personajes/Villanos/CaballeroMaloH/Hcaballero_malo.tscn" id="17_8lmcl"]
 [ext_resource type="PackedScene" uid="uid://ustdp3bae0k5" path="res://Scenes/UI/Personajes/NPC/monje2.tscn" id="18_8lmcl"]
+[ext_resource type="PackedScene" uid="uid://blg5ae8e677t1" path="res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn" id="19_ohvpp"]
 [ext_resource type="Texture2D" uid="uid://di3qilmk2tol0" path="res://SpritesDelJuego/Arboles/Wood Resource.png" id="23_yqccj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0gxex"]
@@ -13337,3 +13338,8 @@ speed = 500.0
 
 [node name="HCaballeroMalo" parent="." unique_id=1378590200 instance=ExtResource("17_8lmcl")]
 position = Vector2(2299, 1381)
+
+[node name="CaballeroMalo" parent="." unique_id=1409435913 instance=ExtResource("19_ohvpp")]
+z_index = 2
+position = Vector2(1725, 1229)
+collision_layer = 1
