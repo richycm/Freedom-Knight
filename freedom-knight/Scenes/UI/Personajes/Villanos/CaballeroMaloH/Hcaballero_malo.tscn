@@ -232,9 +232,10 @@ radius = 68.007355
 radius = 80.00625
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qeogi"]
-radius = 220.0
+radius = 371.0337
 
 [node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
+z_index = 2
 y_sort_enabled = true
 collision_layer = 2
 collision_mask = 0
@@ -260,10 +261,13 @@ collision_layer = 0
 position = Vector2(10.167999, 118.01601)
 shape = SubResource("CircleShape2D_unrqf")
 
-[node name="RangoVision" type="Area2D" parent="." unique_id=1790744427]
-collision_layer = 0
+[node name="ZonaDeteccion" type="Area2D" parent="." unique_id=1790744427]
+collision_layer = 3
+collision_mask = 255
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=973061070]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaDeteccion" unique_id=973061070]
+light_mask = 3
 shape = SubResource("CircleShape2D_qeogi")
 
 [connection signal="body_entered" from="RangoAtaque" to="." method="_on_rango_ataque_body_entered"]
+[connection signal="body_entered" from="ZonaDeteccion" to="." method="_on_zona_deteccion_body_entered"]

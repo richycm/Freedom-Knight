@@ -13256,6 +13256,7 @@ sources/5 = SubResource("TileSetAtlasSource_yqccj")
 
 [node name="1" type="Node2D" unique_id=940503634]
 script = ExtResource("1_nqs6v")
+monje_escena = ExtResource("18_8lmcl")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=743223612]
 z_index = 1
@@ -13326,7 +13327,7 @@ polygon = PackedVector2Array(1783, 698, 1899, 609, 1937, 608, 2040, 702, 2031, 7
 [node name="CollisionPolygon2D8" type="CollisionPolygon2D" parent="StaticBody2D" unique_id=1106221021]
 polygon = PackedVector2Array(2692, 867, 2675, 763, 2760, 685, 2828, 687, 2908, 750, 2928, 782, 2915, 861, 2864, 856, 2788, 856)
 
-[node name="Caballero" parent="." unique_id=470449425 instance=ExtResource("3_ry2wr")]
+[node name="Caballero" parent="." unique_id=470449425 groups=["Jugador"] instance=ExtResource("3_ry2wr")]
 z_index = 2
 position = Vector2(289, 274)
 collision_mask = 1
@@ -13334,12 +13335,8 @@ speed = 500.0
 
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("4_0gxex")]
 
-[node name="CaballeroMalo" parent="." unique_id=1378590200 instance=ExtResource("17_8lmcl")]
-z_index = 2
+[node name="CaballeroMalo" parent="." unique_id=1378590200 groups=["CaballeroMalo"] instance=ExtResource("17_8lmcl")]
 position = Vector2(2564, 1497)
 
-[node name="Monje2" parent="." unique_id=1080574383 instance=ExtResource("18_8lmcl")]
-z_index = 2
-position = Vector2(3905, 1058)
-collision_layer = 0
-collision_mask = 0
+[node name="Marker2D" type="Marker2D" parent="." unique_id=379384220]
+position = Vector2(2335, 1145)
