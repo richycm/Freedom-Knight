@@ -129,3 +129,4 @@ vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [connection signal="pressed" from="Salir/TextureButton" to="." method="_on_texture_button_pressed_salir"]
+[connection signal="pressed" from="Guardar/TextureButton" to="." method="_on_texture_button_pressed_guardar"]

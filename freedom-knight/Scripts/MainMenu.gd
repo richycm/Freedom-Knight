@@ -75,7 +75,10 @@ func _on_texture_button_pressed_prueba() -> void:
 
 func _on_texture_button_pressed_continuarjuego() -> void:
 	print("CLICK CONTINUAR")
-	pass 
+	if SaveManager.existe_partida():
+		SaveManager.cargar_y_posicionar()
+	else:
+		print("No hay datos guardados")
 
 func _on_texture_button_pressed_configuracion() -> void:
 	print("CLICK CONFIG")

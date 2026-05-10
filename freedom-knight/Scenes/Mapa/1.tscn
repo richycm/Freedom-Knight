@@ -13335,8 +13335,5 @@ speed = 500.0
 
 [node name="Botones" parent="." unique_id=619180748 instance=ExtResource("4_0gxex")]
 
-[node name="CaballeroMalo" parent="." unique_id=1378590200 groups=["CaballeroMalo"] instance=ExtResource("17_8lmcl")]
-position = Vector2(2564, 1497)
-
-[node name="Marker2D" type="Marker2D" parent="." unique_id=379384220]
-position = Vector2(2335, 1145)
+[node name="HCaballeroMalo" parent="." unique_id=1378590200 instance=ExtResource("17_8lmcl")]
+position = Vector2(2299, 1381)

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://de3o516tbdsp8"]
 
-[ext_resource type="Script" uid="uid://1pwlu0kuy58y" path="res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.gd" id="1_o4ylb"]
+[ext_resource type="Script" uid="uid://bo4njc5asep5x" path="res://Scenes/UI/Personajes/Villanos/CaballeroMaloH/Hcaballero_malo.gd" id="1_13wgv"]
 [ext_resource type="Texture2D" uid="uid://xj6ym6f17gr7" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Attack1.png" id="2_syi7j"]
 [ext_resource type="Texture2D" uid="uid://clin7tqv0wrj" path="res://Scenes/Efectos/Explosion_02.png" id="3_26qti"]
 [ext_resource type="Texture2D" uid="uid://2by2qofmstr7" path="res://SpritesDelJuego/CaballeroMaloSprites/Warrior_Idle.png" id="4_oekxe"]
@@ -234,12 +234,12 @@ radius = 80.00625
 [sub_resource type="CircleShape2D" id="CircleShape2D_qeogi"]
 radius = 371.0337
 
-[node name="CaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
+[node name="HCaballeroMalo" type="CharacterBody2D" unique_id=1378590200]
 z_index = 2
 y_sort_enabled = true
 collision_layer = 2
 collision_mask = 0
-script = ExtResource("1_o4ylb")
+script = ExtResource("1_13wgv")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=1231386101]
 y_sort_enabled = true
@@ -248,7 +248,6 @@ scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_7y38a")
 animation = &"idle"
 autoplay = "idle"
-frame_progress = 0.64237994
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=559062799]
 shape = SubResource("CircleShape2D_1r5sp")
