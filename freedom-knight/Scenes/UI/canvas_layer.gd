@@ -4,8 +4,10 @@ extends CanvasLayer
 @onready var contenedor_corazones = $BarraVidas
 @onready var controles_tactiles = $Control
 @onready var boton_attack = $Control/attack  # Asegúrate de que la ruta sea correcta
+@onready var boton_guard = $Control/guard
 @onready var boton_interact = $Control/interact # Asegúrate de que la ruta sea correcta
 @onready var boton_menu = $Control/menu
+@onready var guard_timer_label = $GuardTimer
 var escena_menu = preload("res://Scenes/UI/MenuPausa.tscn")
 var menu_pausa = null
 
@@ -30,6 +32,15 @@ func _ready() -> void:
 	# Forzamos que siempre sea visible al iniciar
 	controles_tactiles.show()
 	
+	# Asegurar que el CanvasLayer siempre procese entrada, incluso en pausa
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	if boton_menu:
+		boton_menu.action = "menu"
+		# Desconectamos cualquier señal previa para evitar el doble disparo (ya lo manejamos en _input)
+		if boton_menu.is_connected("pressed", _on_menu_pressed):
+			boton_menu.disconnect("pressed", _on_menu_pressed)
+
 	menu_pausa = escena_menu.instantiate()
 	self.call_deferred("add_child", menu_pausa)
 	menu_pausa.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
@@ -41,7 +52,16 @@ func _process(_delta: float) -> void:
 	# 1. FEEDBACK VISUAL DE BOTONES (Teclado/Control -> Pantalla)
 	# Si se presiona la acción, cambiamos el color o estado del botón táctil
 	_actualizar_feedback_boton(boton_attack, "attack")
+	_actualizar_feedback_boton(boton_guard, "guard")
 	_actualizar_feedback_boton(boton_interact, "interact")
+	_actualizar_feedback_boton(boton_menu, "menu")
+	
+	if guard_timer_label:
+		var player = get_tree().current_scene.find_child("Caballero", true)
+		if player and player.has_method("get_guard_energy"):
+			guard_timer_label.text = "Guard: %.1fs" % player.get_guard_energy()
+	
+	# Detectar menu desde teclado o botón táctil se hace en _input para evitar múltiples disparos
 	
 	# 2. FEEDBACK VISUAL DEL JOYSTICK
 	# Si el jugador se mueve con WASD o el Stick del mando, movemos el "palo" visual
@@ -66,6 +86,9 @@ func _input(event: InputEvent) -> void:
 	# ANULADO: Ya no ocultamos nada. 
 	# Los controles táctiles siempre procesan el joystick si hay toque.
 	_procesar_joystick(event)
+	
+	if event.is_action_pressed("menu"):
+		_on_menu_pressed()
 
 func _procesar_joystick(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
@@ -121,5 +144,21 @@ func _on_menu_pressed() -> void:
 		get_tree().paused = false
 	else:
 		menu_pausa.show()
-		await get_tree().process_frame
 		get_tree().paused = true
+
+
+
+func _on_guard_pressed() -> void:
+	var player = get_tree().current_scene.find_child("Caballero", true)
+	if player and player.has_method("_start_guard"):
+		player._start_guard()
+
+
+func _on_guard_released() -> void:
+	var player = get_tree().current_scene.find_child("Caballero", true)
+	if player and player.has_method("_stop_guard"):
+		player._stop_guard()
+
+
+func _on_menu_released() -> void:
+	pass # Evitamos doble activación con _on_menu_pressed

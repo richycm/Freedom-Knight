@@ -110,7 +110,6 @@ tile_map_data = PackedByteArray("AAD0//f/AQACAAMAAAD0//j/AQACAAQAAAD1//f/AQADAAM
 tile_set = SubResource("TileSet_oeggp")
 
 [node name="Caballero" parent="." unique_id=470449425 groups=["Jugador"] instance=ExtResource("1_rqu3x")]
-z_index = 2
 position = Vector2(238, 42)
 collision_mask = 1
 

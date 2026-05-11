@@ -37,11 +37,19 @@ func _ready() -> void:
 		rango_ataque.body_entered.connect(_on_rango_ataque_body_entered)
 	rango_ataque.monitoring = false
 	
-	# Colisiones: Solo choca con el mapa (Capa 1)
+	# FÍSICA: El enemigo está en la Capa 3 y solo choca con el mapa (Capa 1)
 	set_collision_layer_value(1, false)
-	set_collision_layer_value(2, true)
+	set_collision_layer_value(2, false)
+	set_collision_layer_value(3, true)
 	set_collision_mask_value(1, true) 
 	set_collision_mask_value(2, false)
+	set_collision_mask_value(3, false)
+	
+	# COMBATE: El rango de ataque debe detectar al jugador (Capa 2)
+	rango_ataque.set_collision_layer_value(1, false)
+	rango_ataque.set_collision_mask_value(1, false)
+	rango_ataque.set_collision_mask_value(2, true)
+	rango_ataque.set_collision_mask_value(3, false)
 	
 	if player:
 		_actualizar_orientacion(global_position.direction_to(player.global_position))

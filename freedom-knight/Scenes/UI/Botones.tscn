@@ -6,6 +6,10 @@
 [ext_resource type="Texture2D" uid="uid://cswdg2n1ywqrj" path="res://Scenes/UI/Joistick/joyring.png" id="3_yqa16"]
 [ext_resource type="Texture2D" uid="uid://g24w1h8gbb7u" path="res://Scenes/UI/Joistick/joyknobpng.png" id="4_3yh78"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4r5k"]
+atlas = ExtResource("2_yqa16")
+region = Rect2(1711.624, 6.5099792, 367.59814, 407.09204)
+
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yqa16"]
 load_path = "res://.godot/imported/FKbtns.png-45a2266fd34f2d2d44c66a020be65e44.ctex"
 
@@ -33,23 +37,30 @@ offset_right = 2.9999924
 offset_bottom = -206.0
 scale = Vector2(1.5, 1.5)
 
+[node name="guard" type="TouchScreenButton" parent="Control" unique_id=954505377]
+position = Vector2(719.3334, 513.3334)
+scale = Vector2(0.18921308, 0.18141131)
+texture_normal = SubResource("AtlasTexture_c4r5k")
+action = "guard"
+
 [node name="interact" type="TouchScreenButton" parent="Control" unique_id=2042661713]
-position = Vector2(712.6666, 384.66666)
+position = Vector2(705.99994, 397.99994)
 scale = Vector2(0.18390763, 0.1800762)
 texture_normal = SubResource("AtlasTexture_meyst")
 action = "interact"
 
 [node name="attack" type="TouchScreenButton" parent="Control" unique_id=1881671234]
-position = Vector2(592.66675, 460.00006)
+position = Vector2(592.66675, 470.6667)
 scale = Vector2(0.2528736, 0.24760537)
 texture_normal = SubResource("AtlasTexture_3yh78")
 action = "attack"
 
 [node name="menu" type="TouchScreenButton" parent="Control" unique_id=400980928]
 process_mode = 3
-position = Vector2(28, 165.33333)
-scale = Vector2(0.2666666, 0.24878053)
+position = Vector2(55.333347, 186.66666)
+scale = Vector2(0.19074064, 0.17794713)
 texture_normal = SubResource("AtlasTexture_yqa16")
+action = "menu"
 
 [node name="VirtualJoystick" type="Node2D" parent="Control" unique_id=1111716673]
 position = Vector2(153.33333, 513.3333)
@@ -65,12 +76,20 @@ position = Vector2(-27.333334, -34.666668)
 scale = Vector2(0.027777776, 0.027777776)
 texture_normal = ExtResource("4_3yh78")
 
+[node name="GuardTimer" type="Label" parent="." unique_id=2000000001]
+custom_minimum_size = Vector2(140, 26)
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 20.0
+offset_bottom = 20.0
+text = "Guard: 5.0s"
+
 [node name="BarraVidas" type="HBoxContainer" parent="." unique_id=283931321]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -390.0
-offset_bottom = 67.0
+offset_bottom = 120.0
 grow_horizontal = 0
 
 [node name="Corazon1" type="TextureRect" parent="BarraVidas" unique_id=1002653830]
@@ -103,6 +122,8 @@ layout_mode = 2
 expand_mode = 1
 stretch_mode = 4
 
+[connection signal="pressed" from="Control/guard" to="." method="_on_guard_pressed"]
+[connection signal="released" from="Control/guard" to="." method="_on_guard_released"]
 [connection signal="pressed" from="Control/interact" to="." method="_on_interact_pressed"]
 [connection signal="released" from="Control/interact" to="." method="_on_interact_released"]
 [connection signal="pressed" from="Control/attack" to="." method="_on_attack_pressed"]

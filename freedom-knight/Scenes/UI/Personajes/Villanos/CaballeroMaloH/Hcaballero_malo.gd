@@ -23,6 +23,25 @@ func _ready():
 		zona_deteccion.body_entered.connect(_on_detectar)
 	if not zona_deteccion.body_exited.is_connected(_on_perder):
 		zona_deteccion.body_exited.connect(_on_perder)
+		
+	# FÍSICA: El enemigo está en la Capa 3 y choca con el mapa (Capa 1)
+	set_collision_layer_value(1, false)
+	set_collision_layer_value(2, false)
+	set_collision_layer_value(3, true)
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(2, false)
+	set_collision_mask_value(3, false)
+	
+	# DETECCIÓN: Rango y zona detectan al jugador (Capa 2)
+	zona_deteccion.set_collision_layer_value(1, false)
+	zona_deteccion.set_collision_mask_value(1, false)
+	zona_deteccion.set_collision_mask_value(2, true)
+	zona_deteccion.set_collision_mask_value(3, false)
+	
+	rango_ataque.set_collision_layer_value(1, false)
+	rango_ataque.set_collision_mask_value(1, false)
+	rango_ataque.set_collision_mask_value(2, true)
+	rango_ataque.set_collision_mask_value(3, false)
 	
 	modulate.a = 1.0 
 	sprite.play("idle")

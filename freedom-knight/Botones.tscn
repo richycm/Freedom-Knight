@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://yg503dbcyfid"]
 
-[ext_resource type="Script" path="res://canvas_layer.gd" id="1_fsodk"]
 [ext_resource type="Texture2D" uid="uid://bj8rmgsll4hbw" path="res://Botones_Iconos/UI_buttons16x16.png" id="2_meyst"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_r8vn4"]
@@ -36,7 +35,6 @@ atlas = SubResource("CompressedTexture2D_fsodk")
 region = Rect2(128, 0, 32, 16)
 
 [node name="Botones" type="CanvasLayer" unique_id=619180748]
-script = ExtResource("1_fsodk")
 
 [node name="Control" type="Control" parent="." unique_id=2057887903]
 layout_mode = 3

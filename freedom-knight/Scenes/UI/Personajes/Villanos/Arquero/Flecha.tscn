@@ -81,7 +81,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_6jadg")
 }],
-"loop": true,
+"loop": false,
 "name": &"death",
 "speed": 12.01
 }, {
@@ -101,10 +101,12 @@ radius = 26.019224
 collision_layer = 2
 script = ExtResource("1_a8ov7")
 
-[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=114483851]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=114483851]
+scale = Vector2(0.8229167, 0.8229167)
 sprite_frames = SubResource("SpriteFrames_4xcmg")
 animation = &"death"
-frame_progress = 0.72648835
+frame = 9
+frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1851678350]
 shape = SubResource("CircleShape2D_a8ov7")

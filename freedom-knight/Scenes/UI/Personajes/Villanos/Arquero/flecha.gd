@@ -14,8 +14,17 @@ var is_destroyed: bool = false
 
 func _ready():
 	# Reproducimos la animación de vuelo por defecto
-	if sprite:
-		sprite.play("idle")
+	sprite.play("idle")
+	
+	# CONFIGURACIÓN DE COLISIONES DE LA FLECHA
+	# La flecha es un proyectil enemigo (Capa 3)
+	set_collision_layer_value(1, false)
+	set_collision_layer_value(2, false)
+	set_collision_layer_value(3, true)
+	# Debe detectar al mapa (Capa 1) y al jugador (Capa 2)
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(2, true)
+	set_collision_mask_value(3, false)
 		
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
