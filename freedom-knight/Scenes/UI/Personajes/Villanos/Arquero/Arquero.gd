@@ -26,7 +26,7 @@ var flecha_scene = preload("res://Scenes/UI/Personajes/Villanos/Arquero/Flecha.t
 func _ready() -> void:
 	add_to_group("enemigos")
 	salud_actual = vida_maxima
-	player = get_tree().current_scene.find_child("Caballero", true)
+	player = _obtener_jugador_mas_cercano()
 	
 	# Forzar Y-Sort
 	y_sort_enabled = true
@@ -71,7 +71,10 @@ func _ejecutar_spawn_magico() -> void:
 	is_spawning = false
 
 func _physics_process(delta: float) -> void:
-	if is_dead or is_spawning or not player: return
+	if is_dead or is_spawning: return
+	
+	player = _obtener_jugador_mas_cercano()
+	if not is_instance_valid(player): return
 	
 	if attack_timer > 0:
 		attack_timer -= delta
@@ -150,3 +153,15 @@ func _morir() -> void:
 	sprite.play("death")
 	await sprite.animation_finished
 	queue_free()
+
+func _obtener_jugador_mas_cercano() -> CharacterBody2D:
+	var jugadores = get_tree().get_nodes_in_group("jugador")
+	var mas_cercano = null
+	var min_dist = INF
+	for j in jugadores:
+		if j is CharacterBody2D and is_instance_valid(j) and not (j.get("is_dead") == true):
+			var dist = global_position.distance_to(j.global_position)
+			if dist < min_dist:
+				min_dist = dist
+				mas_cercano = j
+	return mas_cercano

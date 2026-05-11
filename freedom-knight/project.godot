@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 SaveManager="*uid://d2nx42bwt6y1m"
+NetworkManager="*res://Scripts/NetworkManager.gd"
 
 [display]
 

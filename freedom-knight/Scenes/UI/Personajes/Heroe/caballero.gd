@@ -42,6 +42,27 @@ func _ready() -> void:
 	hitbox.set_deferred("monitoring", false)
 	hitbox.set_deferred("monitorable", false) # IMPORTANTE: Evita que la flecha la vea sin atacar
 	
+	# --- ETIQUETA DE NOMBRE ---
+	var label_nombre = Label.new()
+	if SaveManager.nombre_jugador != "":
+		label_nombre.text = SaveManager.nombre_jugador
+	else:
+		label_nombre.text = "Caballero"
+		
+	label_nombre.add_theme_font_size_override("font_size", 12)
+	label_nombre.add_theme_color_override("font_outline_color", Color.BLACK)
+	label_nombre.add_theme_constant_override("outline_size", 4)
+	label_nombre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label_nombre.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label_nombre.z_index = 10 # Asegura que esté sobre el personaje
+	
+	# Centrar la etiqueta sobre la cabeza del personaje
+	label_nombre.position = Vector2(-50, -45) # Un poco más arriba (-45)
+	label_nombre.custom_minimum_size = Vector2(100, 20)
+	add_child(label_nombre)
+	
+	await get_tree().process_frame 
+				
 	await get_tree().process_frame 
 	actualizar_ui_corazones()
 

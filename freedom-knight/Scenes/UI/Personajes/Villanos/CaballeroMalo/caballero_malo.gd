@@ -24,7 +24,7 @@ var attack_timer: float = 0.0
 func _ready() -> void:
 	add_to_group("enemigos")
 	salud_actual = vida_maxima
-	player = get_tree().current_scene.find_child("Caballero", true)
+	player = _obtener_jugador_mas_cercano()
 	
 	# Forzar Y-Sort en el caballero
 	y_sort_enabled = true
@@ -73,7 +73,11 @@ func _ejecutar_spawn_magico() -> void:
 	is_spawning = false
 
 func _physics_process(delta: float) -> void:
-	if is_dead or is_spawning or not player: return
+	if is_dead or is_spawning: return
+	
+	# Actualizar el target siempre al jugador más cercano
+	player = _obtener_jugador_mas_cercano()
+	if not is_instance_valid(player): return
 	
 	if attack_timer > 0:
 		attack_timer -= delta
@@ -153,6 +157,18 @@ func _on_rango_ataque_body_entered(body: Node2D) -> void:
 	
 	# --- LA MAGIA ESTÁ AQUÍ ---
 	# Preguntamos: ¿El cuerpo que acabo de tocar es el jugador?
-	if body == player:
+	if body.is_in_group("jugador"):
 		if body.has_method("recibir_dano"):
 			body.recibir_dano(poder_ataque)
+
+func _obtener_jugador_mas_cercano() -> CharacterBody2D:
+	var jugadores = get_tree().get_nodes_in_group("jugador")
+	var mas_cercano = null
+	var min_dist = INF
+	for j in jugadores:
+		if j is CharacterBody2D and is_instance_valid(j) and not (j.get("is_dead") == true):
+			var dist = global_position.distance_to(j.global_position)
+			if dist < min_dist:
+				min_dist = dist
+				mas_cercano = j
+	return mas_cercano

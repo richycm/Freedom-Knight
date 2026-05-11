@@ -68,8 +68,9 @@ func _on_body_entered(body):
 			if player:
 				var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
 				var flecha_frente = false
-				if mirando_derecha and global_position.x >= player.global_position.x - 5: flecha_frente = true
-				elif not mirando_derecha and global_position.x <= player.global_position.x + 5: flecha_frente = true
+				# Aumentamos el margen de detección a 15 píxeles para ser más generosos
+				if mirando_derecha and global_position.x >= player.global_position.x - 15: flecha_frente = true
+				elif not mirando_derecha and global_position.x <= player.global_position.x + 15: flecha_frente = true
 				
 				if flecha_frente:
 					print("¡Parry salvador! Golpeaste la flecha en el último milisegundo.")
@@ -79,7 +80,12 @@ func _on_body_entered(body):
 		
 	# Si choca con alguien que recibe daño (Jugador o Enemigo)
 	if body.has_method("recibir_dano"):
-		print("¡LA FLECHA IMPACTÓ A ", body.name, "!")
+		# Si es el jugador y está bloqueando, la flecha explota pero no hace daño real (lo maneja el caballero)
+		if body.is_in_group("jugador") and body.get("is_guarding"):
+			print("¡FLECHA BLOQUEADA POR ESCUDO!")
+		else:
+			print("¡LA FLECHA IMPACTÓ A ", body.name, "!")
+			
 		body.recibir_dano(dano)
 		_explotar()
 	# Si choca con el mapa o límites
@@ -96,9 +102,9 @@ func _on_area_entered(area):
 			var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
 			var flecha_frente = false
 			
-			if mirando_derecha and global_position.x >= player.global_position.x - 5:
+			if mirando_derecha and global_position.x >= player.global_position.x - 15:
 				flecha_frente = true
-			elif not mirando_derecha and global_position.x <= player.global_position.x + 5:
+			elif not mirando_derecha and global_position.x <= player.global_position.x + 15:
 				flecha_frente = true
 				
 			if not flecha_frente:

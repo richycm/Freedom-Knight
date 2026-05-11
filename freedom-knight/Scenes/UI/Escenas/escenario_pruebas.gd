@@ -63,6 +63,8 @@ func _ready() -> void:
 	await get_tree().create_timer(1.5).timeout
 	_spawnear_un_enemigo()
 
+# Eliminadas funciones de red obsoletas
+
 # ─────────────────────────────────────────
 #  LÍMITES
 # ─────────────────────────────────────────
@@ -84,10 +86,8 @@ func _pos_aleatoria_lejos_del_player() -> Vector2:
 	var distancia_minima = 150.0
 	for _intento in range(10):
 		var pos = _pos_aleatoria()
-		if not is_instance_valid(player):
-			return pos
-		if pos.distance_to(player.global_position) >= distancia_minima:
-			return pos
+		
+	return _pos_aleatoria()
 	return _pos_aleatoria()
 
 # ─────────────────────────────────────────
@@ -101,9 +101,7 @@ func _on_enemigo_murio(_pos) -> void:
 	_spawnear_un_enemigo()
 
 func _spawnear_un_enemigo() -> void:
-	if not enemigo_scene or not is_instance_valid(player):
-		return
-	if "is_dead" in player and player.is_dead:
+	if not enemigo_scene or not _hay_jugadores_vivos():
 		return
 	
 	var nuevo = enemigo_scene.instantiate()
@@ -135,9 +133,7 @@ func _iniciar_timer_arqueros() -> void:
 	timer_arqueros.start()
 
 func _spawnear_arquero() -> void:
-	if not arquero_scene or not is_instance_valid(player):
-		return
-	if "is_dead" in player and player.is_dead:
+	if not arquero_scene or not _hay_jugadores_vivos():
 		return
 	if arqueros_vivos >= max_arqueros_simultaneos:
 		return
@@ -213,7 +209,7 @@ func _spawnear_pocion() -> void:
 	timer_pociones.wait_time = randf_range(intervalo_pocion_min, intervalo_pocion_max)
 	timer_pociones.start()
 	
-	if not player or ("is_dead" in player and player.is_dead):
+	if not _hay_jugadores_vivos():
 		return
 	if not pocion_scene:
 		return
@@ -229,3 +225,8 @@ func _spawnear_pocion() -> void:
 	
 	if "cantidad_curacion" in nueva_pocion:
 		nueva_pocion.cantidad_curacion = 2
+
+func _hay_jugadores_vivos() -> bool:
+	if is_instance_valid(player) and not player.is_dead:
+		return true
+	return false
