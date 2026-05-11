@@ -273,8 +273,8 @@ animations = [{
 "speed": 16.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_b85wf"]
-size = Vector2(121.99997, 124)
+[sub_resource type="CircleShape2D" id="CircleShape2D_crgsd"]
+radius = 43.011627
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ev73a"]
 radius = 95.047356
@@ -288,12 +288,14 @@ script = ExtResource("1_b85wf")
 position = Vector2(-1, 3.0000038)
 scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_lybl4")
-animation = &"guard"
+animation = &"attack"
 autoplay = "idle"
-frame_progress = 0.6566394
+frame = 3
+frame_progress = 0.6023998
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1917436634]
-shape = SubResource("RectangleShape2D_b85wf")
+visible = false
+shape = SubResource("CircleShape2D_crgsd")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1585368044]
 position_smoothing_enabled = true

@@ -99,7 +99,7 @@ size = Vector2(4349, 939.5)
 
 [node name="EscenarioPruebas" type="Node2D" unique_id=1162748324 groups=["jugador"]]
 y_sort_enabled = true
-position = Vector2(391, 289)
+position = Vector2(392, 290)
 script = ExtResource("1_k7j0i")
 metadata/_edit_horizontal_guides_ = [788.0]
 

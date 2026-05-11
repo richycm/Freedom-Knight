@@ -1,13 +1,13 @@
 extends CanvasLayer
 
 # --- REFERENCIAS ---
-@onready var contenedor_corazones = $BarraVidas
-@onready var controles_tactiles = $Control
-@onready var boton_attack = $Control/attack  # Asegúrate de que la ruta sea correcta
-@onready var boton_guard = $Control/guard
-@onready var boton_interact = $Control/interact # Asegúrate de que la ruta sea correcta
-@onready var boton_menu = $Control/menu
-@onready var guard_timer_label = $GuardTimer
+@onready var contenedor_corazones = $UI/TopRight/BarraVidas
+@onready var controles_tactiles = $UI
+@onready var boton_attack = $UI/BottomRight/attack
+@onready var boton_guard = $UI/BottomRight/guard
+@onready var boton_interact = $UI/BottomRight/interact
+@onready var boton_menu = $UI/TopLeft/menu
+@onready var guard_timer_label = $UI/TopLeft/GuardTimer
 var escena_menu = preload("res://Scenes/UI/MenuPausa.tscn")
 var menu_pausa = null
 
@@ -17,13 +17,13 @@ var tex_mitad = preload("res://Scenes/Efectos/Corazon medio.png")
 var tex_vacio = preload("res://Scenes/Efectos/corazon vacio.png")
 
 # --- VARIABLES JOYSTICK ---
-@onready var palo = $Control/VirtualJoystick/Palo
-@onready var base = $Control/VirtualJoystick/Base
+@onready var palo = $UI/BottomLeft/VirtualJoystick/Palo
+@onready var base = $UI/BottomLeft/VirtualJoystick/Base
 var radio = 60.0 
 var direccion = Vector2.ZERO
 var dragging = false
 var touch_index: int = -1 
-var centro_palo = Vector2(-27.333, -34.667)
+var centro_palo = Vector2(-27, -27)
 
 func _ready() -> void:
 	if palo:
@@ -162,3 +162,15 @@ func _on_guard_released() -> void:
 
 func _on_menu_released() -> void:
 	pass # Evitamos doble activación con _on_menu_pressed
+
+func _on_interact_pressed() -> void:
+	pass
+
+func _on_interact_released() -> void:
+	pass
+
+func _on_attack_pressed() -> void:
+	pass
+
+func _on_attack_released() -> void:
+	pass

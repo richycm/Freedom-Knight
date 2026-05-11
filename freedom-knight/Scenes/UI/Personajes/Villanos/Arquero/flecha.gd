@@ -21,10 +21,11 @@ func _ready():
 	set_collision_layer_value(1, false)
 	set_collision_layer_value(2, false)
 	set_collision_layer_value(3, true)
-	# Debe detectar al mapa (Capa 1) y al jugador (Capa 2)
+	# Debe detectar al mapa (Capa 1), al jugador (Capa 2), y la ESPADA (Capa 4)
 	set_collision_mask_value(1, true)
 	set_collision_mask_value(2, true)
 	set_collision_mask_value(3, false)
+	set_collision_mask_value(4, true)
 		
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
@@ -55,22 +56,56 @@ func _physics_process(delta):
 	rotation = direccion.angle()
 
 func _on_body_entered(body):
-	# Ignoramos al arquero que la disparó
+	# Ignoramos a quien disparó la flecha (original o parry)
 	if is_destroyed or body == tirador: 
 		return 
 		
-	if body.is_in_group("jugador") and body.has_method("recibir_dano"):
+	# PREVENCIÓN DE DAÑO INJUSTO (Si el cuerpo y la espada chocan en el mismo frame)
+	var areas_chocando = get_overlapping_areas()
+	for a in areas_chocando:
+		if a.name == "HitboxEspada":
+			var player = get_tree().current_scene.find_child("Caballero", true)
+			if player:
+				var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
+				var flecha_frente = false
+				if mirando_derecha and global_position.x >= player.global_position.x - 5: flecha_frente = true
+				elif not mirando_derecha and global_position.x <= player.global_position.x + 5: flecha_frente = true
+				
+				if flecha_frente:
+					print("¡Parry salvador! Golpeaste la flecha en el último milisegundo.")
+					is_destroyed = true
+					_explotar()
+					return
+		
+	# Si choca con alguien que recibe daño (Jugador o Enemigo)
+	if body.has_method("recibir_dano"):
+		print("¡LA FLECHA IMPACTÓ A ", body.name, "!")
 		body.recibir_dano(dano)
 		_explotar()
+	# Si choca con el mapa o límites
 	elif body is TileMapLayer or "Limite" in body.name:
 		_explotar()
 
 func _on_area_entered(area):
 	if is_destroyed: return
 	
-	# ¡MECÁNICA DE PARRY PERFECTO!
+	# ¡MECÁNICA DE PARRY! 
 	if area.name == "HitboxEspada":
-		print("¡PARRY PERFECTO! Flecha destruida.")
+		var player = get_tree().current_scene.find_child("Caballero", true)
+		if player:
+			var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
+			var flecha_frente = false
+			
+			if mirando_derecha and global_position.x >= player.global_position.x - 5:
+				flecha_frente = true
+			elif not mirando_derecha and global_position.x <= player.global_position.x + 5:
+				flecha_frente = true
+				
+			if not flecha_frente:
+				return # Ignorar si viene por la espalda
+				
+		is_destroyed = true # Bloqueamos daño inmediato
+		print("¡PARRY! Flecha destruida por el escudo de espada.")
 		_explotar()
 
 func _explotar():

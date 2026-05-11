@@ -71,13 +71,12 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.58
-anchor_top = 0.20888889
-anchor_right = 0.97583336
-anchor_bottom = 0.36740744
-offset_bottom = -3.0517578e-05
+anchor_top = 0.21
+anchor_right = 0.975
+anchor_bottom = 0.37
 texture_normal = ExtResource("1_0c3un")
 ignore_texture_size = true
-stretch_mode = 0
+stretch_mode = 5
 metadata/_edit_use_anchors_ = true
 
 [node name="Label" type="Label" parent="Salir/TextureButton" unique_id=81309238]
@@ -107,12 +106,12 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.58
-anchor_top = 0.026666667
+anchor_top = 0.027
 anchor_right = 0.975
-anchor_bottom = 0.18666668
+anchor_bottom = 0.187
 texture_normal = ExtResource("1_0c3un")
 ignore_texture_size = true
-stretch_mode = 0
+stretch_mode = 5
 metadata/_edit_use_anchors_ = true
 
 [node name="Label" type="Label" parent="Guardar/TextureButton" unique_id=1207448263]

@@ -29,24 +29,19 @@ var is_dead: bool = false
 func _ready() -> void:
 	add_to_group("jugador")
 	# FÍSICA: El jugador está en la Capa 2 y solo choca con el mapa (Capa 1)
-	# Esto evita que empuje físicamente a los enemigos (Capa 3)
 	set_collision_layer_value(1, false)
 	set_collision_layer_value(2, true)
-	set_collision_layer_value(3, false)
 	set_collision_mask_value(1, true)
-	set_collision_mask_value(2, false)
-	set_collision_mask_value(3, false)
 	
 	salud_actual = vida_maxima
 	
-	# COMBATE: La espada debe detectar a los enemigos y flechas (Capa 3)
+	# COMBATE: La espada (Capa 4) debe detectar a los enemigos (Capa 3)
 	hitbox.set_collision_layer_value(1, false)
-	hitbox.set_collision_mask_value(1, false)
-	hitbox.set_collision_mask_value(2, false)
+	hitbox.set_collision_layer_value(4, true) # La espada es visible en la Capa 4
 	hitbox.set_collision_mask_value(3, true)
-	hitbox.monitoring = false
+	hitbox.set_deferred("monitoring", false)
+	hitbox.set_deferred("monitorable", false) # IMPORTANTE: Evita que la flecha la vea sin atacar
 	
-	# Pintar los corazones al iniciar el nivel
 	await get_tree().process_frame 
 	actualizar_ui_corazones()
 
@@ -112,17 +107,27 @@ func _execute_attack() -> void:
 	sprite.sprite_frames.set_animation_loop(ANIM_ATTACK, false)
 	sprite.play(ANIM_ATTACK)
 	
-	hitbox.monitoring = true
+	hitbox.set_deferred("monitoring", true)
+	hitbox.set_deferred("monitorable", true)
+	
 	await sprite.animation_finished
 	
-	hitbox.monitoring = false
+	hitbox.set_deferred("monitoring", false)
+	hitbox.set_deferred("monitorable", false)
 	is_attacking = false
 
 func _start_guard() -> void:
-	if is_dead or is_attacking or is_guarding:
+	if is_dead or is_guarding:
 		return
 	if guard_energy <= 0.0:
 		return
+		
+	# PRIORIDAD: El escudo interrumpe el ataque
+	if is_attacking:
+		is_attacking = false
+		hitbox.set_deferred("monitoring", false)
+		hitbox.set_deferred("monitorable", false)
+		
 	is_guarding = true
 	sprite.play(ANIM_GUARD)
 
@@ -140,8 +145,10 @@ func recibir_dano(cantidad: int) -> void:
 	if is_dead:
 		return
 	if is_guarding:
+		print("¡ATAQUE BLOQUEADO POR EL ESCUDO!")
 		return
 
+	print("¡EL CABALLERO RECIBIÓ DAÑO! (-", cantidad, " puntos)")
 	salud_actual -= cantidad
 	salud_actual = clampi(salud_actual, 0, vida_maxima)
 	

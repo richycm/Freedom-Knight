@@ -22,6 +22,7 @@ var is_spawning: bool = true
 var attack_timer: float = 0.0
 
 func _ready() -> void:
+	add_to_group("enemigos")
 	salud_actual = vida_maxima
 	player = get_tree().current_scene.find_child("Caballero", true)
 	
