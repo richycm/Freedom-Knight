@@ -86,8 +86,9 @@ func _pos_aleatoria_lejos_del_player() -> Vector2:
 	var distancia_minima = 150.0
 	for _intento in range(10):
 		var pos = _pos_aleatoria()
-		
-	return _pos_aleatoria()
+		if pos.distance_to(player.global_position) >= distancia_minima:
+			return pos
+	
 	return _pos_aleatoria()
 
 # ─────────────────────────────────────────
