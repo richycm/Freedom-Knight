@@ -245,12 +245,9 @@ func mejorar_fuerza(cantidad: int) -> void:
 	
 	print("[SISTEMA] Fuerza Total: ", fuerza, " | Daño Actual: ", poder_ataque)
 
-	# 3. SINCRONIZACIÓN: Avisamos al script del escenario (Dificultad)
+	# 3. SINCRONIZACIÓN: Avisamos al script del escenario (Si tiene una variable específica de progreso)
 	var escenario = get_tree().current_scene
-	if "fuerza" in escenario:
-		escenario.fuerza = self.fuerza
+	if "fuerza_jugador" in escenario:
+		escenario.fuerza_jugador = self.fuerza
 		print("[CONEXIÓN] Estadísticas sincronizadas con el Escenario")
-	elif "fuerza_actual" in escenario:
-		escenario.fuerza_actual = self.fuerza
-		print("[CONEXIÓN] Fuerza sincronizada con 'fuerza_actual' del Escenario")
 	
