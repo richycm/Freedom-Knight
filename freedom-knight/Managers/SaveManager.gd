@@ -7,6 +7,9 @@ var escribiendo_texto: bool = false
 
 func _ready():
 	var dir = DirAccess.open("user://")
+	if dir == null:
+		push_error("No se pudo abrir el directorio user:// para inicializar los guardados.")
+		return
 	if not dir.dir_exists("saves"):
 		dir.make_dir("saves")
 	cargar_config()
