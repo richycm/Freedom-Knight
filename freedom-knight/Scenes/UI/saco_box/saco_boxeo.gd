@@ -10,26 +10,14 @@ func recibir_dano(cantidad: int) -> void:
 		caballero.mejorar_fuerza(1)
 		animar_golpe()
 	else:
-		print("[Error] Recibí el golpe, pero no encontré a nadie con la función 'mejorar_fuerza'")
+		print("[Error] No se encontró al jugador con la función 'mejorar_fuerza'")
 
-# --- FUNCIÓN DE BÚSQUEDA PROFUNDA ---
+# --- FUNCIÓN DE BÚSQUEDA ---
 func encontrar_al_jugador() -> Node:
-	# 1. Buscamos en el árbol principal (Root) a todos los hijos y subhijos
-	var root = get_tree().root
-	return buscar_nodo_con_metodo(root, "mejorar_fuerza")
-
-func buscar_nodo_con_metodo(nodo_actual: Node, nombre_metodo: String) -> Node:
-	# Si el nodo que estamos revisando tiene la función, ¡lo encontramos!
-	if nodo_actual.has_method(nombre_metodo):
-		return nodo_actual
-		
-	# Si no lo tiene, revisamos a todos sus hijos uno por uno
-	for hijo in nodo_actual.get_children():
-		var resultado = buscar_nodo_con_metodo(hijo, nombre_metodo)
-		if resultado != null:
-			return resultado
-			
-	# Si ni este nodo ni sus hijos lo tienen, devolvemos null
+	# Buscamos en el grupo "jugador" al primero que tenga el método mejorar_fuerza
+	for nodo in get_tree().get_nodes_in_group("jugador"):
+		if nodo.has_method("mejorar_fuerza"):
+			return nodo
 	return null
 
 # --- ANIMACIÓN ---

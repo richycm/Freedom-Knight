@@ -13,7 +13,7 @@ height = 528.0
 
 [node name="SacoBoxeo" type="StaticBody2D" unique_id=998762272]
 scale = Vector2(0.25, 0.25)
-collision_layer = 2
+collision_layer = 6
 script = ExtResource("1_uimpc")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=342533954]
@@ -25,7 +25,7 @@ shape = SubResource("CapsuleShape2D_uimpc")
 
 [node name="HurtboxSaco" type="Area2D" parent="." unique_id=2038149871]
 position = Vector2(261, 414)
-collision_layer = 2
+collision_layer = 6
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxSaco" unique_id=312195852]
 position = Vector2(-259, -441)

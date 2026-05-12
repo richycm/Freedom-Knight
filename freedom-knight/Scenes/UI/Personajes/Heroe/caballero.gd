@@ -125,6 +125,7 @@ func _update_animations(direction: Vector2) -> void:
 
 func _execute_attack() -> void:
 	is_attacking = true
+	# Aseguramos que la animación NO sea en bucle para que el await termine
 	sprite.sprite_frames.set_animation_loop(ANIM_ATTACK, false)
 	sprite.play(ANIM_ATTACK)
 	
@@ -133,6 +134,7 @@ func _execute_attack() -> void:
 	
 	await sprite.animation_finished
 	
+	# Resetear estados
 	hitbox.set_deferred("monitoring", false)
 	hitbox.set_deferred("monitorable", false)
 	is_attacking = false
@@ -248,4 +250,7 @@ func mejorar_fuerza(cantidad: int) -> void:
 	if "fuerza" in escenario:
 		escenario.fuerza = self.fuerza
 		print("[CONEXIÓN] Estadísticas sincronizadas con el Escenario")
+	elif "fuerza_actual" in escenario:
+		escenario.fuerza_actual = self.fuerza
+		print("[CONEXIÓN] Fuerza sincronizada con 'fuerza_actual' del Escenario")
 	
