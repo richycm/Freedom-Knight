@@ -42,7 +42,9 @@ func _on_texture_button_pressed_salir() -> void:
 
 
 func _on_texture_button_pressed_guardar() -> void:
-	var player = get_tree().get_first_node_in_group("Jugador") 
+	var player = get_tree().get_first_node_in_group("Jugador")
+	if not player:
+		player = get_tree().get_first_node_in_group("jugador")
 	if not player:
 		push_error("No se encontró el nodo del jugador para guardar.")
 		return
