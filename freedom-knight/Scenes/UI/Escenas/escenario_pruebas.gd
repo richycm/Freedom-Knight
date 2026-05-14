@@ -164,6 +164,7 @@ func _spawnear_arquero() -> void:
 func _on_arquero_murio(_pos) -> void:
 	arqueros_vivos -= 1
 	arqueros_derrotados += 1
+	_subir_dificultad()
 	print("[ARQUERO] Arquero derrotado. Vivos: ", arqueros_vivos)
 
 # ─────────────────────────────────────────
@@ -190,6 +191,8 @@ func _subir_dificultad() -> void:
 	if muertes_totales >= 10:
 		max_arqueros_simultaneos = 4
 		tiempo_entre_arqueros = 12.0
+		if timer_arqueros:
+			timer_arqueros.wait_time = tiempo_entre_arqueros
 	
 	print("[DIFICULTAD] Muertes:%d | Fuerza:%d | Vida:%d | Vel:%.0f | Arqueros max:%d" % [
 		muertes_totales, fuerza_actual, vida_actual, velocidad_actual, max_arqueros_simultaneos

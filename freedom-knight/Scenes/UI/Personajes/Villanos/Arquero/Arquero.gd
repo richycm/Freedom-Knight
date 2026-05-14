@@ -165,3 +165,9 @@ func _obtener_jugador_mas_cercano() -> CharacterBody2D:
 				min_dist = dist
 				mas_cercano = j
 	return mas_cercano
+
+func _on_rango_ataque_body_entered(body: Node2D) -> void:
+	if body.is_in_group("jugador") or body.is_in_group("Jugador"):
+		player = body
+		if not is_attacking and not is_dead and not is_spawning and attack_timer <= 0:
+			_atacar()

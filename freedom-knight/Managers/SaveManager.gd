@@ -112,6 +112,8 @@ func cargar_y_posicionar_datos(datos: Dictionary) -> void:
 	
 	# 4. Intentamos mover al jugador
 	var player = get_tree().get_first_node_in_group("Jugador")
+	if player == null:
+		player = get_tree().get_first_node_in_group("jugador")
 	if player:
 		if player is CharacterBody2D:
 			player.velocity = Vector2.ZERO
@@ -119,7 +121,7 @@ func cargar_y_posicionar_datos(datos: Dictionary) -> void:
 		player.global_position = Vector2(datos["pos_x"], datos["pos_y"])
 		print("Jugador posicionado en: ", player.global_position)
 	else:
-		print("Error: No se encontró al jugador en el grupo 'Jugador'")
+		print("Error: No se encontró al jugador en los grupos 'Jugador'/'jugador'")
 
 func cargar_y_posicionar() -> void:
 	var datos = cargar_datos()

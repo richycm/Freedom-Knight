@@ -83,7 +83,7 @@ func _physics_process(_delta: float) -> void:
 	elif Input.is_action_just_released("guard"):
 		_stop_guard()
 
-	if Input.is_action_just_pressed("attack") and not is_attacking:
+	if Input.is_action_just_pressed("attack") and not is_attacking and not is_guarding:
 		_execute_attack()
 
 	if is_guarding:
