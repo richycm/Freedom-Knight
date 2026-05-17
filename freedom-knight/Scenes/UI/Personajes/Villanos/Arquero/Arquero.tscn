@@ -264,5 +264,3 @@ collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangoVision" unique_id=973061070]
 shape = SubResource("CircleShape2D_qeogi")
-
-[connection signal="body_entered" from="RangoAtaque" to="." method="_on_rango_ataque_body_entered"]
