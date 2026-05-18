@@ -1,28 +1,36 @@
-extends Node2D 
+extends Node2D
 
-@export var velocidad: float = 200.0
+@export_group("Movimiento Caballero Bueno")
+@export var velocidad: float = 250.0
 
-# Usamos @onready para asegurar que el nodo esté listo antes de usarlo.
-# ¡IMPORTANTE!: Cambia "Sprite2D" por el nombre real de tu nodo de imagen.
-@onready var sprite = $Sprite2D 
+@export_group("Sistema de Aliados")
+@export var monje_escena: PackedScene # Arrastra el Monje2.tscn aquí en el Inspector
 
-func _physics_process(delta: float) -> void:
-	# 1. Obtener dirección
-	var direccion = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	
-	# 2. Voltear el sprite según la dirección
-	if direccion.x != 0 and sprite != null:
-		sprite.flip_h = direccion.x < 0
-		
-	# 3. Mover el personaje (indispensable en Node2D)
-	# Multiplicamos por delta para que el movimiento sea fluido y no dependa de los FPS
-	position += direccion * velocidad * delta
+@onready var sprite = $Caballero 
 
 func _ready() -> void:
-	# Verificación de seguridad para que no crashee si el nombre está mal
-	if sprite == null:
-		print("ERROR: No se encontró el nodo del Sprite. Revisa el nombre en el script.")
+	y_sort_enabled = true
+		# Buscamos a todos los nodos que tengan la etiqueta "CaballeroMalo"
+	for enemigo in get_tree().get_nodes_in_group("CaballeroMalo"):
+		if enemigo.has_signal("murio"):
+			enemigo.murio.connect(_on_enemigo_murio)
+			print("Conectado con éxito a: ", enemigo.name)
 
-func _process(_delta: float) -> void:
-	pass
+func _physics_process(delta: float) -> void:
+	# Tu movimiento original (sin lag)
+	var direccion = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	
+	if direccion != Vector2.ZERO:
+		position += direccion.normalized() * velocidad * delta
+
+	if direccion.x != 0 and sprite != null:
+		sprite.flip_h = direccion.x < 0
+
+# Esta función se activa automáticamente cuando un CaballeroMalo muere
+func _on_enemigo_murio(posicion_muerte: Vector2) -> void:
+	if monje_escena:
+		var monje = monje_escena.instantiate()
+		monje.global_position = Vector2(2335, 1145)
+		add_child.call_deferred(monje) 
+		
+		print("Mapa: Monje programado para aparecer en el siguiente frame.")

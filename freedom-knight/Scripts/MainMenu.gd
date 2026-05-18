@@ -12,6 +12,7 @@ extends Control
 
 # Variable para saber qué estamos usando
 var usando_mando_o_teclado = false
+var mostrando_configuracion = false
 
 func _ready():
 	if music_player:
@@ -22,8 +23,8 @@ func _ready():
 			boton.focus_entered.connect(_oscurecer_boton.bind(boton))
 			boton.focus_exited.connect(_aclarar_boton.bind(boton))
 
-	# ¡QUITAMOS el grab_focus() inicial! 
-	# Así empieza en modo Mouse/Touch y no hay ningún botón oscuro al abrir el juego.
+	# Desactivar salir directo
+	get_tree().quit_on_go_back = false
 
 # --- FUNCIONES DE COLOR ---
 func _oscurecer_boton(boton_seleccionado):
@@ -34,6 +35,7 @@ func _aclarar_boton(boton_seleccionado):
 
 # --- LÓGICA DE ENTRADA HÍBRIDA ---
 func _input(event):
+	if mostrando_configuracion: return
 	# 1. Si el usuario toca la pantalla o mueve el mouse: MODO TOUCH
 	if event is InputEventMouseMotion or event is InputEventMouseButton or event is InputEventScreenTouch:
 		if usando_mando_o_teclado:
@@ -59,7 +61,6 @@ func _input(event):
 		
 		if boton_actual and boton_actual is BaseButton:
 			boton_actual.emit_signal("pressed") 
-			# ¡Eliminamos set_input_as_handled() que era el que daba el error en rojo!
 
 # --- FUNCIONES DE LOS BOTONES ---
 
@@ -75,8 +76,235 @@ func _on_texture_button_pressed_prueba() -> void:
 
 func _on_texture_button_pressed_continuarjuego() -> void:
 	print("CLICK CONTINUAR")
-	pass 
+	if SaveManager.existe_partida():
+		_mostrar_menu_partidas()
+	else:
+		print("No hay datos guardados")
+		var lbl = Label.new()
+		lbl.text = "No hay partidas guardadas"
+		lbl.add_theme_color_override("font_color", Color.RED)
+		lbl.add_theme_font_size_override("font_size", 24)
+		lbl.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.offset_top = -150
+		add_child(lbl)
+		var tween = create_tween()
+		tween.tween_property(lbl, "modulate:a", 0.0, 2.0).set_delay(1.0)
+		tween.finished.connect(func(): lbl.queue_free())
 
 func _on_texture_button_pressed_configuracion() -> void:
 	print("CLICK CONFIG")
-	pass
+	_mostrar_menu_configuracion()
+
+# --- ESTILOS MINIMALISTAS ---
+func _crear_estilo_panel() -> StyleBoxFlat:
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.05, 0.9)
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(0.5, 0.5, 0.5, 0.3)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	return style
+
+func _crear_estilo_boton(color_base: Color) -> StyleBoxFlat:
+	var style = StyleBoxFlat.new()
+	style.bg_color = color_base
+	style.corner_radius_top_left = 5
+	style.corner_radius_top_right = 5
+	style.corner_radius_bottom_left = 5
+	style.corner_radius_bottom_right = 5
+	return style
+
+func _mostrar_menu_configuracion() -> void:
+	mostrando_configuracion = true
+	
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.9)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.z_index = 100
+	
+	var panel = PanelContainer.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(450, 250)
+	panel.add_theme_stylebox_override("panel", _crear_estilo_panel())
+	overlay.add_child(panel)
+	
+	panel.anchor_left = 0.5
+	panel.anchor_top = 0.5
+	panel.anchor_right = 0.5
+	panel.anchor_bottom = 0.5
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	
+	var vbox = VBoxContainer.new()
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 20)
+	panel.add_child(vbox)
+	
+	var label = Label.new()
+	label.text = "CONFIGURACIÓN"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 24)
+	vbox.add_child(label)
+	
+	var label_tag = Label.new()
+	label_tag.text = "Gamertag:"
+	label_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(label_tag)
+	
+	var input = LineEdit.new()
+	input.placeholder_text = "Tu nombre..."
+	input.text = SaveManager.nombre_jugador
+	input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	input.custom_minimum_size = Vector2(300, 45)
+	
+	var style_input = StyleBoxFlat.new()
+	style_input.bg_color = Color(0, 0, 0, 0.5)
+	style_input.border_width_bottom = 1
+	style_input.border_color = Color(1, 1, 1, 0.5)
+	input.add_theme_stylebox_override("normal", style_input)
+	vbox.add_child(input)
+	
+	var btn_guardar = Button.new()
+	btn_guardar.text = "Guardar y Salir"
+	btn_guardar.custom_minimum_size = Vector2(200, 50)
+	btn_guardar.add_theme_stylebox_override("normal", _crear_estilo_boton(Color(0.2, 0.2, 0.2)))
+	vbox.add_child(btn_guardar)
+	
+	btn_guardar.pressed.connect(func():
+		var nombre = input.text.strip_edges()
+		if nombre == "": nombre = "Caballero"
+		SaveManager.nombre_jugador = nombre
+		if SaveManager.has_method("guardar_config"):
+			SaveManager.call("guardar_config")
+		mostrando_configuracion = false
+		overlay.queue_free()
+	)
+	
+	add_child(overlay)
+	input.grab_focus()
+
+func _mostrar_menu_partidas() -> void:
+	var partidas = SaveManager.obtener_lista_partidas()
+	
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 1.0) # Totalmente opaco
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.z_index = 100
+	add_child(overlay)
+	
+	var panel = PanelContainer.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(480, 320) # Tamaño base
+	panel.add_theme_stylebox_override("panel", _crear_estilo_panel())
+	overlay.add_child(panel)
+	
+	# Centrado forzado responsivo
+	panel.anchor_left = 0.5
+	panel.anchor_top = 0.5
+	panel.anchor_right = 0.5
+	panel.anchor_bottom = 0.5
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	
+	var main_vbox = VBoxContainer.new()
+	main_vbox.add_theme_constant_override("separation", 15)
+	panel.add_child(main_vbox)
+	
+	var titulo = Label.new()
+	titulo.text = "PARTIDAS"
+	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titulo.add_theme_font_size_override("font_size", 24)
+	titulo.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	main_vbox.add_child(titulo)
+	
+	var scroll = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 200) # Más pequeño para dar espacio al botón
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_vbox.add_child(scroll)
+	
+	var list_vbox = VBoxContainer.new()
+	list_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list_vbox.add_theme_constant_override("separation", 15)
+	scroll.add_child(list_vbox)
+	
+	for partida in partidas:
+		var item_hbox = HBoxContainer.new()
+		item_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		item_hbox.add_theme_constant_override("separation", 5)
+		
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(0, 60)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.mouse_filter = Control.MOUSE_FILTER_STOP
+		btn.add_theme_stylebox_override("normal", _crear_estilo_boton(Color(1, 1, 1, 0.05)))
+		btn.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(1, 1, 1, 0.1)))
+		btn.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(1, 1, 1, 0.02)))
+		
+		var modo = partida.get("modo", "Historia")
+		var texto = "[%s] %s - %s" % [modo.to_upper(), partida.get("nombre_partida", "Auto"), partida.get("fecha", "")]
+		btn.text = texto
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+
+		
+		btn.pressed.connect(func():
+			overlay.queue_free()
+			if music_player: music_player.stop()
+			SaveManager.cargar_y_posicionar_datos(partida)
+		)
+		
+		var btn_borrar = Button.new()
+		btn_borrar.text = "X"
+		btn_borrar.add_theme_color_override("font_color", Color(1, 0.4, 0.4))
+		btn_borrar.add_theme_font_size_override("font_size", 16)
+		btn_borrar.custom_minimum_size = Vector2(40, 60)
+		btn_borrar.mouse_filter = Control.MOUSE_FILTER_STOP
+		
+		btn_borrar.add_theme_stylebox_override("normal", _crear_estilo_boton(Color(0.1, 0.1, 0.1)))
+		btn_borrar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(0.3, 0.1, 0.1)))
+		btn_borrar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(0.2, 0.05, 0.05)))
+		
+		btn_borrar.pressed.connect(func():
+			if not is_instance_valid(item_hbox): return
+			btn_borrar.disabled = true
+			SaveManager.borrar_partida(partida.get("archivo", ""))
+			var t = create_tween()
+			t.tween_property(item_hbox, "modulate:a", 0.0, 0.3)
+			t.finished.connect(func(): 
+				if is_instance_valid(item_hbox):
+					item_hbox.queue_free()
+			)
+		)
+		
+		item_hbox.add_child(btn)
+		item_hbox.add_child(btn_borrar)
+		list_vbox.add_child(item_hbox)
+		
+	var btn_cerrar = Button.new()
+	btn_cerrar.text = "Volver al Menú"
+	btn_cerrar.add_theme_font_size_override("font_size", 18)
+	btn_cerrar.custom_minimum_size = Vector2(0, 45)
+	btn_cerrar.mouse_filter = Control.MOUSE_FILTER_STOP
+	btn_cerrar.add_theme_stylebox_override("normal", _crear_estilo_boton(Color(0.2, 0.2, 0.2)))
+	btn_cerrar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(0.3, 0.3, 0.3)))
+	btn_cerrar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(0.1, 0.1, 0.1)))
+	btn_cerrar.pressed.connect(func(): 
+		var t = create_tween()
+		t.tween_property(overlay, "modulate:a", 0.0, 0.2)
+		t.finished.connect(func(): overlay.queue_free())
+	)
+	main_vbox.add_child(btn_cerrar)
+	
+	# Animación entrada
+	overlay.modulate.a = 0
+	create_tween().tween_property(overlay, "modulate:a", 1.0, 0.2)
+
+
+# --- FIN DEL SCRIPT ---

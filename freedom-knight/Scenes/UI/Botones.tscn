@@ -6,6 +6,10 @@
 [ext_resource type="Texture2D" uid="uid://cswdg2n1ywqrj" path="res://Scenes/UI/Joistick/joyring.png" id="3_yqa16"]
 [ext_resource type="Texture2D" uid="uid://g24w1h8gbb7u" path="res://Scenes/UI/Joistick/joyknobpng.png" id="4_3yh78"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4r5k"]
+atlas = ExtResource("2_yqa16")
+region = Rect2(1711.624, 6.5099792, 367.59814, 407.09204)
+
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_yqa16"]
 load_path = "res://.godot/imported/FKbtns.png-45a2266fd34f2d2d44c66a020be65e44.ctex"
 
@@ -24,87 +28,143 @@ region = Rect2(472.91364, 5.434227, 360.64746, 410.92914)
 [node name="Botones" type="CanvasLayer" unique_id=619180748]
 script = ExtResource("1_fsodk")
 
-[node name="Control" type="Control" parent="." unique_id=2057887903]
+[node name="UI" type="Control" parent="." unique_id=2057887903]
 layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopLeft" type="Control" parent="UI"]
+layout_mode = 1
 anchors_preset = 0
-offset_left = -37.000008
-offset_top = -246.0
-offset_right = 2.9999924
-offset_bottom = -206.0
-scale = Vector2(1.5, 1.5)
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
 
-[node name="interact" type="TouchScreenButton" parent="Control" unique_id=2042661713]
-position = Vector2(712.6666, 384.66666)
-scale = Vector2(0.18390763, 0.1800762)
-texture_normal = SubResource("AtlasTexture_meyst")
-action = "interact"
-
-[node name="attack" type="TouchScreenButton" parent="Control" unique_id=1881671234]
-position = Vector2(592.66675, 460.00006)
-scale = Vector2(0.2528736, 0.24760537)
-texture_normal = SubResource("AtlasTexture_3yh78")
-action = "attack"
-
-[node name="menu" type="TouchScreenButton" parent="Control" unique_id=400980928]
+[node name="menu" type="TouchScreenButton" parent="UI/TopLeft" unique_id=400980928]
 process_mode = 3
-position = Vector2(28, 165.33333)
-scale = Vector2(0.2666666, 0.24878053)
+position = Vector2(30, 30)
+scale = Vector2(0.25, 0.25)
 texture_normal = SubResource("AtlasTexture_yqa16")
+action = "menu"
 
-[node name="VirtualJoystick" type="Node2D" parent="Control" unique_id=1111716673]
-position = Vector2(153.33333, 513.3333)
-script = ExtResource("2_qsnex")
+[node name="GuardTimer" type="Label" parent="UI/TopLeft" unique_id=2000000001]
+custom_minimum_size = Vector2(140, 26)
+layout_mode = 0
+offset_left = 26.0
+offset_top = 11.0
+offset_right = 166.0
+offset_bottom = 37.0
+text = "Guard: 5.0s"
 
-[node name="Base" type="Sprite2D" parent="Control/VirtualJoystick" unique_id=481487367]
-position = Vector2(-0.6666667, -8)
-scale = Vector2(0.0767795, 0.0767795)
-texture = ExtResource("3_yqa16")
-
-[node name="Palo" type="TouchScreenButton" parent="Control/VirtualJoystick" unique_id=1500518910]
-position = Vector2(-27.333334, -34.666668)
-scale = Vector2(0.027777776, 0.027777776)
-texture_normal = ExtResource("4_3yh78")
-
-[node name="BarraVidas" type="HBoxContainer" parent="." unique_id=283931321]
+[node name="TopRight" type="Control" parent="UI"]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -390.0
-offset_bottom = 67.0
 grow_horizontal = 0
+mouse_filter = 2
 
-[node name="Corazon1" type="TextureRect" parent="BarraVidas" unique_id=1002653830]
-custom_minimum_size = Vector2(32, 32)
+[node name="BarraVidas" type="HBoxContainer" parent="UI/TopRight" unique_id=283931321]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 80.0
+grow_horizontal = 0
+alignment = 2
+
+[node name="Corazon1" type="TextureRect" parent="UI/TopRight/BarraVidas" unique_id=1002653830]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 5
 
-[node name="Corazon2" type="TextureRect" parent="BarraVidas" unique_id=2083663639]
-custom_minimum_size = Vector2(32, 32)
+[node name="Corazon2" type="TextureRect" parent="UI/TopRight/BarraVidas" unique_id=2083663639]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 5
 
-[node name="Corazon3" type="TextureRect" parent="BarraVidas" unique_id=1597124555]
-custom_minimum_size = Vector2(32, 32)
+[node name="Corazon3" type="TextureRect" parent="UI/TopRight/BarraVidas" unique_id=1597124555]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 5
 
-[node name="Corazon4" type="TextureRect" parent="BarraVidas" unique_id=1103194715]
-custom_minimum_size = Vector2(32, 32)
+[node name="Corazon4" type="TextureRect" parent="UI/TopRight/BarraVidas" unique_id=1103194715]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 5
 
-[node name="Corazon5" type="TextureRect" parent="BarraVidas" unique_id=794884493]
-custom_minimum_size = Vector2(32, 32)
+[node name="Corazon5" type="TextureRect" parent="UI/TopRight/BarraVidas" unique_id=794884493]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 5
 
-[connection signal="pressed" from="Control/interact" to="." method="_on_interact_pressed"]
-[connection signal="released" from="Control/interact" to="." method="_on_interact_released"]
-[connection signal="pressed" from="Control/attack" to="." method="_on_attack_pressed"]
-[connection signal="released" from="Control/attack" to="." method="_on_attack_released"]
-[connection signal="pressed" from="Control/menu" to="." method="_on_menu_pressed"]
+[node name="BottomLeft" type="Control" parent="UI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="VirtualJoystick" type="Node2D" parent="UI/BottomLeft" unique_id=1111716673]
+position = Vector2(140, -140)
+scale = Vector2(1.5, 1.5)
+script = ExtResource("2_qsnex")
+
+[node name="Base" type="Sprite2D" parent="UI/BottomLeft/VirtualJoystick" unique_id=481487367]
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("3_yqa16")
+
+[node name="Palo" type="TouchScreenButton" parent="UI/BottomLeft/VirtualJoystick" unique_id=1500518910]
+position = Vector2(-27, -27)
+scale = Vector2(0.028, 0.028)
+texture_normal = ExtResource("4_3yh78")
+
+[node name="BottomRight" type="Control" parent="UI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="attack" type="TouchScreenButton" parent="UI/BottomRight" unique_id=1881671234]
+position = Vector2(-350, -250)
+scale = Vector2(0.35, 0.35)
+texture_normal = SubResource("AtlasTexture_3yh78")
+action = "attack"
+
+[node name="guard" type="TouchScreenButton" parent="UI/BottomRight" unique_id=954505377]
+position = Vector2(-180, -180)
+scale = Vector2(0.3, 0.3)
+texture_normal = SubResource("AtlasTexture_c4r5k")
+action = "guard"
+
+[node name="interact" type="TouchScreenButton" parent="UI/BottomRight" unique_id=2042661713]
+position = Vector2(-180, -380)
+scale = Vector2(0.3, 0.3)
+texture_normal = SubResource("AtlasTexture_meyst")
+action = "interact"
+
+[connection signal="pressed" from="UI/BottomRight/guard" to="." method="_on_guard_pressed"]
+[connection signal="released" from="UI/BottomRight/guard" to="." method="_on_guard_released"]
+[connection signal="pressed" from="UI/BottomRight/interact" to="." method="_on_interact_pressed"]
+[connection signal="released" from="UI/BottomRight/interact" to="." method="_on_interact_released"]
+[connection signal="pressed" from="UI/BottomRight/attack" to="." method="_on_attack_pressed"]
+[connection signal="released" from="UI/BottomRight/attack" to="." method="_on_attack_released"]
+[connection signal="pressed" from="UI/TopLeft/menu" to="." method="_on_menu_pressed"]
