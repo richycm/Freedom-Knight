@@ -105,11 +105,13 @@ func _pos_aleatoria() -> Vector2:
 	)
 
 func _pos_aleatoria_lejos_del_player() -> Vector2:
-	var distancia_minima = 150.0
-	for _intento in range(10):
+	var distancia_minima = 400.0 # Empezar buscando un punto muy lejos
+	for _intento in range(40):
 		var pos = _pos_aleatoria()
 		if pos.distance_to(player.global_position) >= distancia_minima:
 			return pos
+		# Si no encuentra, reduce un poco la exigencia para el siguiente intento
+		distancia_minima -= 5.0
 	
 	return _pos_aleatoria()
 
@@ -212,9 +214,9 @@ func _subir_dificultad() -> void:
 	# Velocidad: sube suavemente hasta un limite bastante alto
 	velocidad_actual = min(velocidad_actual + 2.0, 300.0)
 	
-	# Más arqueros y caballeros, pero con un LÍMITE (max 4 y 3) para no explotar celulares
-	max_caballeros_simultaneos = min(4, 1 + int(floor(muertes_totales / 15.0)))
-	max_arqueros_simultaneos = min(3, 2 + int(floor(muertes_totales / 20.0)))
+	# Límite estricto de 5 enemigos MÁXIMO en pantalla a la vez (3 caballeros, 2 arqueros)
+	max_caballeros_simultaneos = min(3, 1 + int(floor(muertes_totales / 15.0)))
+	max_arqueros_simultaneos = min(2, 1 + int(floor(muertes_totales / 20.0)))
 	
 	_mantener_caballeros()
 	
