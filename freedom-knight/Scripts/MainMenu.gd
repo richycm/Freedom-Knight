@@ -65,12 +65,12 @@ func _input(event):
 # --- FUNCIONES DE LOS BOTONES ---
 
 func _on_texture_button_pressed_nuevojuego() -> void:
-	print("CLICK NUEVA PARTIDA")
+	print("CLICK MODO HISTORIA")
 	if music_player: music_player.stop()
 	get_tree().change_scene_to_file("res://Scenes/Cinematica/C1_inicio.tscn")
 
 func _on_texture_button_pressed_prueba() -> void:
-	print("CLICK PRUEBA")
+	print("CLICK ARCADE")
 	if music_player: music_player.stop()
 	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/escenario_pruebas.tscn")
 

@@ -3,6 +3,8 @@ extends Node2D
 var enemigo_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn")
 var arquero_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn")
 var pocion_scene: PackedScene = preload("res://Scenes/UI/PocionesHechizos/PocionDeVida.tscn")
+var curandero_scene: PackedScene = preload("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
+var gata_scene: PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn")
 
 @onready var player = $Caballero
 @onready var punto_a = $PuntoA
@@ -61,6 +63,16 @@ func _ready() -> void:
 	_iniciar_timer_arqueros()
 	
 	_crear_ui_contador()
+	
+	if player and player.has_signal("nivel_subido"):
+		player.nivel_subido.connect(_spawnear_curandero)
+		
+	var timer_gata = Timer.new()
+	timer_gata.wait_time = 60.0
+	timer_gata.one_shot = true
+	timer_gata.timeout.connect(_spawnear_gata)
+	add_child(timer_gata)
+	timer_gata.start()
 	
 	# Limpiar enemigos existentes
 	for n in get_tree().get_nodes_in_group("enemigos"):
@@ -122,6 +134,7 @@ func _on_enemigo_murio(_pos) -> void:
 	enemigos_derrotados += 1
 	caballeros_vivos -= 1
 	_subir_dificultad()
+	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
 	
 	await get_tree().create_timer(1.0).timeout
 	_mantener_caballeros()
@@ -196,6 +209,7 @@ func _on_arquero_murio(_pos) -> void:
 	arqueros_vivos -= 1
 	arqueros_derrotados += 1
 	_subir_dificultad()
+	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
 	print("[ARQUERO] Arquero derrotado. Vivos: ", arqueros_vivos)
 
 # ─────────────────────────────────────────
@@ -211,8 +225,8 @@ func _subir_dificultad() -> void:
 	# Vida del enemigo: Aumenta muy poco a poco (1 punto extra cada 8 muertes)
 	vida_actual = 3 + floor(muertes_totales / 8.0)
 	
-	# Velocidad: sube suavemente hasta un limite bastante alto
-	velocidad_actual = min(velocidad_actual + 2.0, 300.0)
+	# Velocidad: sube suavemente hasta un limite balanceado para el jugador (máximo 150.0)
+	velocidad_actual = min(velocidad_actual + 0.5, 150.0)
 	
 	# Límite estricto de 5 enemigos MÁXIMO en pantalla a la vez (3 caballeros, 2 arqueros)
 	max_caballeros_simultaneos = min(3, 1 + int(floor(muertes_totales / 15.0)))
@@ -268,3 +282,31 @@ func _hay_jugadores_vivos() -> bool:
 	if is_instance_valid(player) and not player.is_dead:
 		return true
 	return false
+
+# ─────────────────────────────────────────
+#  NPCs (NUEVO)
+# ─────────────────────────────────────────
+func _spawnear_curandero() -> void:
+	if not curandero_scene or not _hay_jugadores_vivos():
+		return
+		
+	# Verificar si ya existe un curandero en la escena
+	var curanderos_activos = get_tree().get_nodes_in_group("curanderos")
+	if curanderos_activos.size() > 0:
+		print("[NPC] Ya hay un curandero activo. No se genera uno nuevo.")
+		return
+		
+	var nuevo_curandero = curandero_scene.instantiate()
+	add_child(nuevo_curandero)
+	nuevo_curandero.add_to_group("curanderos")
+	nuevo_curandero.global_position = _pos_aleatoria_lejos_del_player()
+	print("[NPC] Curandero invocado por subir de nivel en ", nuevo_curandero.global_position)
+
+func _spawnear_gata() -> void:
+	if not gata_scene or not _hay_jugadores_vivos():
+		return
+		
+	var nueva_gata = gata_scene.instantiate()
+	add_child(nueva_gata)
+	nueva_gata.global_position = _pos_aleatoria_lejos_del_player()
+	print("[NPC] Gata aparecio en el mapa a los 60s en ", nueva_gata.global_position)

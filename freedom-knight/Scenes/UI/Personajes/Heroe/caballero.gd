@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal nivel_subido
+
 const ANIM_IDLE = "idle"
 const ANIM_MOVE = "move"
 const ANIM_ATTACK = "attack"
@@ -312,6 +314,8 @@ func ganar_experiencia(cantidad: int) -> void:
 	_actualizar_ui_nivel()
 
 func _subir_de_nivel() -> void:
+	nivel_subido.emit()
+	
 	# Aumentar velocidad rápidamente
 	speed = min(600.0, velocidad_base + (nivel * 5.0))
 	

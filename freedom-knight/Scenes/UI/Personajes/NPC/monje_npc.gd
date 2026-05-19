@@ -88,9 +88,15 @@ func ejecutar_curacion():
 	# Usamos la variable directa que atrapamos en la colisión
 	if jugador_cercano:
 		if jugador_cercano.has_method("curar"):
-			jugador_cercano.curar(puntos_salud)
+			var curacion_total = jugador_cercano.vida_maxima if "vida_maxima" in jugador_cercano else 100
+			jugador_cercano.curar(curacion_total)
 			ya_curado = true
-			print("[SISTEMA] ¡Curación exitosa!")
+			print("[SISTEMA] ¡Curación al 100% exitosa!")
+			
+			# Efecto de desaparición
+			var tween = create_tween()
+			tween.tween_property(self, "modulate:a", 0.0, 1.0)
+			tween.tween_callback(self.queue_free)
 		else:
 			print("[ERROR] El nodo que está enfrente no tiene método 'curar'")
 	else:
