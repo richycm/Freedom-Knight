@@ -6,6 +6,7 @@ var lancero_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/La
 var pocion_scene: PackedScene = preload("res://Scenes/UI/PocionesHechizos/PocionDeVida.tscn")
 var curandero_scene: PackedScene = preload("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
 var gata_scene: PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn")
+var spawn_pausado: bool = false
 
 @onready var player = $Caballero
 @onready var punto_a = $PuntoA
@@ -51,7 +52,7 @@ var velocidad_maxima: float = 130.0
 # ─────────────────────────────────────────
 #  CONFIGURACIÓN DE ARQUEROS
 # ─────────────────────────────────────────
-var max_arqueros_simultaneos: int = 2
+var max_arqueros_simultaneos: int = 0
 var arqueros_vivos: int = 0
 var tiempo_entre_arqueros: float = 15.0
 var timer_arqueros: Timer
@@ -279,32 +280,33 @@ func _subir_dificultad() -> void:
 	oleada_actual += 1
 	var muertes_totales = enemigos_derrotados + arqueros_derrotados + lanceros_derrotados
 	
-	# Fuerza: Sube muy despacio para que no sea frustrante (1 punto extra cada 12 muertes)
+	# Dificultad base
 	fuerza_actual = 1 + floor(muertes_totales / 12.0)
-	
-	# Vida del enemigo: Aumenta muy poco a poco (1 punto extra cada 8 muertes)
 	vida_actual = 3 + floor(muertes_totales / 8.0)
-	
-	# Velocidad: sube suavemente hasta un limite balanceado para el jugador (máximo 150.0)
 	velocidad_actual = min(velocidad_actual + 0.5, 150.0)
 	
-	# Límite estricto de 7 enemigos MÁXIMO en pantalla a la vez (3 caballeros, 2 arqueros, 2 lanceros)
+	# Control de Caballeros (Etapa 1)
 	max_caballeros_simultaneos = min(3, 1 + int(floor(muertes_totales / 15.0)))
-	max_arqueros_simultaneos = min(2, 1 + int(floor(muertes_totales / 20.0)))
 	
-	# Lanceros empiezan a aparecer a partir de 25 muertes (máximo 2 simultáneos)
+	# Control de Arqueros (Etapa 2 - a partir de 25 muertes)
 	if muertes_totales >= 25:
-		max_lanceros_simultaneos = min(2, 1 + int(floor((muertes_totales - 25) / 20.0)))
+		max_arqueros_simultaneos = min(2, 1 + int(floor((muertes_totales - 25) / 20.0)))
+	else:
+		max_arqueros_simultaneos = 0
+		
+	# Control de Lanceros (Etapa 3 - a partir de 50 muertes)
+	if muertes_totales >= 50:
+		max_lanceros_simultaneos = min(2, 1 + int(floor((muertes_totales - 50) / 15.0)))
 	else:
 		max_lanceros_simultaneos = 0
 	
 	_mantener_caballeros.call_deferred()
 	_mantener_lanceros.call_deferred()
 	
-	if muertes_totales >= 5:
-		tiempo_entre_arqueros = max(6.0, 15.0 - floor(muertes_totales / 5.0))
-		if is_instance_valid(timer_arqueros):
-			timer_arqueros.wait_time = tiempo_entre_arqueros
+	# Ajustar tiempo del timer de arqueros si estan activos
+	if muertes_totales >= 25 and is_instance_valid(timer_arqueros):
+		tiempo_entre_arqueros = max(6.0, 15.0 - floor((muertes_totales - 25) / 5.0))
+		timer_arqueros.wait_time = tiempo_entre_arqueros
 	
 	if is_instance_valid(label_contador_muertes):
 		label_contador_muertes.text = "Enemigos Derrotados: %d\nNivel de Dificultad: %d" % [muertes_totales, oleada_actual]
@@ -414,4 +416,4 @@ func _cambiar_mapa(config: Dictionary) -> void:
 	nuevo_mapa.name = "TileMapLayer"
 	add_child(nuevo_mapa)
 	move_child(nuevo_mapa, 0) # Al fondo para que el jugador y enemigos queden encima
-	print("[MAPA] ¡%s cargado! Puntuación, nivel y stats conservados." % config["nombre"])
+	
