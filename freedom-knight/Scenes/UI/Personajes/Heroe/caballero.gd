@@ -227,6 +227,8 @@ func _morir() -> void:
 	var escenario = get_tree().current_scene
 	if "enemigos_derrotados" in escenario and "arqueros_derrotados" in escenario:
 		muertes = escenario.enemigos_derrotados + escenario.arqueros_derrotados
+		if "lanceros_derrotados" in escenario:
+			muertes += escenario.lanceros_derrotados
 
 	var canvas = CanvasLayer.new()
 	canvas.layer = 100

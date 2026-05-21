@@ -18,7 +18,7 @@ signal connection_succeeded
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-func _process(delta):
+func _process(_delta):
 	# Si estamos buscando servidores (cliente)
 	if udp_listener and udp_listener.is_bound():
 		while udp_listener.get_available_packet_count() > 0:

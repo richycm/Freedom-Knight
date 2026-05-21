@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dm6gfu00kgj7h" path="res://Scenes/UI/saco_box/saco_boxeo.tscn" id="7_oeggp"]
 [ext_resource type="PackedScene" uid="uid://cxmwyq8xwrjk0" path="res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn" id="8_ui1ag"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdknx"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_oeggp"]
 texture = ExtResource("2_fdknx")
 texture_region_size = Vector2i(32, 32)
 3:4/0 = 0
@@ -81,7 +81,7 @@ texture_region_size = Vector2i(32, 32)
 1:4/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_oeggp"]
-sources/1 = SubResource("TileSetAtlasSource_fdknx")
+sources/1 = SubResource("TileSetAtlasSource_oeggp")
 sources/3 = SubResource("TileSetAtlasSource_ui1ag")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nyo0t"]

@@ -41,7 +41,7 @@ func _ready() -> void:
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 1.0)
 	
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if state == State.DEAD:
 		return
 		
@@ -65,7 +65,7 @@ func _physics_process(delta: float) -> void:
 		
 	move_and_slide()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if state == State.IDLE and can_interact and Input.is_action_just_pressed("interact"):
 		_adopt()
 

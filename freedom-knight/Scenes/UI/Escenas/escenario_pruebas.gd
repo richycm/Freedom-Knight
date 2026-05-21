@@ -2,6 +2,7 @@ extends Node2D
 
 var enemigo_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn")
 var arquero_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn")
+var lancero_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/Lancero/lancero.tscn")
 var pocion_scene: PackedScene = preload("res://Scenes/UI/PocionesHechizos/PocionDeVida.tscn")
 var curandero_scene: PackedScene = preload("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
 var gata_scene: PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn")
@@ -13,14 +14,30 @@ var gata_scene: PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn
 var label_contador_muertes: Label
 
 # ─────────────────────────────────────────
+#  PROGRESIÓN DE MAPAS
+#  Para agregar un mapa nuevo: copia una línea, ajusta el umbral y la ruta de escena.
+#  El orden importa: deben estar de menor a mayor umbral.
+# ─────────────────────────────────────────
+var progresion_mapas: Array = [
+	{ "umbral": 50,  "escena": preload("res://Scenes/UI/Escenas/mapa_2.tscn"), "nombre": "Tierras Oscuras" },
+	# { "umbral": 150, "escena": preload("res://Scenes/UI/Escenas/mapa_3.tscn"), "nombre": "El Castillo" },
+	# { "umbral": 300, "escena": preload("res://Scenes/UI/Escenas/mapa_4.tscn"), "nombre": "El Abismo" },
+]
+var indice_mapa_actual: int = 0
+
+# ─────────────────────────────────────────
 #  CONFIGURACIÓN DE ENEMIGOS
 # ─────────────────────────────────────────
 var enemigos_derrotados: int = 0
 var arqueros_derrotados: int = 0
+var lanceros_derrotados: int = 0
 var oleada_actual: int = 1
 
 var max_caballeros_simultaneos: int = 1
 var caballeros_vivos: int = 0
+
+var max_lanceros_simultaneos: int = 0
+var lanceros_vivos: int = 0
 
 var fuerza_actual: int = 1
 var fuerza_maxima: int = 8
@@ -167,6 +184,39 @@ func _spawnear_un_enemigo() -> void:
 		nuevo.murio.connect(_on_enemigo_murio)
 
 # ─────────────────────────────────────────
+#  LANCEROS (NUEVO)
+# ─────────────────────────────────────────
+func _mantener_lanceros() -> void:
+	while lanceros_vivos < max_lanceros_simultaneos and _hay_jugadores_vivos():
+		_spawnear_un_lancero()
+		await get_tree().create_timer(0.5).timeout
+
+func _spawnear_un_lancero() -> void:
+	if not lancero_scene or not _hay_jugadores_vivos():
+		return
+	if lanceros_vivos >= max_lanceros_simultaneos:
+		return
+	
+	var nuevo = lancero_scene.instantiate()
+	add_child(nuevo)
+	nuevo.global_position = _pos_aleatoria_lejos_del_player()
+	nuevo.add_to_group("enemigos")
+	lanceros_vivos += 1
+	
+	if "poder_ataque" in nuevo:
+		nuevo.poder_ataque = fuerza_actual
+	if "vida_maxima" in nuevo:
+		nuevo.vida_maxima = vida_actual
+		if "salud_actual" in nuevo:
+			nuevo.salud_actual = vida_actual
+	if "speed" in nuevo:
+		# Lancero es un poco más lento (70.0 vs caballero 85.0)
+		nuevo.speed = velocidad_actual * 0.82
+	
+	if not nuevo.murio.is_connected(_on_lancero_murio):
+		nuevo.murio.connect(_on_lancero_murio)
+
+# ─────────────────────────────────────────
 #  ARQUEROS (NUEVO)
 # ─────────────────────────────────────────
 func _iniciar_timer_arqueros() -> void:
@@ -212,12 +262,22 @@ func _on_arquero_murio(_pos) -> void:
 	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
 	print("[ARQUERO] Arquero derrotado. Vivos: ", arqueros_vivos)
 
+func _on_lancero_murio(_pos) -> void:
+	lanceros_vivos -= 1
+	lanceros_derrotados += 1
+	_subir_dificultad()
+	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
+	print("[LANCERO] Lancero derrotado. Vivos: ", lanceros_vivos)
+	
+	await get_tree().create_timer(1.0).timeout
+	_mantener_lanceros.call_deferred()
+
 # ─────────────────────────────────────────
 #  DIFICULTAD
 # ─────────────────────────────────────────
 func _subir_dificultad() -> void:
 	oleada_actual += 1
-	var muertes_totales = enemigos_derrotados + arqueros_derrotados
+	var muertes_totales = enemigos_derrotados + arqueros_derrotados + lanceros_derrotados
 	
 	# Fuerza: Sube muy despacio para que no sea frustrante (1 punto extra cada 12 muertes)
 	fuerza_actual = 1 + floor(muertes_totales / 12.0)
@@ -228,11 +288,18 @@ func _subir_dificultad() -> void:
 	# Velocidad: sube suavemente hasta un limite balanceado para el jugador (máximo 150.0)
 	velocidad_actual = min(velocidad_actual + 0.5, 150.0)
 	
-	# Límite estricto de 5 enemigos MÁXIMO en pantalla a la vez (3 caballeros, 2 arqueros)
+	# Límite estricto de 7 enemigos MÁXIMO en pantalla a la vez (3 caballeros, 2 arqueros, 2 lanceros)
 	max_caballeros_simultaneos = min(3, 1 + int(floor(muertes_totales / 15.0)))
 	max_arqueros_simultaneos = min(2, 1 + int(floor(muertes_totales / 20.0)))
 	
-	_mantener_caballeros()
+	# Lanceros empiezan a aparecer a partir de 25 muertes (máximo 2 simultáneos)
+	if muertes_totales >= 25:
+		max_lanceros_simultaneos = min(2, 1 + int(floor((muertes_totales - 25) / 20.0)))
+	else:
+		max_lanceros_simultaneos = 0
+	
+	_mantener_caballeros.call_deferred()
+	_mantener_lanceros.call_deferred()
 	
 	if muertes_totales >= 5:
 		tiempo_entre_arqueros = max(6.0, 15.0 - floor(muertes_totales / 5.0))
@@ -242,8 +309,15 @@ func _subir_dificultad() -> void:
 	if is_instance_valid(label_contador_muertes):
 		label_contador_muertes.text = "Enemigos Derrotados: %d\nNivel de Dificultad: %d" % [muertes_totales, oleada_actual]
 		
-	print("[DIFICULTAD] Muertes:%d | Fuerza:%d | Vida:%d | Vel:%.0f | Arqueros max:%d" % [
-		muertes_totales, fuerza_actual, vida_actual, velocidad_actual, max_arqueros_simultaneos
+	# Verificar si hay un mapa siguiente desbloqueado por muertes totales
+	if indice_mapa_actual < progresion_mapas.size():
+		var siguiente = progresion_mapas[indice_mapa_actual]
+		if muertes_totales >= siguiente["umbral"]:
+			indice_mapa_actual += 1
+			_cambiar_mapa.call_deferred(siguiente)
+		
+	print("[DIFICULTAD] Muertes:%d | Fuerza:%d | Vida:%d | Vel:%.0f | Arqueros max:%d | Lanceros max:%d" % [
+		muertes_totales, fuerza_actual, vida_actual, velocidad_actual, max_arqueros_simultaneos, max_lanceros_simultaneos
 	])
 
 # ─────────────────────────────────────────
@@ -287,6 +361,9 @@ func _hay_jugadores_vivos() -> bool:
 #  NPCs (NUEVO)
 # ─────────────────────────────────────────
 func _spawnear_curandero() -> void:
+	_do_spawnear_curandero.call_deferred()
+
+func _do_spawnear_curandero() -> void:
 	if not curandero_scene or not _hay_jugadores_vivos():
 		return
 		
@@ -310,3 +387,31 @@ func _spawnear_gata() -> void:
 	add_child(nueva_gata)
 	nueva_gata.global_position = _pos_aleatoria_lejos_del_player()
 	print("[NPC] Gata aparecio en el mapa a los 60s en ", nueva_gata.global_position)
+
+func _cambiar_mapa(config: Dictionary) -> void:
+	print("[MAPA] %d enemigos derrotados. Cargando: %s" % [config["umbral"], config["nombre"]])
+	
+	# ── Flash rápido (no bloquea el juego ni resetea stats) ──
+	var canvas = CanvasLayer.new()
+	canvas.layer = 99
+	add_child(canvas)
+	var flash = ColorRect.new()
+	flash.color = Color(1.0, 1.0, 1.0, 0.0)
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(flash)
+	var tween = create_tween()
+	tween.tween_property(flash, "color:a", 0.7, 0.12)
+	tween.tween_property(flash, "color:a", 0.0, 0.30)
+	tween.tween_callback(canvas.queue_free)
+	
+	# ── Intercambiar solo el TileMapLayer; el jugador, enemigos y stats se conservan ──
+	var tilemap_viejo = get_node_or_null("TileMapLayer")
+	if tilemap_viejo:
+		tilemap_viejo.queue_free()
+	
+	var nuevo_mapa = config["escena"].instantiate()
+	nuevo_mapa.name = "TileMapLayer"
+	add_child(nuevo_mapa)
+	move_child(nuevo_mapa, 0) # Al fondo para que el jugador y enemigos queden encima
+	print("[MAPA] ¡%s cargado! Puntuación, nivel y stats conservados." % config["nombre"])
