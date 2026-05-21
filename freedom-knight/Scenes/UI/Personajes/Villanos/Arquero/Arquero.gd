@@ -22,8 +22,18 @@ var is_spawning: bool = true
 var attack_timer: float = 0.0
 
 var flecha_scene = preload("res://Scenes/UI/Personajes/Villanos/Arquero/Flecha.tscn")
+var sound_disparo = preload("res://Sonidos/Efectos/ArcoFlechaDisparada.mp3")
+var _sfx_player: AudioStreamPlayer2D
+
+func _play_shoot_sound() -> void:
+	if _sfx_player:
+		_sfx_player.play()
 
 func _ready() -> void:
+	_sfx_player = AudioStreamPlayer2D.new()
+	_sfx_player.stream = sound_disparo
+	add_child(_sfx_player)
+	
 	add_to_group("enemigos")
 	salud_actual = vida_maxima
 	player = _obtener_jugador_mas_cercano()
@@ -121,6 +131,8 @@ func _disparar_flecha_perseguidora() -> void:
 	var flecha = flecha_scene.instantiate()
 	get_tree().current_scene.add_child(flecha) 
 	flecha.global_position = global_position
+	
+	_play_shoot_sound()
 	
 	if flecha.has_method("iniciar_flecha"):
 		flecha.iniciar_flecha(player, poder_ataque, self)

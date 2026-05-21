@@ -1,6 +1,4 @@
-[gd_scene format=3 uid="uid://j2hrynkukson"]
-
-[ext_resource type="Script" path="res://gata.gd" id="1_3ta8f"]
+[gd_scene format=3 uid="uid://ci1ynfnqdf3w1"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_t52m0"]
 radius = 43.011627
@@ -9,7 +7,6 @@ radius = 43.011627
 radius = 95.047356
 
 [node name="Gata" type="CharacterBody2D" unique_id=936252258]
-script = ExtResource("1_3ta8f")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=579727018]
 visible = false

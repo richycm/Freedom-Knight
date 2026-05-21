@@ -12,7 +12,20 @@ var is_destroyed: bool = false
 # El código buscará un nodo llamado EXACTAMENTE "AnimatedSprite2D"
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D 
 
+var sound_impacto = preload("res://Sonidos/Efectos/ArcoFlechaEscudo.mp3")
+var _impact_player: AudioStreamPlayer2D
+
+func _play_impact_sound() -> void:
+	if _impact_player:
+		_impact_player.global_position = global_position
+		_impact_player.play()
+		_impact_player.finished.connect(_impact_player.queue_free)
+
 func _ready():
+	_impact_player = AudioStreamPlayer2D.new()
+	_impact_player.stream = sound_impacto
+	get_tree().current_scene.add_child.call_deferred(_impact_player)
+	
 	# Reproducimos la animación de vuelo por defecto
 	sprite.play("idle")
 	
@@ -117,6 +130,8 @@ func _on_area_entered(area):
 func _explotar():
 	is_destroyed = true
 	
+	_play_impact_sound()
+	
 	# Apagamos sus colisiones para que no quite vida mientras explota
 	set_deferred("monitoring", false)
 	set_deferred("monitorable", false)
@@ -131,3 +146,7 @@ func _explotar():
 func _destruccion_por_tiempo():
 	if not is_destroyed:
 		queue_free()
+
+func _exit_tree():
+	if _impact_player and not _impact_player.playing:
+		_impact_player.queue_free()
