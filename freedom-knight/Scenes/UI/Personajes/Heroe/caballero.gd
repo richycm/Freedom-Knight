@@ -35,10 +35,21 @@ var velocidad_base: float = 200.0
 var is_attacking: bool = false
 var is_dead: bool = false 
 
+var sound_espada = preload("res://Sonidos/Efectos/espada.mp3")
+var _sfx_player: AudioStreamPlayer2D
+
+func _play_sword_sound() -> void:
+	if _sfx_player:
+		_sfx_player.play()
+
 var label_nombre: Label
 var label_nivel: Label
 
 func _ready() -> void:
+	_sfx_player = AudioStreamPlayer2D.new()
+	_sfx_player.stream = sound_espada
+	add_child(_sfx_player)
+	
 	add_to_group("jugador")
 	# FÍSICA: El jugador está en la Capa 2 y solo choca con el mapa (Capa 1)
 	set_collision_layer_value(1, false)
@@ -150,6 +161,7 @@ func _update_animations(direction: Vector2) -> void:
 
 func _execute_attack() -> void:
 	is_attacking = true
+	_play_sword_sound()
 	# Aseguramos que la animación NO sea en bucle para que el await termine
 	sprite.sprite_frames.set_animation_loop(ANIM_ATTACK, false)
 	sprite.play(ANIM_ATTACK)

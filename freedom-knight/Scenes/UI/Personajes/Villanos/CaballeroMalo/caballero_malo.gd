@@ -21,7 +21,18 @@ var is_dead: bool = false
 var is_spawning: bool = true 
 var attack_timer: float = 0.0
 
+var sound_espada = preload("res://Sonidos/Efectos/espada.mp3")
+var _sfx_player: AudioStreamPlayer2D
+
+func _play_sword_sound() -> void:
+	if _sfx_player:
+		_sfx_player.play()
+
 func _ready() -> void:
+	_sfx_player = AudioStreamPlayer2D.new()
+	_sfx_player.stream = sound_espada
+	add_child(_sfx_player)
+	
 	add_to_group("enemigos")
 	salud_actual = vida_maxima
 	player = _obtener_jugador_mas_cercano()
@@ -113,6 +124,7 @@ func _atacar() -> void:
 	if is_attacking or is_dead: return
 	is_attacking = true
 	sprite.play("attack")
+	_play_sword_sound()
 	
 	await get_tree().create_timer(0.2).timeout
 	rango_ataque.monitoring = true
