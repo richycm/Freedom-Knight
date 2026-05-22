@@ -130,8 +130,24 @@ func _on_texture_button_pressed_guardar() -> void:
 		var datos_a_guardar = {
 			"escena": get_tree().current_scene.scene_file_path,
 			"pos_x": player.global_position.x,
-			"pos_y": player.global_position.y
+			"pos_y": player.global_position.y,
+			"nivel": player.nivel if "nivel" in player else 1,
+			"experiencia": player.experiencia if "experiencia" in player else 0,
+			"fuerza": player.fuerza if "fuerza" in player else 0,
+			"salud_actual": player.salud_actual if "salud_actual" in player else 10,
 		}
+		
+		# Guardar progreso del escenario actual si existe
+		var escenario = get_tree().current_scene
+		if escenario:
+			if "enemigos_derrotados" in escenario:
+				datos_a_guardar["enemigos_derrotados"] = escenario.enemigos_derrotados
+			if "arqueros_derrotados" in escenario:
+				datos_a_guardar["arqueros_derrotados"] = escenario.arqueros_derrotados
+			if "lanceros_derrotados" in escenario:
+				datos_a_guardar["lanceros_derrotados"] = escenario.lanceros_derrotados
+			if "oleada_actual" in escenario:
+				datos_a_guardar["oleada_actual"] = escenario.oleada_actual
 		
 		SaveManager.guardar_datos_con_nombre(nombre_partida, datos_a_guardar)
 		print("Partida guardada con éxito: " + nombre_partida)

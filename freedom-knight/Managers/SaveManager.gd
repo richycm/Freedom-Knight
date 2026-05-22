@@ -101,27 +101,73 @@ func cargar_y_posicionar_datos(datos: Dictionary) -> void:
 	if datos.has("nombre_partida"):
 		partida_actual = datos["nombre_partida"]
 	
+	var old_scene = get_tree().current_scene
+	
 	# 1. Cambiamos la escena
 	get_tree().change_scene_to_file(datos["escena"])
 	
-	# 2. Esperamos a que la escena se "instancie"
-	await get_tree().tree_changed 
+	# 2. Esperamos a que la escena vieja se libere y cargue la nueva
+	while get_tree().current_scene == old_scene or get_tree().current_scene == null:
+		await get_tree().process_frame
 	
-	# 3. Damos un pequeño respiro (un frame) para que los nodos hagan su _ready()
-	await get_tree().process_frame
+	# 3. Esperamos 2 frames para la inicialización (_ready) de los nuevos nodos
+	for i in range(2):
+		await get_tree().process_frame
 	
-	# 4. Intentamos mover al jugador
+	# 4. Buscamos y restauramos al jugador
 	var player = get_tree().get_first_node_in_group("Jugador")
 	if player == null:
 		player = get_tree().get_first_node_in_group("jugador")
+		
 	if player:
 		if player is CharacterBody2D:
 			player.velocity = Vector2.ZERO
 			
 		player.global_position = Vector2(datos["pos_x"], datos["pos_y"])
-		print("Jugador posicionado en: ", player.global_position)
+		
+		# Restaurar nivel y estadísticas
+		if datos.has("nivel") and "nivel" in player:
+			player.nivel = datos["nivel"]
+		if datos.has("experiencia") and "experiencia" in player:
+			player.experiencia = datos["experiencia"]
+		if datos.has("fuerza") and "fuerza" in player:
+			player.fuerza = datos["fuerza"]
+		if datos.has("salud_actual") and "salud_actual" in player:
+			player.salud_actual = datos["salud_actual"]
+			
+		# Recalcular estadísticas derivadas del jugador
+		if "velocidad_base" in player and "speed" in player:
+			player.speed = min(600.0, player.velocidad_base + (player.nivel * 5.0))
+		if "dano_base" in player and "poder_ataque" in player:
+			player.poder_ataque = player.dano_base + floor(player.fuerza / 3.0) + floor(player.nivel / 2.0)
+			
+		# Forzar refresco visual de nivel y vida
+		if player.has_method("_actualizar_ui_nivel"):
+			player._actualizar_ui_nivel()
+		if player.has_method("actualizar_ui_corazones"):
+			player.actualizar_ui_corazones()
+			
+		print("¡Carga exitosa! Jugador posicionado en: ", player.global_position, 
+			" | Nivel: ", player.nivel, " | Fuerza: ", player.fuerza, " | Salud: ", player.salud_actual)
 	else:
 		print("Error: No se encontró al jugador en los grupos 'Jugador'/'jugador'")
+
+	# 5. Restaurar progreso del escenario si aplica
+	var escenario = get_tree().current_scene
+	if escenario:
+		if datos.has("enemigos_derrotados") and "enemigos_derrotados" in escenario:
+			escenario.enemigos_derrotados = datos["enemigos_derrotados"]
+		if datos.has("arqueros_derrotados") and "arqueros_derrotados" in escenario:
+			escenario.arqueros_derrotados = datos["arqueros_derrotados"]
+		if datos.has("lanceros_derrotados") and "lanceros_derrotados" in escenario:
+			escenario.lanceros_derrotados = datos["lanceros_derrotados"]
+		if datos.has("oleada_actual") and "oleada_actual" in escenario:
+			# Restamos 1 porque _subir_dificultad() incrementa la oleada en 1
+			escenario.oleada_actual = datos["oleada_actual"] - 1
+			
+		# Sincronizar la UI de muertes y recalcular parámetros de spawn enemigos
+		if escenario.has_method("_subir_dificultad"):
+			escenario._subir_dificultad()
 
 func cargar_y_posicionar() -> void:
 	var datos = cargar_datos()

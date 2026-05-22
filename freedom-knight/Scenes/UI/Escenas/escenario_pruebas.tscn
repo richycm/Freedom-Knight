@@ -97,7 +97,7 @@ size = Vector2(4866, 1306)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oeggp"]
 size = Vector2(4349, 939.5)
 
-[node name="EscenarioPruebas" type="Node2D" unique_id=1162748324 groups=["jugador"]]
+[node name="EscenarioPruebas" type="Node2D" unique_id=1162748324]
 y_sort_enabled = true
 position = Vector2(392, 290)
 script = ExtResource("1_k7j0i")
@@ -152,6 +152,6 @@ position = Vector2(-161, 52)
 [node name="Arquero" parent="." unique_id=1378590200 instance=ExtResource("8_ui1ag")]
 position = Vector2(875, -121)
 
-[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("9_music")
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=1135725053]
 process_mode = 1
+stream = ExtResource("9_music")

@@ -6,24 +6,21 @@ var lancero_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/La
 var pocion_scene: PackedScene = preload("res://Scenes/UI/PocionesHechizos/PocionDeVida.tscn")
 var curandero_scene: PackedScene = preload("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
 var gata_scene: PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn")
-var spawn_pausado: bool = false
+
+# ── NUEVA PRECÁRGA: ESCENA DEL JEFE FINAL ──
+var jefe_scene: PackedScene = preload("res://Scenes/UI/Personajes/Villanos/jefe/jefe_piso.tscn")
 
 @onready var player = $Caballero
 @onready var punto_a = $PuntoA
 @onready var punto_b = $PuntoB
 
 var label_contador_muertes: Label
-@onready var music_player: AudioStreamPlayer = $MusicPlayer
 
 # ─────────────────────────────────────────
 #  PROGRESIÓN DE MAPAS
-#  Para agregar un mapa nuevo: copia una línea, ajusta el umbral y la ruta de escena.
-#  El orden importa: deben estar de menor a mayor umbral.
 # ─────────────────────────────────────────
 var progresion_mapas: Array = [
 	{ "umbral": 50,  "escena": preload("res://Scenes/UI/Escenas/mapa_2.tscn"), "nombre": "Tierras Oscuras" },
-	# { "umbral": 150, "escena": preload("res://Scenes/UI/Escenas/mapa_3.tscn"), "nombre": "El Castillo" },
-	# { "umbral": 300, "escena": preload("res://Scenes/UI/Escenas/mapa_4.tscn"), "nombre": "El Abismo" },
 ]
 var indice_mapa_actual: int = 0
 
@@ -53,7 +50,7 @@ var velocidad_maxima: float = 130.0
 # ─────────────────────────────────────────
 #  CONFIGURACIÓN DE ARQUEROS
 # ─────────────────────────────────────────
-var max_arqueros_simultaneos: int = 0
+var max_arqueros_simultaneos: int = 0 # Iniciamos en 0 para respetar la Etapa 1
 var arqueros_vivos: int = 0
 var tiempo_entre_arqueros: float = 15.0
 var timer_arqueros: Timer
@@ -74,17 +71,12 @@ var limite_der: float
 var limite_arr: float
 var limite_aba: float
 
+# ── NUEVA VARIABLE DE CONTROL: BANDERA DEL JEFE ──
+var jefe_activo: bool = false
+
 # ═════════════════════════════════════════
 func _ready() -> void:
 	y_sort_enabled = true
-	
-	# Iniciar música de fondo (OST-1.wav) al estilo del Main Menu
-	if music_player:
-		if not music_player.finished.is_connected(_on_music_player_finished):
-			music_player.finished.connect(_on_music_player_finished)
-		music_player.play()
-		print("[SONIDO] Música de fondo OST-1 iniciada para el modo Arcade")
-
 	_calcular_limites()
 	_iniciar_timer_pociones()
 	_iniciar_timer_arqueros()
@@ -124,8 +116,6 @@ func _crear_ui_contador() -> void:
 	label_contador_muertes.position = Vector2(20, 150)
 	canvas.add_child(label_contador_muertes)
 
-# Eliminadas funciones de red obsoletas
-
 # ─────────────────────────────────────────
 #  LÍMITES
 # ─────────────────────────────────────────
@@ -144,12 +134,11 @@ func _pos_aleatoria() -> Vector2:
 	)
 
 func _pos_aleatoria_lejos_del_player() -> Vector2:
-	var distancia_minima = 400.0 # Empezar buscando un punto muy lejos
+	var distancia_minima = 400.0
 	for _intento in range(40):
 		var pos = _pos_aleatoria()
 		if pos.distance_to(player.global_position) >= distancia_minima:
 			return pos
-		# Si no encuentra, reduce un poco la exigencia para el siguiente intento
 		distancia_minima -= 5.0
 	
 	return _pos_aleatoria()
@@ -167,12 +156,15 @@ func _on_enemigo_murio(_pos) -> void:
 	_mantener_caballeros()
 
 func _mantener_caballeros() -> void:
+	# Si el jefe está en el mapa, no dejamos que salgan más caballeros pequeños
+	if jefe_activo: return
+	
 	while caballeros_vivos < max_caballeros_simultaneos and _hay_jugadores_vivos():
 		_spawnear_un_enemigo()
 		await get_tree().create_timer(0.5).timeout
 
 func _spawnear_un_enemigo() -> void:
-	if not enemigo_scene or not _hay_jugadores_vivos():
+	if not enemigo_scene or not _hay_jugadores_vivos() or jefe_activo:
 		return
 	
 	var nuevo = enemigo_scene.instantiate()
@@ -194,15 +186,18 @@ func _spawnear_un_enemigo() -> void:
 		nuevo.murio.connect(_on_enemigo_murio)
 
 # ─────────────────────────────────────────
-#  LANCEROS (NUEVO)
+#  LANCEROS
 # ─────────────────────────────────────────
 func _mantener_lanceros() -> void:
+	# Si el jefe está activo, bloqueamos el spawn de lanceros comunes
+	if jefe_activo: return
+	
 	while lanceros_vivos < max_lanceros_simultaneos and _hay_jugadores_vivos():
 		_spawnear_un_lancero()
 		await get_tree().create_timer(0.5).timeout
 
 func _spawnear_un_lancero() -> void:
-	if not lancero_scene or not _hay_jugadores_vivos():
+	if not lancero_scene or not _hay_jugadores_vivos() or jefe_activo:
 		return
 	if lanceros_vivos >= max_lanceros_simultaneos:
 		return
@@ -220,14 +215,13 @@ func _spawnear_un_lancero() -> void:
 		if "salud_actual" in nuevo:
 			nuevo.salud_actual = vida_actual
 	if "speed" in nuevo:
-		# Lancero es un poco más lento (70.0 vs caballero 85.0)
 		nuevo.speed = velocidad_actual * 0.82
 	
 	if not nuevo.murio.is_connected(_on_lancero_murio):
 		nuevo.murio.connect(_on_lancero_murio)
 
 # ─────────────────────────────────────────
-#  ARQUEROS (NUEVO)
+#  ARQUEROS
 # ─────────────────────────────────────────
 func _iniciar_timer_arqueros() -> void:
 	timer_arqueros = Timer.new()
@@ -238,7 +232,7 @@ func _iniciar_timer_arqueros() -> void:
 	timer_arqueros.start()
 
 func _spawnear_arquero() -> void:
-	if not arquero_scene or not _hay_jugadores_vivos():
+	if not arquero_scene or not _hay_jugadores_vivos() or jefe_activo:
 		return
 	if arqueros_vivos >= max_arqueros_simultaneos:
 		return
@@ -249,7 +243,6 @@ func _spawnear_arquero() -> void:
 	nuevo_arquero.add_to_group("enemigos")
 	arqueros_vivos += 1
 	
-	# Configurar estadísticas del arquero
 	if "poder_ataque" in nuevo_arquero:
 		nuevo_arquero.poder_ataque = fuerza_actual
 	if "vida_maxima" in nuevo_arquero:
@@ -257,27 +250,21 @@ func _spawnear_arquero() -> void:
 		if "salud_actual" in nuevo_arquero:
 			nuevo_arquero.salud_actual = vida_actual
 	
-	# Conectar señal de muerte
 	if nuevo_arquero.has_signal("murio"):
 		if not nuevo_arquero.murio.is_connected(_on_arquero_murio):
 			nuevo_arquero.murio.connect(_on_arquero_murio)
-	else:
-		# Si no tiene señal, usamos un grupo y lo verificamos periódicamente
-		print("[ARQUERO] No tiene señal 'murio', usando método alternativo")
 
 func _on_arquero_murio(_pos) -> void:
 	arqueros_vivos -= 1
 	arqueros_derrotados += 1
 	_subir_dificultad()
 	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
-	print("[ARQUERO] Arquero derrotado. Vivos: ", arqueros_vivos)
 
 func _on_lancero_murio(_pos) -> void:
 	lanceros_vivos -= 1
 	lanceros_derrotados += 1
 	_subir_dificultad()
 	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
-	print("[LANCERO] Lancero derrotado. Vivos: ", lanceros_vivos)
 	
 	await get_tree().create_timer(1.0).timeout
 	_mantener_lanceros.call_deferred()
@@ -289,21 +276,18 @@ func _subir_dificultad() -> void:
 	oleada_actual += 1
 	var muertes_totales = enemigos_derrotados + arqueros_derrotados + lanceros_derrotados
 	
-	# Dificultad base
 	fuerza_actual = 1 + floor(muertes_totales / 12.0)
 	vida_actual = 3 + floor(muertes_totales / 8.0)
 	velocidad_actual = min(velocidad_actual + 0.5, 150.0)
 	
-	# Control de Caballeros (Etapa 1)
+	# Control por Etapas limpiado de comentarios raros
 	max_caballeros_simultaneos = min(3, 1 + int(floor(muertes_totales / 15.0)))
 	
-	# Control de Arqueros (Etapa 2 - a partir de 25 muertes)
 	if muertes_totales >= 25:
 		max_arqueros_simultaneos = min(2, 1 + int(floor((muertes_totales - 25) / 20.0)))
 	else:
 		max_arqueros_simultaneos = 0
 		
-	# Control de Lanceros (Etapa 3 - a partir de 50 muertes)
 	if muertes_totales >= 50:
 		max_lanceros_simultaneos = min(2, 1 + int(floor((muertes_totales - 50) / 15.0)))
 	else:
@@ -312,7 +296,6 @@ func _subir_dificultad() -> void:
 	_mantener_caballeros.call_deferred()
 	_mantener_lanceros.call_deferred()
 	
-	# Ajustar tiempo del timer de arqueros si estan activos
 	if muertes_totales >= 25 and is_instance_valid(timer_arqueros):
 		tiempo_entre_arqueros = max(6.0, 15.0 - floor((muertes_totales - 25) / 5.0))
 		timer_arqueros.wait_time = tiempo_entre_arqueros
@@ -326,10 +309,6 @@ func _subir_dificultad() -> void:
 		if muertes_totales >= siguiente["umbral"]:
 			indice_mapa_actual += 1
 			_cambiar_mapa.call_deferred(siguiente)
-		
-	print("[DIFICULTAD] Muertes:%d | Fuerza:%d | Vida:%d | Vel:%.0f | Arqueros max:%d | Lanceros max:%d" % [
-		muertes_totales, fuerza_actual, vida_actual, velocidad_actual, max_arqueros_simultaneos, max_lanceros_simultaneos
-	])
 
 # ─────────────────────────────────────────
 #  POCIONES
@@ -369,7 +348,7 @@ func _hay_jugadores_vivos() -> bool:
 	return false
 
 # ─────────────────────────────────────────
-#  NPCs (NUEVO)
+#  NPCs
 # ─────────────────────────────────────────
 func _spawnear_curandero() -> void:
 	_do_spawnear_curandero.call_deferred()
@@ -378,17 +357,14 @@ func _do_spawnear_curandero() -> void:
 	if not curandero_scene or not _hay_jugadores_vivos():
 		return
 		
-	# Verificar si ya existe un curandero en la escena
 	var curanderos_activos = get_tree().get_nodes_in_group("curanderos")
 	if curanderos_activos.size() > 0:
-		print("[NPC] Ya hay un curandero activo. No se genera uno nuevo.")
 		return
 		
 	var nuevo_curandero = curandero_scene.instantiate()
 	add_child(nuevo_curandero)
 	nuevo_curandero.add_to_group("curanderos")
 	nuevo_curandero.global_position = _pos_aleatoria_lejos_del_player()
-	print("[NPC] Curandero invocado por subir de nivel en ", nuevo_curandero.global_position)
 
 func _spawnear_gata() -> void:
 	if not gata_scene or not _hay_jugadores_vivos():
@@ -397,12 +373,17 @@ func _spawnear_gata() -> void:
 	var nueva_gata = gata_scene.instantiate()
 	add_child(nueva_gata)
 	nueva_gata.global_position = _pos_aleatoria_lejos_del_player()
-	print("[NPC] Gata aparecio en el mapa a los 60s en ", nueva_gata.global_position)
 
+# ─────────────────────────────────────────
+#  NUEVA LÓGICA DE EVENTO DEL JEFE FINAL
+# ─────────────────────────────────────────
 func _cambiar_mapa(config: Dictionary) -> void:
-	print("[MAPA] %d enemigos derrotados. Cargando: %s" % [config["umbral"], config["nombre"]])
+	# Activamos la bandera para congelar los spawns comunes
+	jefe_activo = true
 	
-	# ── Flash rápido (no bloquea el juego ni resetea stats) ──
+	print("[EVENTO] ¡Llegaste a 50 muertes! Limpiando el campo para el Jefe.")
+	
+	# 1. Flash visual en pantalla
 	var canvas = CanvasLayer.new()
 	canvas.layer = 99
 	add_child(canvas)
@@ -416,7 +397,38 @@ func _cambiar_mapa(config: Dictionary) -> void:
 	tween.tween_property(flash, "color:a", 0.0, 0.30)
 	tween.tween_callback(canvas.queue_free)
 	
-	# ── Intercambiar solo el TileMapLayer; el jugador, enemigos y stats se conservan ──
+	# 2. Desvanecer o eliminar todos los enemigos pequeños en pantalla [cite: 12]
+	for n in get_tree().get_nodes_in_group("enemigos"):
+		if is_instance_valid(n):
+			# Si el enemigo tiene el método para desaparecer bonito, lo usamos
+			if n.has_method("desvanecer_y_morir"):
+				n.desvanecer_y_morir()
+			else:
+				n.queue_free() # Si no, borrado directo seguro [cite: 12]
+				
+	caballeros_vivos = 0
+	lanceros_vivos = 0
+	arqueros_vivos = 0
+	
+	# 3. Pausa dramática de 3 segundos antes de que aparezca el jefe
+	await get_tree().create_timer(3.0).timeout
+	
+	# 4. Invocación del Caballero Oscuro (Jefe Final)
+	if jefe_scene and _hay_jugadores_vivos():
+		var jefe = jefe_scene.instantiate()
+		add_child(jefe)
+		jefe.global_position = _pos_aleatoria_lejos_del_player()
+		
+		# Conectamos la muerte del jefe para saltar de verdad al mapa 2
+		if jefe.has_signal("murio"):
+			jefe.murio.connect(func(_pos_jefe): _cargar_siguiente_escena_real(config))
+			
+		print("[JEFE] ¡El Lord Caballero de la Sombra ha aparecido!")
+
+# Función auxiliar para hacer el cambio real del escenario tras matar al jefe
+func _cargar_siguiente_escena_real(config: Dictionary) -> void:
+	print("[RECOMPENSA] Jefe derrotado. Pasando a: %s" % config["nombre"])
+	
 	var tilemap_viejo = get_node_or_null("TileMapLayer")
 	if tilemap_viejo:
 		tilemap_viejo.queue_free()
@@ -424,8 +436,10 @@ func _cambiar_mapa(config: Dictionary) -> void:
 	var nuevo_mapa = config["escena"].instantiate()
 	nuevo_mapa.name = "TileMapLayer"
 	add_child(nuevo_mapa)
-	move_child(nuevo_mapa, 0) # Al fondo para que el jugador y enemigos queden encima
-
-func _on_music_player_finished() -> void:
-	if music_player:
-		music_player.play()
+	move_child(nuevo_mapa, 0)
+	
+	# Restauramos la bandera para permitir enemigos en el nuevo piso
+	jefe_activo = false
+	await get_tree().create_timer(2.0).timeout
+	if _hay_jugadores_vivos():
+		_mantener_caballeros()
