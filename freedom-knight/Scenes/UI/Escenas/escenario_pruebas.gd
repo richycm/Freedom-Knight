@@ -13,6 +13,7 @@ var spawn_pausado: bool = false
 @onready var punto_b = $PuntoB
 
 var label_contador_muertes: Label
+@onready var music_player: AudioStreamPlayer = $MusicPlayer
 
 # ─────────────────────────────────────────
 #  PROGRESIÓN DE MAPAS
@@ -76,6 +77,14 @@ var limite_aba: float
 # ═════════════════════════════════════════
 func _ready() -> void:
 	y_sort_enabled = true
+	
+	# Iniciar música de fondo (OST-1.wav) al estilo del Main Menu
+	if music_player:
+		if not music_player.finished.is_connected(_on_music_player_finished):
+			music_player.finished.connect(_on_music_player_finished)
+		music_player.play()
+		print("[SONIDO] Música de fondo OST-1 iniciada para el modo Arcade")
+
 	_calcular_limites()
 	_iniciar_timer_pociones()
 	_iniciar_timer_arqueros()
@@ -416,4 +425,7 @@ func _cambiar_mapa(config: Dictionary) -> void:
 	nuevo_mapa.name = "TileMapLayer"
 	add_child(nuevo_mapa)
 	move_child(nuevo_mapa, 0) # Al fondo para que el jugador y enemigos queden encima
-	
+
+func _on_music_player_finished() -> void:
+	if music_player:
+		music_player.play()
