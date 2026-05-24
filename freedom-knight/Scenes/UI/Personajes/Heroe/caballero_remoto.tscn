@@ -1,0 +1,193 @@
+[gd_scene format=3 uid="uid://caballero_remoto_fk"]
+
+[ext_resource type="Script" path="res://Scenes/UI/Personajes/Heroe/caballero_remoto.gd" id="1_remote"]
+[ext_resource type="Texture2D" uid="uid://b3nfv4ha2qwx3" path="res://SpritesDelJuego/CaballeroSprites/Warrior_Attack1.png" id="2_1vs1e"]
+[ext_resource type="Texture2D" uid="uid://dh21dsssyd0qn" path="res://SpritesDelJuego/CaballeroSprites/Warrior_Idle.png" id="3_4gnwb"]
+[ext_resource type="Texture2D" uid="uid://clin7tqv0wrj" path="res://Scenes/Efectos/Explosion_02.png" id="3_kjnvo"]
+[ext_resource type="Texture2D" uid="uid://dhqflp6n3rvct" path="res://SpritesDelJuego/CaballeroSprites/Warrior_Guard.png" id="4_crgsd"]
+[ext_resource type="Texture2D" uid="uid://hyxm8v4lloa2" path="res://SpritesDelJuego/CaballeroSprites/Warrior_Run.png" id="4_mhvlk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_att1"]
+atlas = ExtResource("2_1vs1e")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_att2"]
+atlas = ExtResource("2_1vs1e")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_att3"]
+atlas = ExtResource("2_1vs1e")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_att4"]
+atlas = ExtResource("2_1vs1e")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth1"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth2"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth3"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth4"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth5"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth6"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth7"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth8"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth9"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(1536, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dth10"]
+atlas = ExtResource("3_kjnvo")
+region = Rect2(1728, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grd1"]
+atlas = ExtResource("4_crgsd")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grd2"]
+atlas = ExtResource("4_crgsd")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grd3"]
+atlas = ExtResource("4_crgsd")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grd4"]
+atlas = ExtResource("4_crgsd")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grd5"]
+atlas = ExtResource("4_crgsd")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grd6"]
+atlas = ExtResource("4_crgsd")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl1"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl2"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl3"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl4"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl5"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl6"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl7"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idl8"]
+atlas = ExtResource("3_4gnwb")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv1"]
+atlas = ExtResource("4_mhvlk")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv2"]
+atlas = ExtResource("4_mhvlk")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv3"]
+atlas = ExtResource("4_mhvlk")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv4"]
+atlas = ExtResource("4_mhvlk")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv5"]
+atlas = ExtResource("4_mhvlk")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv6"]
+atlas = ExtResource("4_mhvlk")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_remote"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_att1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_att2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_att3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_att4")}],
+"loop": false,
+"name": &"attack",
+"speed": 15.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_dth1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth4")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth6")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth7")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth8")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth9")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_dth10")}],
+"loop": true,
+"name": &"death",
+"speed": 24.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_grd1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_grd2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_grd3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_grd4")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_grd5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_grd6")}],
+"loop": true,
+"name": &"guard",
+"speed": 15.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idl1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl4")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl6")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl7")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_idl8")}],
+"loop": true,
+"name": &"idle",
+"speed": 20.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_mv1")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_mv2")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_mv3")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_mv4")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_mv5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_mv6")}],
+"loop": true,
+"name": &"move",
+"speed": 16.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_remote"]
+radius = 43.011627
+
+[node name="CaballeroRemoto" type="CharacterBody2D" groups=["jugador"]]
+y_sort_enabled = true
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_remote")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(-1, 3.0)
+scale = Vector2(1.342, 1.354)
+sprite_frames = SubResource("SpriteFrames_remote")
+animation = &"idle"
+autoplay = "idle"
+modulate = Color(0.85, 0.90, 1.00, 1.0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("CircleShape2D_remote")

@@ -4,6 +4,12 @@ extends CharacterBody2D
 
 var player: CharacterBody2D = null
 
+# Sincronización de red (para clientes)
+var net_position : Vector2 = Vector2.ZERO
+var net_anim     : String  = "correr"
+var net_flip     : bool    = false
+const INTERP_SPEED : float = 12.0
+
 var speed: float = 65.0 # Un poco lento pero imponente
 var vida_maxima: float = 120.0
 var salud_actual: float = 120.0
@@ -21,6 +27,14 @@ var barra_vida: ProgressBar = null
 signal murio(posicion)
 
 func _ready() -> void:
+	# En modo cliente: deshabilitar IA
+	if _is_client_only():
+		set_physics_process(false)
+		net_position = global_position
+		_configurar_animaciones()
+		_crear_barra_vida()
+		return
+
 	add_to_group("jefe")
 	add_to_group("enemigos")
 	salud_actual = vida_maxima
@@ -165,6 +179,12 @@ func _physics_process(delta: float) -> void:
 			_atacar_jugador()
 			
 	move_and_slide()
+
+	# Sincronizar estado a clientes (host → broadcast)
+	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+		var anim = animated_sprite.animation if animated_sprite else "default"
+		var flip = animated_sprite.flip_h if animated_sprite else false
+		_rpc_sync_enemy.rpc(global_position, anim, flip, salud_actual, is_dead)
 	
 	# Voltear el sprite en el eje X dependiendo de si va a la izquierda o derecha
 	if direccion.x < 0:
@@ -246,8 +266,65 @@ func _morir() -> void:
 	velocity = Vector2.ZERO
 	murio.emit(global_position)
 	
+	if PlayerRegistry.has_method("crear_explosion"):
+		PlayerRegistry.crear_explosion(global_position, 2.5)
+		
+	# Enviar RPC de muerte explícito a los clientes
+	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+		_rpc_sync_enemy.rpc(global_position, "default", false, 0, true)
+	
 	# Desvanecer al jefe de forma suave
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 1.2)
 	await tween.finished
 	queue_free()
+
+func _is_client_only() -> bool:
+	return NetworkManager.is_multiplayer_active() and not NetworkManager.is_server()
+
+func _process(delta: float) -> void:
+	if _is_client_only():
+		if is_dead: return
+		global_position = global_position.lerp(net_position, INTERP_SPEED * delta)
+		if animated_sprite:
+			if animated_sprite.animation != net_anim:
+				animated_sprite.play(net_anim)
+			animated_sprite.flip_h = net_flip
+
+func _morir_client() -> void:
+	is_dead = true
+	if is_instance_valid(barra_vida):
+		barra_vida.queue_free()
+	
+	# Desactivar colisiones
+	set_collision_layer_value(1, false)
+	set_collision_layer_value(2, false)
+	set_collision_layer_value(3, false)
+	set_collision_mask_value(1, false)
+	set_collision_mask_value(2, false)
+	set_collision_mask_value(3, false)
+	
+	if PlayerRegistry.has_method("crear_explosion"):
+		PlayerRegistry.crear_explosion(net_position, 2.5)
+		
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 1.2)
+	await tween.finished
+	queue_free()
+
+@rpc("authority", "unreliable_ordered")
+func _rpc_sync_enemy(pos: Vector2, anim: String, flip: bool, salud: float, dead: bool) -> void:
+	if NetworkManager.is_server(): return
+	net_position = pos
+	net_anim = anim
+	net_flip = flip
+	
+	if salud < salud_actual:
+		_efecto_dano()
+	salud_actual = salud
+	
+	if is_instance_valid(barra_vida):
+		barra_vida.value = salud_actual
+		
+	if dead and not is_dead:
+		_morir_client()

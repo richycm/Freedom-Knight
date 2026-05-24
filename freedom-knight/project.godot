@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 SaveManager="*uid://d2nx42bwt6y1m"
 NetworkManager="*res://Scripts/NetworkManager.gd"
+PlayerRegistry="*res://Scripts/PlayerRegistry.gd"
 
 [display]
 

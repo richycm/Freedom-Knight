@@ -36,13 +36,13 @@ func _ready():
 
 func _on_body_entered(body):
 	# ¡Atrapamos al caballero exacto que entró en la zona!
-	if body.name == "Caballero":
+	if body.is_in_group("jugador"):
 		puede_interactuar = true
 		jugador_cercano = body
 
 func _on_body_exited(body):
 	# Soltamos al caballero cuando se va
-	if body.name == "Caballero":
+	if body.is_in_group("jugador"):
 		puede_interactuar = false
 		globo.visible = false
 		indice_actual = 0 

@@ -1,152 +1,224 @@
+## ============================================================
+##  flecha.gd  — Freedom Knight
+##  SISTEMA DE PROYECTILES MULTIJUGADOR
+##
+##  ARCHITECTURE:
+##    - El HOST es el único que calcula física, colisiones y daño.
+##    - Los CLIENTES solo renderizan la posición interpolada.
+##    - Cada flecha tiene un projectile_id único para evitar
+##      duplicados y sincronizar destrucción correctamente.
+##    - Anti-ghost: is_destroyed es la única fuente de verdad.
+##    - Sin double-damage: recibir_dano() solo se llama en el host.
+##
+##  SOLITARIO: funciona exactamente igual que antes.
+## ============================================================
 extends Area2D
 
-@export var velocidad: float = 300.0
-@export var fuerza_persecucion: float = 2.0 
+# ─────────────────────────────────────────────────────────────
+#  EXPORTS
+# ─────────────────────────────────────────────────────────────
+@export var velocidad         : float = 300.0
+@export var fuerza_persecucion: float = 2.0
 
-var objetivo: Node2D = null
-var dano: int = 1
-var direccion: Vector2 = Vector2.RIGHT
-var tirador: Node2D = null
-var is_destroyed: bool = false
+# ─────────────────────────────────────────────────────────────
+#  ESTADO
+# ─────────────────────────────────────────────────────────────
+var objetivo     : Node2D = null
+var dano         : int    = 1
+var direccion    : Vector2 = Vector2.RIGHT
+var tirador      : Node2D = null
+var is_destroyed : bool   = false
 
-# El código buscará un nodo llamado EXACTAMENTE "AnimatedSprite2D"
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D 
+## ID único para sincronización en red (host lo asigna al spawnear)
+var projectile_id : int = 0
 
-var sound_impacto = preload("res://Sonidos/Efectos/ArcoFlechaEscudo.mp3")
-var _impact_player: AudioStreamPlayer2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-func _play_impact_sound() -> void:
-	if _impact_player:
-		_impact_player.global_position = global_position
-		_impact_player.play()
-		_impact_player.finished.connect(_impact_player.queue_free)
+var sound_impacto  = preload("res://Sonidos/Efectos/ArcoFlechaEscudo.mp3")
+var _impact_player : AudioStreamPlayer2D
 
-func _ready():
+# ─────────────────────────────────────────────────────────────
+#  LIFECYCLE
+# ─────────────────────────────────────────────────────────────
+func _ready() -> void:
 	_impact_player = AudioStreamPlayer2D.new()
 	_impact_player.stream = sound_impacto
 	get_tree().current_scene.add_child.call_deferred(_impact_player)
-	
-	# Reproducimos la animación de vuelo por defecto
+
 	sprite.play("idle")
-	
-	# CONFIGURACIÓN DE COLISIONES DE LA FLECHA
-	# La flecha es un proyectil enemigo (Capa 3)
+
+	# Capas de colisión (igual que antes)
 	set_collision_layer_value(1, false)
 	set_collision_layer_value(2, false)
 	set_collision_layer_value(3, true)
-	# Debe detectar al mapa (Capa 1), al jugador (Capa 2), y la ESPADA (Capa 4)
 	set_collision_mask_value(1, true)
 	set_collision_mask_value(2, true)
 	set_collision_mask_value(3, false)
 	set_collision_mask_value(4, true)
-		
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
-		
-	if not area_entered.is_connected(_on_area_entered):
-		area_entered.connect(_on_area_entered)
-		
-	get_tree().create_timer(5.0).timeout.connect(_destruccion_por_tiempo)
 
-func iniciar_flecha(target: Node2D, poder: int, quien_dispara: Node2D):
+	# ── CLAVE: En modo cliente, desactivar física y colisiones ──
+	# El cliente solo renderiza; el host procesa todo.
+	if _is_client_only():
+		set_physics_process(false)
+		set_deferred("monitoring", false)
+		set_deferred("monitorable", false)
+	else:
+		# Host o solitario: conectar señales de colisión
+		if not body_entered.is_connected(_on_body_entered):
+			body_entered.connect(_on_body_entered)
+		if not area_entered.is_connected(_on_area_entered):
+			area_entered.connect(_on_area_entered)
+		get_tree().create_timer(5.0).timeout.connect(_destruccion_por_tiempo)
+
+func _is_client_only() -> bool:
+	return NetworkManager.is_multiplayer_active() and not NetworkManager.is_server()
+
+func _exit_tree() -> void:
+	if _impact_player and is_instance_valid(_impact_player):
+		if not _impact_player.playing:
+			_impact_player.queue_free()
+
+# ─────────────────────────────────────────────────────────────
+#  INICIALIZACIÓN (llamada por el Arquero)
+# ─────────────────────────────────────────────────────────────
+func iniciar_flecha(target: Node2D, poder: int, quien_dispara: Node2D) -> void:
 	objetivo = target
-	dano = poder
-	tirador = quien_dispara 
-	
-	if objetivo:
-		direccion = global_position.direction_to(objetivo.global_position)
-		rotation = direccion.angle()
+	dano     = poder
+	tirador  = quien_dispara
 
-func _physics_process(delta):
-	# Si ya explotó, se detiene en el aire
-	if is_destroyed: return
-	
 	if objetivo and is_instance_valid(objetivo):
+		direccion = global_position.direction_to(objetivo.global_position)
+		rotation  = direccion.angle()
+
+	# Generar ID único: timestamp_millis + nodo instance_id
+	projectile_id = int(Time.get_ticks_msec()) ^ get_instance_id()
+
+# ─────────────────────────────────────────────────────────────
+#  PHYSICS (solo HOST o solitario)
+# ─────────────────────────────────────────────────────────────
+func _physics_process(delta: float) -> void:
+	if is_destroyed: return
+
+	if objetivo and is_instance_valid(objetivo) and not objetivo.is_queued_for_deletion() and not objetivo.get("is_dead"):
 		var dir_ideal = global_position.direction_to(objetivo.global_position)
 		direccion = direccion.slerp(dir_ideal, fuerza_persecucion * delta)
-	
-	position += direccion * velocidad * delta
-	rotation = direccion.angle()
 
-func _on_body_entered(body):
-	# Ignoramos a quien disparó la flecha (original o parry)
-	if is_destroyed or body == tirador: 
-		return 
-		
-	# PREVENCIÓN DE DAÑO INJUSTO (Si el cuerpo y la espada chocan en el mismo frame)
+	position += direccion * velocidad * delta
+	rotation  = direccion.angle()
+
+	# ── Sincronizar posición a clientes (host → broadcast) ──
+	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+		_rpc_sync_position.rpc(global_position, rotation)
+
+# ─────────────────────────────────────────────────────────────
+#  SINCRONIZACIÓN DE POSICIÓN (Host → Clientes)
+# ─────────────────────────────────────────────────────────────
+@rpc("authority", "unreliable_ordered")
+func _rpc_sync_position(pos: Vector2, rot: float) -> void:
+	# Solo ejecuta en clientes
+	if NetworkManager.is_server(): return
+	global_position = global_position.lerp(pos, 0.4)
+	rotation = rot
+
+# ─────────────────────────────────────────────────────────────
+#  COLISIONES (solo HOST o solitario)
+# ─────────────────────────────────────────────────────────────
+func _on_body_entered(body: Node) -> void:
+	if is_destroyed: return
+	if body == tirador: return
+
+	# ── PARRY CHECK: espada en el mismo frame ──
 	var areas_chocando = get_overlapping_areas()
 	for a in areas_chocando:
 		if a.name == "HitboxEspada":
-			var player = get_tree().current_scene.find_child("Caballero", true)
-			if player:
-				var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
-				var flecha_frente = false
-				# Aumentamos el margen de detección a 15 píxeles para ser más generosos
-				if mirando_derecha and global_position.x >= player.global_position.x - 15: flecha_frente = true
-				elif not mirando_derecha and global_position.x <= player.global_position.x + 15: flecha_frente = true
-				
-				if flecha_frente:
-					print("¡Parry salvador! Golpeaste la flecha en el último milisegundo.")
-					is_destroyed = true
-					_explotar()
-					return
-		
-	# Si choca con alguien que recibe daño (Jugador o Enemigo)
+			var player = _find_player_owner_of_hitbox(a)
+			if player and _flecha_frente_al_jugador(player):
+				print("¡Parry salvador! Flecha destruida en el último milisegundo.")
+				_explotar_y_sincronizar()
+				return
+
+	# ── DAÑO A JUGADOR O ENEMIGO ──
 	if body.has_method("recibir_dano"):
-		# Si es el jugador y está bloqueando, la flecha explota pero no hace daño real (lo maneja el caballero)
 		if body.is_in_group("jugador") and body.get("is_guarding"):
 			print("¡FLECHA BLOQUEADA POR ESCUDO!")
 		else:
-			print("¡LA FLECHA IMPACTÓ A ", body.name, "!")
-			
-		body.recibir_dano(dano)
-		_explotar()
-	# Si choca con el mapa o límites
-	elif body is TileMapLayer or "Limite" in body.name:
-		_explotar()
+			print("¡FLECHA IMPACTÓ A %s!" % body.name)
+			body.recibir_dano(dano)
+	elif body is TileMapLayer or (body.name and "Limite" in body.name):
+		pass  # Solo explotar
+	else:
+		return  # No explotar contra otros objetos
 
-func _on_area_entered(area):
+	_explotar_y_sincronizar()
+
+func _on_area_entered(area: Area2D) -> void:
 	if is_destroyed: return
-	
-	# ¡MECÁNICA DE PARRY! 
-	if area.name == "HitboxEspada":
-		var player = get_tree().current_scene.find_child("Caballero", true)
-		if player:
-			var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
-			var flecha_frente = false
-			
-			if mirando_derecha and global_position.x >= player.global_position.x - 15:
-				flecha_frente = true
-			elif not mirando_derecha and global_position.x <= player.global_position.x + 15:
-				flecha_frente = true
-				
-			if not flecha_frente:
-				return # Ignorar si viene por la espalda
-				
-		is_destroyed = true # Bloqueamos daño inmediato
-		print("¡PARRY! Flecha destruida por el escudo de espada.")
-		_explotar()
+	if area.name != "HitboxEspada": return
 
-func _explotar():
+	var player = _find_player_owner_of_hitbox(area)
+	if player and _flecha_frente_al_jugador(player):
+		print("¡PARRY! Flecha destruida por el escudo de espada.")
+		_explotar_y_sincronizar()
+
+func _find_player_owner_of_hitbox(hitbox_area: Area2D) -> Node:
+	# El hitbox es hijo del caballero
+	return hitbox_area.get_parent() if hitbox_area else null
+
+func _flecha_frente_al_jugador(player: Node) -> bool:
+	if not player or not player.get_node_or_null("AnimatedSprite"): return false
+	var mirando_derecha = not player.get_node("AnimatedSprite").flip_h
+	if mirando_derecha:
+		return global_position.x >= player.global_position.x - 15
+	else:
+		return global_position.x <= player.global_position.x + 15
+
+# ─────────────────────────────────────────────────────────────
+#  DESTRUCCIÓN
+# ─────────────────────────────────────────────────────────────
+
+## Explotar en el host Y notificar a todos los clientes
+func _explotar_y_sincronizar() -> void:
+	if is_destroyed: return
 	is_destroyed = true
-	
+
+	# Notificar destrucción a clientes ANTES de explotar visualmente
+	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+		_rpc_destroy.rpc()
+
+	_explotar()
+
+## Clientes reciben orden de destrucción del host
+@rpc("authority", "reliable")
+func _rpc_destroy() -> void:
+	if is_destroyed: return
+	is_destroyed = true
+	_explotar()
+
+func _explotar() -> void:
+	is_destroyed = true
 	_play_impact_sound()
-	
-	# Apagamos sus colisiones para que no quite vida mientras explota
+
 	set_deferred("monitoring", false)
 	set_deferred("monitorable", false)
-	
-	if sprite:
-		rotation = 0 # Enderezamos la explosión para que no se vea chueca
+	set_physics_process(false)
+
+	if sprite and is_instance_valid(sprite):
+		rotation = 0
 		sprite.play("death")
 		await sprite.animation_finished
-		
-	queue_free()
 
-func _destruccion_por_tiempo():
-	if not is_destroyed:
+	if is_instance_valid(self):
 		queue_free()
 
-func _exit_tree():
-	if _impact_player and not _impact_player.playing:
-		_impact_player.queue_free()
+func _destruccion_por_tiempo() -> void:
+	if not is_destroyed:
+		_explotar_y_sincronizar()
+
+# ─────────────────────────────────────────────────────────────
+#  AUDIO
+# ─────────────────────────────────────────────────────────────
+func _play_impact_sound() -> void:
+	if _impact_player and is_instance_valid(_impact_player):
+		_impact_player.global_position = global_position
+		_impact_player.play()
+		_impact_player.finished.connect(_impact_player.queue_free)

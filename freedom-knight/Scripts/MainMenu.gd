@@ -13,6 +13,7 @@ extends Control
 # Variable para saber qué estamos usando
 var usando_mando_o_teclado = false
 var mostrando_configuracion = false
+var mostrando_partidas = false
 
 func _ready():
 	if music_player:
@@ -65,16 +66,19 @@ func _input(event):
 # --- FUNCIONES DE LOS BOTONES ---
 
 func _on_texture_button_pressed_nuevojuego() -> void:
+	if mostrando_configuracion or mostrando_partidas: return
 	print("CLICK MODO HISTORIA")
 	if music_player: music_player.stop()
 	get_tree().change_scene_to_file("res://Scenes/Cinematica/C1_inicio.tscn")
 
 func _on_texture_button_pressed_prueba() -> void:
-	print("CLICK ARCADE")
+	if mostrando_configuracion or mostrando_partidas: return
+	print("CLICK ARCADE → ArcadeMenu")
 	if music_player: music_player.stop()
-	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/escenario_pruebas.tscn")
+	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/ArcadeMenu.tscn")
 
 func _on_texture_button_pressed_continuarjuego() -> void:
+	if mostrando_configuracion or mostrando_partidas: return
 	print("CLICK CONTINUAR")
 	if SaveManager.existe_partida():
 		_mostrar_menu_partidas()
@@ -93,6 +97,7 @@ func _on_texture_button_pressed_continuarjuego() -> void:
 		tween.finished.connect(func(): lbl.queue_free())
 
 func _on_texture_button_pressed_configuracion() -> void:
+	if mostrando_configuracion or mostrando_partidas: return
 	print("CLICK CONFIG")
 	_mostrar_menu_configuracion()
 
@@ -190,6 +195,7 @@ func _mostrar_menu_configuracion() -> void:
 	input.grab_focus()
 
 func _mostrar_menu_partidas() -> void:
+	mostrando_partidas = true
 	var partidas = SaveManager.obtener_lista_partidas()
 	
 	var overlay = ColorRect.new()
@@ -256,6 +262,7 @@ func _mostrar_menu_partidas() -> void:
 		
 		btn.pressed.connect(func():
 			overlay.queue_free()
+			mostrando_partidas = false
 			if music_player: music_player.stop()
 			SaveManager.cargar_y_posicionar_datos(partida)
 		)
@@ -298,7 +305,10 @@ func _mostrar_menu_partidas() -> void:
 	btn_cerrar.pressed.connect(func(): 
 		var t = create_tween()
 		t.tween_property(overlay, "modulate:a", 0.0, 0.2)
-		t.finished.connect(func(): overlay.queue_free())
+		t.finished.connect(func(): 
+			mostrando_partidas = false
+			overlay.queue_free()
+		)
 	)
 	main_vbox.add_child(btn_cerrar)
 	

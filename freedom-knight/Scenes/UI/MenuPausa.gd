@@ -38,6 +38,8 @@ func _crear_estilo_boton(color_base: Color) -> StyleBoxFlat:
 
 func _on_texture_button_pressed_salir() -> void:
 	get_tree().paused = false
+	if NetworkManager.has_method("cleanup"):
+		NetworkManager.cleanup()
 	get_tree().change_scene_to_file("res://Scenes/UI/MainMenu.tscn")
 
 

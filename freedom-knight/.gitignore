@@ -14,6 +14,7 @@
 # --- Seguridad y Firmas (Lo que platicamos) ---
 *.keystore
 *.jks
+credenciales_firma.txt
 !debug.keystore # Solo si decides que el debug SÍ se suba, pero mejor déjalo fuera
 
 # --- Archivos de Sistema/Editor ---

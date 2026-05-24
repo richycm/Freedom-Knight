@@ -16,15 +16,28 @@ func _ready() -> void:
 	# Buscamos en el grupo CaballeroMalo (por compatibilidad)
 	var enemigos = get_tree().get_nodes_in_group("CaballeroMalo")
 	
-	# También buscamos de forma directa si no están en el grupo
-	for nombre_enemigo in ["HCaballeroMalo", "CaballeroMalo"]:
+	# También buscamos de forma directa si no están en el grupo (excluyendo al aliado HCaballeroMalo)
+	for nombre_enemigo in ["CaballeroMalo"]:
 		var nodo = get_node_or_null(nombre_enemigo)
 		if nodo and not nodo in enemigos:
 			enemigos.append(nodo)
 			
-	# O buscamos a cualquier hijo directo que tenga la señal "murio"
+	# Instanciar un segundo enemigo CaballeroMalo para mantener la meta de 2 enemigos en el mapa
+	var enemigo_escena = load("res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn")
+	if enemigo_escena:
+		var nuevo_malo = enemigo_escena.instantiate()
+		nuevo_malo.name = "CaballeroMalo2"
+		add_child(nuevo_malo)
+		var base_enemigo = get_node_or_null("CaballeroMalo")
+		if base_enemigo:
+			nuevo_malo.global_position = base_enemigo.global_position + Vector2(150, -50)
+		else:
+			nuevo_malo.global_position = Vector2(2335, 1145)
+		enemigos.append(nuevo_malo)
+			
+	# O buscamos a cualquier hijo directo que tenga la señal "murio" (excluyendo a HCaballeroMalo)
 	for hijo in get_children():
-		if hijo.has_signal("murio") and not hijo in enemigos:
+		if hijo.name != "HCaballeroMalo" and hijo.has_signal("murio") and not hijo in enemigos:
 			enemigos.append(hijo)
 			
 	# Conectamos las señales
@@ -52,8 +65,8 @@ func _on_enemigo_murio(posicion_muerte: Vector2) -> void:
 	if enemigos_muertos == 1:
 		if monje_escena:
 			var monje = monje_escena.instantiate()
-			monje.global_position = Vector2(2335, 1145)
-			add_child.call_deferred(monje) 
+			add_child(monje)
+			monje.global_position = Vector2(2335, 1145) 
 			print("Mapa: Monje programado para aparecer en el siguiente frame.")
 			
 	# El segundo caballero que muere corta la escena y regresa al menú

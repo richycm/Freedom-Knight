@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bva81yxej6n30" path="res://Scenes/UI/Botones.tscn" id="2_yx73p"]
 [ext_resource type="Texture2D" uid="uid://dlnd2lkei82u5" path="res://SpritesDelJuego/Terreno/Shadow.png" id="3_oeggp"]
 [ext_resource type="PackedScene" uid="uid://dm6gfu00kgj7h" path="res://Scenes/UI/saco_box/saco_boxeo.tscn" id="7_oeggp"]
-[ext_resource type="PackedScene" uid="uid://cxmwyq8xwrjk0" path="res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn" id="8_ui1ag"]
+[ext_resource type="Script" uid="uid://805co3yk5s5h" path="res://Scenes/UI/Escenas/spawn_mobs.gd" id="8_ui1ag"]
 [ext_resource type="AudioStream" uid="uid://tspn36qglhyn" path="res://Sonidos/Musica/OST-1.wav" id="9_music"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_oeggp"]
@@ -97,6 +97,9 @@ size = Vector2(4866, 1306)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oeggp"]
 size = Vector2(4349, 939.5)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ui1ag"]
+size = Vector2(2079, 695)
+
 [node name="EscenarioPruebas" type="Node2D" unique_id=1162748324]
 y_sort_enabled = true
 position = Vector2(392, 290)
@@ -141,17 +144,19 @@ position = Vector2(405, 864)
 shape = SubResource("RectangleShape2D_oeggp")
 
 [node name="PuntoA" type="Marker2D" parent="." unique_id=821617664]
-position = Vector2(-63, -211)
+position = Vector2(-1482, -1122)
 
 [node name="PuntoB" type="Marker2D" parent="." unique_id=1310447721]
-position = Vector2(1070, 381)
+position = Vector2(2120, 864)
 
 [node name="SacoBoxeo" parent="." unique_id=998762272 instance=ExtResource("7_oeggp")]
 position = Vector2(-161, 52)
 
-[node name="Arquero" parent="." unique_id=1378590200 instance=ExtResource("8_ui1ag")]
-position = Vector2(875, -121)
-
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=1135725053]
 process_mode = 1
 stream = ExtResource("9_music")
+
+[node name="SpawnMobs" type="CollisionShape2D" parent="." unique_id=1282176179]
+position = Vector2(490, -56)
+shape = SubResource("RectangleShape2D_ui1ag")
+script = ExtResource("8_ui1ag")
