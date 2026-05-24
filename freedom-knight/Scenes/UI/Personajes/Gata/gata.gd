@@ -177,13 +177,19 @@ func _process(delta: float) -> void:
 		# Permitir que el cliente presione interact
 		if state == State.IDLE and can_interact and Input.is_action_just_pressed("interact"):
 			var my_id = NetworkManager.get_my_peer_id()
-			rpc_request_adopt.rpc_id(1, my_id)
+			if not jugador_tiene_gato(my_id):
+				rpc_request_adopt.rpc_id(1, my_id)
+			else:
+				print("[Gata] (Cliente) Ya tienes un gato. No solicitando adopción.")
 		return
 		
 	# Lógica local / Servidor
 	if state == State.IDLE and can_interact and Input.is_action_just_pressed("interact"):
 		var my_id = NetworkManager.get_my_peer_id()
-		adoptar_gata(my_id)
+		if not jugador_tiene_gato(my_id):
+			adoptar_gata(my_id)
+		else:
+			print("[Gata] Ya tienes un gato. No se puede adoptar otro.")
 
 func _on_body_entered(body: Node2D) -> void:
 	if body == PlayerRegistry.get_local_player():
@@ -317,7 +323,10 @@ func rpc_request_adopt(p_peer_id: int) -> void:
 	var p_node = PlayerRegistry.get_player(p_peer_id)
 	if p_node and is_instance_valid(p_node) and global_position.distance_to(p_node.global_position) <= 150.0:
 		if state == State.IDLE: # Evitar doble adopción
-			adoptar_gata(p_peer_id)
+			if not jugador_tiene_gato(p_peer_id):
+				adoptar_gata(p_peer_id)
+			else:
+				print("[Gata] (Server) Peer %d ya tiene un gato. Rechazando adopción." % p_peer_id)
 
 @rpc("authority", "unreliable_ordered")
 func _rpc_sync_cat(pos: Vector2, anim: String, flip: bool, p_state: int, p_peer_id: int, health: int) -> void:
@@ -395,3 +404,10 @@ func _show_heal_label() -> void:
 	tween.tween_property(heal_label, "position:y", -60.0, 1.0)
 	tween.parallel().tween_property(heal_label, "modulate:a", 0.0, 1.0)
 	tween.tween_callback(heal_label.queue_free)
+
+func jugador_tiene_gato(p_peer_id: int) -> bool:
+	for m in get_tree().get_nodes_in_group("mascotas"):
+		if is_instance_valid(m) and not m.is_queued_for_deletion():
+			if m.get("state") == State.ADOPTED and m.get("target_peer_id") == p_peer_id:
+				return true
+	return false

@@ -60,7 +60,7 @@ func _ready() -> void:
 
 	menu_pausa = escena_menu.instantiate()
 	add_child(menu_pausa)
-	menu_pausa.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	menu_pausa.process_mode = Node.PROCESS_MODE_ALWAYS
 	menu_pausa.hide()
 
 # ─────────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ func _input(event: InputEvent) -> void:
 		_on_menu_pressed()
 
 func _procesar_joystick(event: InputEvent) -> void:
-	if get_tree().paused: return
+	if get_tree().paused or (menu_pausa and menu_pausa.visible): return
 
 	if event is InputEventScreenTouch:
 		if event.pressed and not dragging:

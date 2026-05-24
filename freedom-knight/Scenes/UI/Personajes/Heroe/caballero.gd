@@ -143,6 +143,13 @@ func _setup_labels() -> void:
 #  PHYSICS PROCESS
 # ─────────────────────────────────────────────────────────────
 func _physics_process(delta: float) -> void:
+	# Congelar controles si el menú de pausa está visible
+	var ui = get_tree().current_scene.find_child("Botones", true)
+	if ui and ui.get("menu_pausa") and ui.menu_pausa.visible:
+		velocity = Vector2.ZERO
+		_update_animations(Vector2.ZERO)
+		return
+
 	if is_dead:
 		if NetworkManager.is_multiplayer_active():
 			# Buscar jugadores vivos en el registry (incluye el caballero_remoto del host)
@@ -433,7 +440,7 @@ func _on_hitbox_espada_body_entered(body: Node2D) -> void:
 
 	# Host o solitario
 	if body.has_method("recibir_dano"):
-		if body.is_in_group("mascotas"):
+		if body.is_in_group("mascotas") or body.name.begins_with("SacoBoxeo"):
 			body.recibir_dano(poder_ataque, self)
 		else:
 			body.recibir_dano(poder_ataque)
@@ -518,7 +525,7 @@ func rpc_request_damage_enemy(enemy_path: NodePath) -> void:
 	if dist <= 180.0:
 		if enemy.has_method("recibir_dano"):
 			var client_power = client_node.get("poder_ataque") if "poder_ataque" in client_node else 2
-			if enemy.is_in_group("mascotas"):
+			if enemy.is_in_group("mascotas") or enemy.name.begins_with("SacoBoxeo"):
 				enemy.recibir_dano(client_power, client_node)
 			else:
 				enemy.recibir_dano(client_power)
@@ -527,6 +534,10 @@ func rpc_request_damage_enemy(enemy_path: NodePath) -> void:
 @rpc("authority", "reliable")
 func rpc_give_experience(amount: int) -> void:
 	ganar_experiencia(amount)
+
+@rpc("authority", "reliable")
+func rpc_apply_mejorar_fuerza(cantidad: int) -> void:
+	mejorar_fuerza(cantidad)
 
 @rpc("authority", "reliable")
 func _rpc_notify_host_death(muertes: int) -> void:

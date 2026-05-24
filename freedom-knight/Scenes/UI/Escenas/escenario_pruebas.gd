@@ -221,6 +221,12 @@ func _on_remote_player_left(peer_id: int) -> void:
 	var node = PlayerRegistry.get_player(peer_id)
 	if is_instance_valid(node):
 		node.queue_free()
+	
+	# Eliminar el gato asociado al peer que salió (evitar gatos huérfanos)
+	for m in get_tree().get_nodes_in_group("mascotas"):
+		if is_instance_valid(m) and m.get("target_peer_id") == peer_id:
+			m.queue_free()
+			
 	print("[Escenario] Jugador remoto %d salió." % peer_id)
 
 func _spawn_remote_player(peer_id: int, gamertag: String) -> void:

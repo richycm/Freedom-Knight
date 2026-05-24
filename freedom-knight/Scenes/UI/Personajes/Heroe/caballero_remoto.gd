@@ -325,3 +325,9 @@ func get_guard_energy() -> float:
 	return 0.0  # Stub para HUD compatibility
 
 var is_guarding: bool = false
+
+func mejorar_fuerza(cantidad: int) -> void:
+	if not NetworkManager.is_server(): return
+	var local_player_node = get_node_or_null("/root/EscenarioPruebas/Caballero")
+	if local_player_node and local_player_node.has_method("rpc_apply_mejorar_fuerza"):
+		local_player_node.rpc_apply_mejorar_fuerza.rpc_id(peer_id, cantidad)

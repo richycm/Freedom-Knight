@@ -169,6 +169,47 @@ func cargar_y_posicionar_datos(datos: Dictionary) -> void:
 		if escenario.has_method("_subir_dificultad"):
 			escenario._subir_dificultad()
 
+		# Restaurar gatos (mascotas) si existen en los datos guardados
+		if datos.has("gatos"):
+			# Primero, limpiar cualquier gato salvaje/inicial preexistente en la escena
+			for m in get_tree().get_nodes_in_group("mascotas"):
+				if is_instance_valid(m):
+					m.queue_free()
+			
+			var gata_scene = load("res://Scenes/UI/Personajes/Gata/gata.tscn")
+			if gata_scene:
+				for cat_data in datos["gatos"]:
+					var cat_instance = gata_scene.instantiate()
+					cat_instance.global_position = Vector2(cat_data["pos_x"], cat_data["pos_y"])
+					if cat_data.has("state"):
+						cat_instance.state = cat_data["state"]
+					if cat_data.has("target_peer_id"):
+						cat_instance.target_peer_id = cat_data["target_peer_id"]
+					if cat_data.has("current_health"):
+						cat_instance.current_health = cat_data["current_health"]
+					if cat_data.has("max_health"):
+						cat_instance.max_health = cat_data["max_health"]
+					if cat_data.has("enemies_killed_since_heal"):
+						cat_instance.enemies_killed_since_heal = cat_data["enemies_killed_since_heal"]
+					
+					escenario.add_child(cat_instance, true)
+					
+					# Si está adoptado, configurar referencia del dueño y actualizar label
+					if cat_instance.state == 1: # State.ADOPTED is 1
+						cat_instance.player = PlayerRegistry.get_player(cat_instance.target_peer_id)
+						var gamertag = ""
+						if NetworkManager.is_multiplayer_active():
+							gamertag = NetworkManager.get_gamertag(cat_instance.target_peer_id)
+						else:
+							gamertag = SaveManager.nombre_jugador
+						if gamertag == "": gamertag = "Caballero"
+						
+						var lbl_interact = cat_instance.get_node_or_null("LabelInteract")
+						if lbl_interact:
+							lbl_interact.text = "Gato de %s" % gamertag
+							lbl_interact.add_theme_color_override("font_color", Color.GOLD)
+							lbl_interact.visible = true
+
 func cargar_y_posicionar() -> void:
 	var datos = cargar_datos()
 	cargar_y_posicionar_datos(datos)
