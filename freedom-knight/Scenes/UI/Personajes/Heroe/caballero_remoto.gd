@@ -238,12 +238,15 @@ func recibir_dano(cantidad: int) -> void:
 	_efecto_dano()
 
 	# Notificar al cliente dueño de este peer para que actualice su Caballero local
-	var local_player_node = get_node_or_null("/root/EscenarioPruebas/Caballero")
-	if local_player_node and local_player_node.has_method("rpc_apply_damage"):
-		local_player_node.rpc_apply_damage.rpc_id(peer_id, salud_actual)
+	# Use the host's local Caballero node as dispatcher — rpc_id routes it to the target client
+	var host_caballero = PlayerRegistry.get_local_player()
+	if is_instance_valid(host_caballero) and host_caballero.has_method("rpc_apply_damage"):
+		host_caballero.rpc_apply_damage.rpc_id(peer_id, salud_actual)
 
-	# Notificar a los demás peers de que este remoto recibió daño (para efecto visual)
-	notify_damage.rpc()
+	# Notificar a los demás peers vía el nodo de escena (siempre presente en el cliente)
+	var escenario = get_tree().current_scene
+	if is_instance_valid(escenario) and escenario.has_method("notify_remote_damage"):
+		escenario.notify_remote_damage(peer_id)
 
 	if salud_actual <= 0:
 		_morir_host()
@@ -256,12 +259,14 @@ func curar(cantidad: int) -> void:
 	_efecto_curacion()
 
 	# Notificar al cliente dueño
-	var local_player_node = get_node_or_null("/root/EscenarioPruebas/Caballero")
-	if local_player_node and local_player_node.has_method("rpc_apply_heal"):
-		local_player_node.rpc_apply_heal.rpc_id(peer_id, salud_actual)
+	var host_caballero = PlayerRegistry.get_local_player()
+	if is_instance_valid(host_caballero) and host_caballero.has_method("rpc_apply_heal"):
+		host_caballero.rpc_apply_heal.rpc_id(peer_id, salud_actual)
 
-	# Sincronizar con los demás peers
-	notify_heal.rpc()
+	# Sincronizar con los demás peers vía el nodo de escena
+	var escenario = get_tree().current_scene
+	if is_instance_valid(escenario) and escenario.has_method("notify_remote_heal"):
+		escenario.notify_remote_heal(peer_id)
 
 func _morir_host() -> void:
 	if is_dead: return
@@ -277,11 +282,13 @@ func _morir_host() -> void:
 	# Notificar a la red del estado muerto
 	NetworkManager.rpc_set_player_alive.rpc(peer_id, false)
 	# Notificar al cliente dueño de su muerte
-	var local_player_node = get_node_or_null("/root/EscenarioPruebas/Caballero")
-	if local_player_node and local_player_node.has_method("rpc_apply_death"):
-		local_player_node.rpc_apply_death.rpc_id(peer_id, _get_kill_count())
-	# Notificar a los demás peers
-	notify_death.rpc(_get_kill_count())
+	var host_caballero = PlayerRegistry.get_local_player()
+	if is_instance_valid(host_caballero) and host_caballero.has_method("rpc_apply_death"):
+		host_caballero.rpc_apply_death.rpc_id(peer_id, _get_kill_count())
+	# Notificar a los demás peers vía el nodo de escena
+	var escenario = get_tree().current_scene
+	if is_instance_valid(escenario) and escenario.has_method("notify_remote_death"):
+		escenario.notify_remote_death(peer_id, _get_kill_count())
 	# Mostrar notificación en la pantalla del host
 	_mostrar_notificacion_muerte_en_pantalla()
 
@@ -328,6 +335,6 @@ var is_guarding: bool = false
 
 func mejorar_fuerza(cantidad: int) -> void:
 	if not NetworkManager.is_server(): return
-	var local_player_node = get_node_or_null("/root/EscenarioPruebas/Caballero")
-	if local_player_node and local_player_node.has_method("rpc_apply_mejorar_fuerza"):
-		local_player_node.rpc_apply_mejorar_fuerza.rpc_id(peer_id, cantidad)
+	var host_caballero = PlayerRegistry.get_local_player()
+	if is_instance_valid(host_caballero) and host_caballero.has_method("rpc_apply_mejorar_fuerza"):
+		host_caballero.rpc_apply_mejorar_fuerza.rpc_id(peer_id, cantidad)

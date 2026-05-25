@@ -276,6 +276,14 @@ func rpc_set_player_alive(peer_id: int, alive: bool) -> void:
 		if not any_player_alive():
 			_trigger_game_over()
 
+## Client calls this to report its own death — host then marks it authoritatively
+@rpc("any_peer", "reliable")
+func rpc_report_my_death() -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id = multiplayer.get_remote_sender_id()
+	rpc_set_player_alive.rpc(sender_id, false)
+
 func _trigger_game_over() -> void:
 	# Add a small delay so players can see the death animation
 	var timer = get_tree().create_timer(4.0)
@@ -287,6 +295,32 @@ func rpc_game_over() -> void:
 	game_running = false
 	get_tree().change_scene_to_file("res://Scenes/UI/MainMenu.tscn")
 
+## Client calls this to report that they loaded the gameplay scene and are ready to receive scene RPCs.
+@rpc("any_peer", "reliable")
+func rpc_set_peer_in_scene(in_scene: bool) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id = multiplayer.get_remote_sender_id()
+	if players.has(sender_id):
+		players[sender_id]["in_scene"] = in_scene
+		print("[NetworkManager] Peer %d in_scene: %s" % [sender_id, in_scene])
+
+func set_local_in_scene(in_scene: bool) -> void:
+	var my_id = get_my_peer_id()
+	if players.has(my_id):
+		players[my_id]["in_scene"] = in_scene
+	if is_multiplayer_active() and not is_server():
+		rpc_set_peer_in_scene.rpc(in_scene)
+
+func is_peer_in_scene(peer_id: int) -> bool:
+	if not is_multiplayer_active():
+		return true
+	if peer_id == get_my_peer_id():
+		return true
+	if players.has(peer_id):
+		return players[peer_id].get("in_scene", false)
+	return false
+
 # ─────────────────────────────────────────────────────────────
 #  INTERNAL REGISTRY HELPERS
 # ─────────────────────────────────────────────────────────────
@@ -296,7 +330,7 @@ func _register_local_player_entry(peer_id: int, gamertag: String) -> void:
 func _register_player_entry(peer_id: int, gamertag: String) -> void:
 	if players.has(peer_id):
 		return
-	players[peer_id] = {"gamertag": gamertag, "ready": false, "alive": true}
+	players[peer_id] = {"gamertag": gamertag, "ready": false, "alive": true, "in_scene": false}
 	player_registered.emit(peer_id, gamertag)
 	# Emitir all_players_ready si hay al menos 1 cliente conectado además del host
 	var client_count = 0

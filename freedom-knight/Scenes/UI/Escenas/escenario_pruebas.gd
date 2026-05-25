@@ -88,6 +88,12 @@ var limite_aba : float
 # Sync timer para remotos
 var _remote_sync_timer: float = 0.0
 
+# Contenedor para jugadores remotos — aislado del MultiplayerSpawner
+# (el spawner solo vigila hijos directos de EscenarioPruebas;
+#  los caballero_remoto aquí adentro no reciben net_id y no causan
+#  ERR_UNAUTHORIZED al liberarse)
+var _remote_players_container: Node2D = null
+
 # ─────────────────────────────────────────────────────────────
 #  READY
 # ─────────────────────────────────────────────────────────────
@@ -104,6 +110,9 @@ func _ready() -> void:
 	
 	# Crear UI
 	_crear_ui_contador()
+
+	# Registrar que estamos listos en la escena
+	NetworkManager.set_local_in_scene(true)
 
 	# Solo el HOST corre la lógica del juego
 	if _should_run_host_logic():
@@ -150,6 +159,14 @@ func _setup_multiplayer() -> void:
 	NetworkManager.player_registered.connect(_on_remote_player_registered)
 	NetworkManager.player_unregistered.connect(_on_remote_player_left)
 
+	# Contenedor aislado para jugadores remotos.
+	# Al estar UN nivel más profundo que spawn_path, el MultiplayerSpawner
+	# no lo vigila y no asigna net_id a los caballero_remoto → evita ERR_UNAUTHORIZED.
+	_remote_players_container = Node2D.new()
+	_remote_players_container.name = "RemotePlayers"
+	_remote_players_container.y_sort_enabled = true
+	add_child(_remote_players_container)
+
 	# Spawnar jugadores ya registrados (si el cliente se une después)
 	for pid in NetworkManager.players:
 		if pid != NetworkManager.get_my_peer_id():
@@ -159,7 +176,7 @@ func _setup_multiplayer() -> void:
 	var spawner = MultiplayerSpawner.new()
 	spawner.name = "MultiplayerSpawner"
 	add_child(spawner)
-	spawner.spawn_path = get_path() # EscenarioPruebas
+	spawner.spawn_path = get_path() # EscenarioPruebas (solo hijos directos)
 	
 	# Registramos las escenas que el Host spawnea dinámicamente
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn")
@@ -202,15 +219,19 @@ func _broadcast_local_state() -> void:
 	var flip: bool   = player.sprite.flip_h          if player.sprite else false
 	var my_id = NetworkManager.get_my_peer_id()
 	
-	# Sincronizar el Caballero local a través de la llamada RPC centralizada
-	rpc_sync_player.rpc(
-		my_id,
-		player.global_position,
-		player.velocity,
-		anim, flip,
-		player.salud_actual,
-		player.nivel
-	)
+	# Sincronizar el Caballero local a través de rpc_id a todos los clientes listos
+	for pid in NetworkManager.players:
+		if pid != my_id:
+			if NetworkManager.is_peer_in_scene(pid):
+				rpc_sync_player.rpc_id(
+					pid,
+					my_id,
+					player.global_position,
+					player.velocity,
+					anim, flip,
+					player.salud_actual,
+					player.nivel
+				)
 
 @rpc("authority", "unreliable_ordered")
 func rpc_sync_player(peer_id: int, pos: Vector2, vel: Vector2, anim: String, flip: bool, salud: int, nivel_val: int) -> void:
@@ -218,6 +239,48 @@ func rpc_sync_player(peer_id: int, pos: Vector2, vel: Vector2, anim: String, fli
 	var remote_node = PlayerRegistry.get_player(peer_id)
 	if remote_node and remote_node.has_method("sync_state"):
 		remote_node.sync_state(pos, vel, anim, flip, salud, nivel_val)
+
+## Host-side helpers to notify damage/heal/death only to clients that have loaded the scene
+func notify_remote_damage(peer_id: int) -> void:
+	if not NetworkManager.is_server(): return
+	for pid in NetworkManager.players:
+		if pid != 1:
+			if NetworkManager.is_peer_in_scene(pid):
+				rpc_notify_remote_damage.rpc_id(pid, peer_id)
+
+func notify_remote_heal(peer_id: int) -> void:
+	if not NetworkManager.is_server(): return
+	for pid in NetworkManager.players:
+		if pid != 1:
+			if NetworkManager.is_peer_in_scene(pid):
+				rpc_notify_remote_heal.rpc_id(pid, peer_id)
+
+func notify_remote_death(peer_id: int, enemy_kills: int) -> void:
+	if not NetworkManager.is_server(): return
+	for pid in NetworkManager.players:
+		if pid != 1:
+			if NetworkManager.is_peer_in_scene(pid):
+				rpc_notify_remote_death.rpc_id(pid, peer_id, enemy_kills)
+
+## Scene-level forwarders — allow host to notify clients via the scene node (always present),
+## instead of via caballero_remoto nodes (which may not be spawned on client yet).
+@rpc("authority", "reliable")
+func rpc_notify_remote_damage(peer_id: int) -> void:
+	var remote_node = PlayerRegistry.get_player(peer_id)
+	if is_instance_valid(remote_node) and remote_node.has_method("_efecto_dano"):
+		remote_node._efecto_dano()
+
+@rpc("authority", "reliable")
+func rpc_notify_remote_heal(peer_id: int) -> void:
+	var remote_node = PlayerRegistry.get_player(peer_id)
+	if is_instance_valid(remote_node) and remote_node.has_method("_efecto_curacion"):
+		remote_node._efecto_curacion()
+
+@rpc("authority", "reliable")
+func rpc_notify_remote_death(peer_id: int, enemy_kills: int) -> void:
+	var remote_node = PlayerRegistry.get_player(peer_id)
+	if is_instance_valid(remote_node) and remote_node.has_method("notify_death"):
+		remote_node.notify_death(enemy_kills)
 
 # ─────────────────────────────────────────────────────────────
 #  REMOTE PLAYER MANAGEMENT
@@ -245,7 +308,9 @@ func _spawn_remote_player(peer_id: int, gamertag: String) -> void:
 	var remoto = remoto_scene.instantiate()
 	var spawn_pos = _pos_aleatoria() if (limite_der - limite_izq) > 0 else Vector2(200, 200)
 	remoto.name = str(peer_id)
-	add_child(remoto, true)
+	# Añadir al contenedor aislado — NO directamente a self — para que el
+	# MultiplayerSpawner no le asigne un net_id y no envíe despawn al cliente.
+	_remote_players_container.add_child(remoto)
 	remoto.global_position = spawn_pos
 	remoto.setup(peer_id, gamertag, spawn_pos)
 	print("[Escenario] Jugador remoto spawneado — ID:%d Gamertag:%s" % [peer_id, gamertag])

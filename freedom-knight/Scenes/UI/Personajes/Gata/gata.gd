@@ -162,7 +162,10 @@ func _physics_process(delta: float) -> void:
 			_sync_timer = 0.0
 			var anim : String = str(sprite.animation) if sprite else "idle"
 			var flip = sprite.flip_h if sprite else false
-			_rpc_sync_cat.rpc(global_position, anim, flip, state, target_peer_id, current_health)
+			for pid in NetworkManager.players:
+				if pid != 1:
+					if NetworkManager.is_peer_in_scene(pid):
+						_rpc_sync_cat.rpc_id(pid, global_position, anim, flip, state, target_peer_id, current_health)
 
 func _process(delta: float) -> void:
 	if _is_client_only():
@@ -218,7 +221,10 @@ func adoptar_gata(p_peer_id: int) -> void:
 	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
 		var anim : String = str(sprite.animation) if sprite else "idle"
 		var flip = sprite.flip_h if sprite else false
-		_rpc_sync_cat.rpc(global_position, anim, flip, state, target_peer_id, current_health)
+		for pid in NetworkManager.players:
+			if pid != 1:
+				if NetworkManager.is_peer_in_scene(pid):
+					_rpc_sync_cat.rpc_id(pid, global_position, anim, flip, state, target_peer_id, current_health)
 
 func _celebrar_adopcion(p_peer_id: int) -> void:
 	var gamertag = ""

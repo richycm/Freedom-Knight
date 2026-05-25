@@ -328,7 +328,8 @@ func _morir() -> void:
 			NetworkManager.rpc_set_player_alive.rpc(1, false)
 			_rpc_notify_host_death.rpc(_get_kill_count())
 		else:
-			NetworkManager.rpc_set_player_alive.rpc_id(1, my_peer_id, false)
+			# El cliente reporta su propia muerte al host vía RPC any_peer
+			NetworkManager.rpc_report_my_death.rpc_id(1)
 
 	# Estadísticas de muertes
 	var muertes = _get_kill_count()
@@ -472,10 +473,13 @@ func _rpc_client_input(pos: Vector2, vel: Vector2, anim: String, flip: bool, sal
 	if remote_node and remote_node.has_method("sync_state"):
 		remote_node.sync_state(pos, vel, anim, flip, salud, nivel_val)
 		
-	# Retransmitir la posición de este cliente a todos los demás clientes
+	# Retransmitir la posición de este cliente a todos los demás clientes listos
 	var escenario = get_tree().current_scene
 	if escenario and escenario.has_method("rpc_sync_player"):
-		escenario.rpc_sync_player.rpc(sender, pos, vel, anim, flip, salud, nivel_val)
+		for pid in NetworkManager.players:
+			if pid != 1 and pid != sender:
+				if NetworkManager.is_peer_in_scene(pid):
+					escenario.rpc_sync_player.rpc_id(pid, sender, pos, vel, anim, flip, salud, nivel_val)
 
 ## RPCs recibidos por el cliente desde el host para aplicar estado oficial
 @rpc("authority", "reliable")
