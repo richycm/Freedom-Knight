@@ -1,56 +1,13 @@
 extends Control
 
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	_conectar_botones_recursivo(self)
 	
-	# Configurar programáticamente el botón Regresar como Reanudar
-	var regresar_node = get_node_or_null("Regresar")
-	var btn_regresar = get_node_or_null("Regresar/TextureButton")
-	var lbl_regresar = get_node_or_null("Regresar/Label")
-	
-	if btn_regresar and regresar_node:
-		regresar_node.visible = true
-		btn_regresar.visible = true
-		
-		# Reposicionar en la pantalla
-		btn_regresar.anchor_left = 0.58
-		btn_regresar.anchor_top = 0.393
-		btn_regresar.anchor_right = 0.975
-		btn_regresar.anchor_bottom = 0.553
-		btn_regresar.ignore_texture_size = true
-		btn_regresar.stretch_mode = 5
-		
-		# Reparentar y configurar el Label para que actúe como "Reanudar"
-		if lbl_regresar:
-			if lbl_regresar.get_parent() != btn_regresar:
-				lbl_regresar.get_parent().remove_child(lbl_regresar)
-				btn_regresar.add_child(lbl_regresar)
-				lbl_regresar.owner = btn_regresar
-			
-			lbl_regresar.visible = true
-			lbl_regresar.text = "Reanudar"
-			lbl_regresar.set_anchors_preset(Control.PRESET_FULL_RECT)
-			lbl_regresar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-			lbl_regresar.grow_vertical = Control.GROW_DIRECTION_BOTH
-			lbl_regresar.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			lbl_regresar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			
-			# Copiar estilos de fuente del botón Salir
-			var lbl_salir = get_node_or_null("Salir/TextureButton/Label")
-			if lbl_salir:
-				lbl_regresar.label_settings = lbl_salir.label_settings
-		
-		# Conectar señal
-		if not btn_regresar.pressed.is_connected(_on_texture_button_pressed_regresar):
-			btn_regresar.pressed.connect(_on_texture_button_pressed_regresar)
-			
-	# Ocultar Guardar para los clientes de multiplayer
+	# Ocultar Guardar en cualquier sesión multijugador (tanto para host como clientes)
 	var guardar_node = get_node_or_null("Guardar")
 	if guardar_node:
-		var is_client = NetworkManager.is_multiplayer_active() and not NetworkManager.is_server()
-		if is_client:
+		if NetworkManager.is_multiplayer_active():
 			guardar_node.visible = false
 		else:
 			guardar_node.visible = true

@@ -191,7 +191,9 @@ func _disparar_flecha_perseguidora() -> void:
 		_sfx_player.play()
 
 	if flecha.has_method("iniciar_flecha"):
-		flecha.iniciar_flecha(player, poder_ataque, self)
+		# Nerfear el daño de la flecha para que no aumente demasiado (escala 1/3 del poder del arquero, mín 1, máx 3)
+		var dano_flecha = clampi(int(poder_ataque / 3.0) + 1, 1, 3)
+		flecha.iniciar_flecha(player, dano_flecha, self)
 
 # ─────────────────────────────────────────────────────────────
 #  DAMAGE

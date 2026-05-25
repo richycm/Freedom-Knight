@@ -69,7 +69,14 @@ func _usar_pocion_server(peer_id: int) -> void:
 	var player_node = PlayerRegistry.get_player(peer_id)
 	if player_node and is_instance_valid(player_node):
 		# Verificar distancia y salud en el servidor para evitar exploits/desync
-		if global_position.distance_to(player_node.global_position) < 100.0:
+		# Comprobar contra global_position y net_position (si existe) para tolerar lag de interpolación
+		var target_pos = player_node.global_position
+		var net_pos = player_node.get("net_position") if "net_position" in player_node else target_pos
+		
+		var dist_to_visual = global_position.distance_to(target_pos)
+		var dist_to_net = global_position.distance_to(net_pos)
+		
+		if dist_to_visual < 200.0 or dist_to_net < 200.0:
 			if player_node.salud_actual < player_node.vida_maxima:
 				_apply_potion_to(player_node)
 
@@ -86,6 +93,10 @@ func rpc_request_use_potion() -> void:
 	if not NetworkManager.is_server(): return
 	var sender_id = multiplayer.get_remote_sender_id()
 	_usar_pocion_server(sender_id)
+
+@rpc("authority", "call_local", "reliable")
+func rpc_set_position(pos: Vector2) -> void:
+	global_position = pos
 
 @rpc("authority", "call_local", "reliable")
 func rpc_play_potion_sound() -> void:

@@ -289,6 +289,11 @@ func recibir_dano(cantidad: int) -> void:
 	_efecto_dano()
 	actualizar_ui_corazones()
 
+	if NetworkManager.is_multiplayer_active():
+		var escenario = get_tree().current_scene
+		if is_instance_valid(escenario) and escenario.has_method("notify_remote_damage"):
+			escenario.notify_remote_damage(1)
+
 	if salud_actual <= 0:
 		_morir()
 
@@ -405,6 +410,11 @@ func curar(cantidad: int) -> void:
 	salud_actual = clampi(salud_actual, 0, vida_maxima)
 	_efecto_curacion()
 	actualizar_ui_corazones()
+
+	if NetworkManager.is_multiplayer_active():
+		var escenario = get_tree().current_scene
+		if is_instance_valid(escenario) and escenario.has_method("notify_remote_heal"):
+			escenario.notify_remote_heal(1)
 
 func _efecto_curacion() -> void:
 	sprite.modulate = Color.GREEN
@@ -525,8 +535,12 @@ func rpc_request_damage_enemy(enemy_path: NodePath) -> void:
 	var client_node = PlayerRegistry.get_player(sender_id)
 	if not client_node or not is_instance_valid(client_node): return
 	
+	var max_dist = 180.0
+	if enemy.is_in_group("jefe"):
+		max_dist = 350.0 # El jefe final tiene un radio de colisión gigante
+		
 	var dist = client_node.global_position.distance_to(enemy.global_position)
-	if dist <= 180.0:
+	if dist <= max_dist:
 		if enemy.has_method("recibir_dano"):
 			var client_power = client_node.get("poder_ataque") if "poder_ataque" in client_node else 2
 			if enemy.is_in_group("mascotas") or enemy.name.begins_with("SacoBoxeo"):

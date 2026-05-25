@@ -519,6 +519,17 @@ func _aplicar_stats_vikingo(node: Node) -> void:
 	if "speed" in node:
 		node.speed = max(115.0, velocidad_actual * 1.35)
 
+func _aplicar_stats_lancero(node: Node) -> void:
+	# Nerfear estadísticas del lancero para que no sea injusto con su gran rango de ataque
+	if "poder_ataque" in node:
+		node.poder_ataque = max(1, int(fuerza_actual * 0.65))
+	if "vida_maxima" in node:
+		node.vida_maxima = max(6, int(vida_actual * 0.80))
+		if "salud_actual" in node:
+			node.salud_actual = node.vida_maxima
+	if "speed" in node:
+		node.speed = velocidad_actual * 0.75
+
 # ─────────────────────────────────────────────────────────────
 #  LANCERS — Solo host
 # ─────────────────────────────────────────────────────────────
@@ -537,7 +548,7 @@ func _spawnear_un_lancero() -> void:
 	nuevo.global_position = _pos_aleatoria_lejos_del_player()
 	nuevo.add_to_group("enemigos")
 	lanceros_vivos += 1
-	_aplicar_stats_enemigo(nuevo, 0.82)
+	_aplicar_stats_lancero(nuevo)
 	if not nuevo.murio.is_connected(_on_lancero_murio):
 		nuevo.murio.connect(_on_lancero_murio)
 
@@ -622,11 +633,12 @@ func _subir_dificultad() -> void:
 
 	# ── Arqueros ─────────────────────────────────────────────────
 	if muertes_totales >= 15:
-		var cap_arquero = (1 + int(floor((muertes_totales - 15) / 15.0))) * alive_players_count
+		# Aumentamos el número de arqueros: empieza en 2 y escala cada 10 muertes (antes 1 y 15)
+		var cap_arquero = (2 + int(floor((muertes_totales - 15) / 10.0))) * alive_players_count
 		if muertes_totales >= 50:
-			# A partir de kill 50 se limita el cap de arqueros para aliviar la presión
-			cap_arquero = min(cap_arquero, 2 * alive_players_count)
-		max_arqueros_simultaneos = min(3 + alive_players_count, cap_arquero)
+			# Límite más generoso a partir de kill 50 (hasta 4 por jugador)
+			cap_arquero = min(cap_arquero, 4 * alive_players_count)
+		max_arqueros_simultaneos = min(5 + alive_players_count, cap_arquero)
 	else:
 		max_arqueros_simultaneos = 0
 
@@ -692,26 +704,70 @@ func _spawnear_pocion() -> void:
 	var nueva_pocion = pocion_scene.instantiate()
 	nueva_pocion.name = "Pocion_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
 	add_child(nueva_pocion, true)
-	nueva_pocion.global_position = _pos_aleatoria()
 	nueva_pocion.add_to_group("pociones")
 	if "cantidad_curacion" in nueva_pocion:
 		nueva_pocion.cantidad_curacion = 2
+		
+	var spawn_pos = _pos_aleatoria()
+	if NetworkManager.is_multiplayer_active():
+		nueva_pocion.rpc_set_position.rpc(spawn_pos)
+	else:
+		nueva_pocion.global_position = spawn_pos
 
 # ─────────────────────────────────────────────────────────────
 #  NPCs — Solo host
 # ─────────────────────────────────────────────────────────────
-func _spawnear_curandero() -> void:
-	_do_spawnear_curandero.call_deferred()
+func _pos_aleatoria_cerca_de_posicion(target_pos: Vector2, radio_min: float = 80.0, radio_max: float = 160.0) -> Vector2:
+	var shape_node = get_current_spawn_shape()
+	var lims = null
+	if shape_node:
+		lims = _obtener_limites_zona(shape_node)
+	else:
+		if (limite_der - limite_izq) > 0 and (limite_aba - limite_arr) > 0:
+			lims = {"izq": limite_izq, "der": limite_der, "arr": limite_arr, "aba": limite_aba}
 
-func _do_spawnear_curandero() -> void:
+	for _intento in range(20):
+		var angulo = randf() * TAU
+		var dist = randf_range(radio_min, radio_max)
+		var pos = target_pos + Vector2(cos(angulo), sin(angulo)) * dist
+		
+		# Validar límites
+		if lims:
+			if pos.x >= lims["izq"] and pos.x <= lims["der"] and pos.y >= lims["arr"] and pos.y <= lims["aba"]:
+				return pos
+		else:
+			return pos
+			
+	return target_pos + Vector2.RIGHT * radio_min
+
+func _spawnear_curandero(peer_id: int = 1) -> void:
+	_do_spawnear_curandero.call_deferred(peer_id)
+
+func _do_spawnear_curandero(peer_id: int) -> void:
 	if not curandero_scene or not PlayerRegistry.any_player_alive(): return
 	var curanderos_activos = get_tree().get_nodes_in_group("curanderos")
-	if curanderos_activos.size() > 0: return
+	for c in curanderos_activos:
+		if is_instance_valid(c):
+			var owner_id = c.get("owner_peer_id")
+			if owner_id == peer_id or (peer_id == 1 and owner_id == 0):
+				print("[SPAWN-CURANDERO] Ya existe un curandero activo para el jugador %d." % peer_id)
+				return
 	var nuevo = curandero_scene.instantiate()
 	nuevo.name = "Curandero_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
 	nuevo.add_to_group("curanderos")
 	add_child(nuevo, true)
-	nuevo.global_position = _pos_aleatoria_lejos_del_player()
+	
+	# Intentar spawnear cerca del jugador específico que subió de nivel
+	var spawn_pos = _pos_aleatoria_lejos_del_player()
+	var player_node = PlayerRegistry.get_player(peer_id)
+	if is_instance_valid(player_node):
+		spawn_pos = _pos_aleatoria_cerca_de_posicion(player_node.global_position)
+
+	# Sincronizar el dueño y posición en red
+	if NetworkManager.is_multiplayer_active():
+		nuevo.rpc_setup_monje.rpc(spawn_pos, peer_id)
+	else:
+		nuevo.global_position = spawn_pos
 
 func _obtener_gatas_vivas() -> Array:
 	var result = []

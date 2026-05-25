@@ -27,14 +27,6 @@ var barra_vida: ProgressBar = null
 signal murio(posicion)
 
 func _ready() -> void:
-	# En modo cliente: deshabilitar IA
-	if _is_client_only():
-		set_physics_process(false)
-		net_position = global_position
-		_configurar_animaciones()
-		_crear_barra_vida()
-		return
-
 	add_to_group("jefe")
 	add_to_group("enemigos")
 	salud_actual = vida_maxima
@@ -52,8 +44,14 @@ func _ready() -> void:
 	
 	# Crear barra de vida flotante sobre la cabeza del jefe
 	_crear_barra_vida()
+
+	# En modo cliente: deshabilitar IA
+	if _is_client_only():
+		set_physics_process(false)
+		net_position = global_position
+		return
 	
-	player = _obtener_jugador()
+	player = _obtener_jugador_mas_cercano()
 
 func _configurar_animaciones() -> void:
 	# Ocultar el sprite neutro estático
@@ -151,14 +149,13 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 		
-	# Si el jugador no existe (murió) o no es válido, intentamos buscarlo
-	if not is_instance_valid(player) or player.get("is_dead") == true:
-		player = _obtener_jugador()
-		if not is_instance_valid(player):
-			velocity = Vector2.ZERO
-			if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("default"):
-				animated_sprite.play("default")
-			return
+	# Actualizar el objetivo al jugador más cercano en cada frame
+	player = _obtener_jugador_mas_cercano()
+	if not is_instance_valid(player):
+		velocity = Vector2.ZERO
+		if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation("default") and animated_sprite.animation != "default":
+			animated_sprite.play("default")
+		return
 			
 	if attack_timer > 0:
 		attack_timer -= delta
@@ -197,13 +194,8 @@ func _physics_process(delta: float) -> void:
 	elif direccion.x > 0:
 		animated_sprite.flip_h = false
 
-func _obtener_jugador() -> CharacterBody2D:
-	for g in ["jugador", "Jugador"]:
-		var nodos = get_tree().get_nodes_in_group(g)
-		for n in nodos:
-			if n is CharacterBody2D and is_instance_valid(n) and not (n.get("is_dead") == true):
-				return n
-	return null
+func _obtener_jugador_mas_cercano() -> CharacterBody2D:
+	return PlayerRegistry.get_nearest_player_to(global_position) as CharacterBody2D
 
 func _atacar_jugador() -> void:
 	if not is_instance_valid(player) or player.get("is_dead") == true:

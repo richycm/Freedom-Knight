@@ -150,6 +150,10 @@ func sync_state(pos: Vector2, vel: Vector2, anim: String, flip: bool, salud: int
 	net_anim      = anim
 	net_flip      = flip
 	salud_actual  = salud
+	if NetworkManager.is_server() and not _is_first_sync and nivel_val > nivel:
+		var escenario = get_tree().current_scene
+		if is_instance_valid(escenario) and escenario.has_method("_spawnear_curandero"):
+			escenario._spawnear_curandero(peer_id)
 	nivel         = nivel_val
 	poder_ataque  = 2 + floor(nivel / 2.0) # Calculate approx attack power on host
 	# Update guarding status based on animation

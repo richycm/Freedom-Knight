@@ -31,6 +31,7 @@ var is_destroyed : bool   = false
 
 ## ID único para sincronización en red (host lo asigna al spawnear)
 var projectile_id : int = 0
+var _is_first_sync: bool = true
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -62,6 +63,7 @@ func _ready() -> void:
 		set_physics_process(false)
 		set_deferred("monitoring", false)
 		set_deferred("monitorable", false)
+		visible = false
 	else:
 		# Host o solitario: conectar señales de colisión
 		if not body_entered.is_connected(_on_body_entered):
@@ -117,7 +119,12 @@ func _physics_process(delta: float) -> void:
 func _rpc_sync_position(pos: Vector2, rot: float) -> void:
 	# Solo ejecuta en clientes
 	if NetworkManager.is_server(): return
-	global_position = global_position.lerp(pos, 0.4)
+	if _is_first_sync:
+		_is_first_sync = false
+		global_position = pos
+		visible = true
+	else:
+		global_position = global_position.lerp(pos, 0.4)
 	rotation = rot
 
 # ─────────────────────────────────────────────────────────────
