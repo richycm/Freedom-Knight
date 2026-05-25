@@ -66,9 +66,14 @@ func _configurar_animaciones() -> void:
 	
 	# Crear SpriteFrames programáticamente
 	var sf = SpriteFrames.new()
-	sf.add_animation("default")
-	sf.add_animation("correr")
-	sf.add_animation("atacar")
+	# Godot 4 ya crea "default" automáticamente en SpriteFrames.new();
+	# solo añadir las animaciones que aún no existan.
+	if not sf.has_animation("default"):
+		sf.add_animation("default")
+	if not sf.has_animation("correr"):
+		sf.add_animation("correr")
+	if not sf.has_animation("atacar"):
+		sf.add_animation("atacar")
 	
 	# Cargar texturas de los archivos del jefe
 	var tex_neutro = load("res://Scenes/UI/Personajes/Villanos/jefe/boss-neutro.png")

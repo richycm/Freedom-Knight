@@ -18,7 +18,7 @@ signal murio(posicion_muerte)
 @export_group("Configuración IA")
 @export var speed          : float = 100.0
 @export var stop_distance  : float = 500.0
-@export var attack_cooldown: float = 1.5
+@export var attack_cooldown: float = 2.2
 
 @export_group("Combate IA")
 @export var vida_maxima  : int = 5

@@ -17,8 +17,8 @@ extends Area2D
 # ─────────────────────────────────────────────────────────────
 #  EXPORTS
 # ─────────────────────────────────────────────────────────────
-@export var velocidad         : float = 300.0
-@export var fuerza_persecucion: float = 2.0
+@export var velocidad         : float = 260.0
+@export var fuerza_persecucion: float = 1.2
 
 # ─────────────────────────────────────────────────────────────
 #  ESTADO

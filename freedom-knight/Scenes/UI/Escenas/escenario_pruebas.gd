@@ -14,6 +14,7 @@ extends Node2D
 var enemigo_scene   : PackedScene = preload("res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn")
 var arquero_scene   : PackedScene = preload("res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn")
 var lancero_scene   : PackedScene = preload("res://Scenes/UI/Personajes/Villanos/Lancero/lancero.tscn")
+var vikingo_scene   : PackedScene = preload("res://Scenes/UI/Personajes/Villanos/Vikingo/vikingo.tscn")
 var pocion_scene    : PackedScene = preload("res://Scenes/UI/PocionesHechizos/PocionDeVida.tscn")
 var curandero_scene : PackedScene = preload("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
 var gata_scene      : PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn")
@@ -41,6 +42,7 @@ var indice_mapa_actual: int = 0
 var enemigos_derrotados : int = 0
 var arqueros_derrotados : int = 0
 var lanceros_derrotados : int = 0
+var vikingos_derrotados : int = 0
 var oleada_actual       : int = 1
 var tiempo_partida      : float = 0.0
 
@@ -50,6 +52,8 @@ var max_lanceros_simultaneos   : int   = 0
 var lanceros_vivos             : int   = 0
 var max_arqueros_simultaneos   : int   = 0
 var arqueros_vivos             : int   = 0
+var max_vikingos_simultaneos   : int   = 0
+var vikingos_vivos             : int   = 0
 
 var fuerza_actual   : int   = 1
 var fuerza_maxima   : int   = 8
@@ -135,7 +139,11 @@ func _setup_local_player() -> void:
 	if is_instance_valid(player):
 		var local_id = NetworkManager.get_my_peer_id()
 		PlayerRegistry.set_local_peer_id(local_id)
-		PlayerRegistry.register(local_id, player)
+		# Solo registrar si no hay ya un nodo válido (evita doble registro si caballero.gd
+		# llama a register() en su propio _ready() antes que nosotros).
+		var existing = PlayerRegistry.get_player(local_id)
+		if not is_instance_valid(existing):
+			PlayerRegistry.register(local_id, player)
 
 func _setup_multiplayer() -> void:
 	# Conectar señales para manejar nuevos jugadores
@@ -157,6 +165,7 @@ func _setup_multiplayer() -> void:
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/CaballeroMalo/caballero_malo.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/Arquero/Arquero.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/Lancero/lancero.tscn")
+	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/Vikingo/vikingo.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/Arquero/Flecha.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/PocionesHechizos/PocionDeVida.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
@@ -404,6 +413,48 @@ func _spawnear_un_enemigo() -> void:
 		nuevo.murio.connect(_on_enemigo_murio)
 
 # ─────────────────────────────────────────────────────────────
+#  VIKINGOS — Solo host (aparecen desde kill 70)
+# ─────────────────────────────────────────────────────────────
+func _on_vikingo_murio(_pos) -> void:
+	vikingos_derrotados += 1
+	vikingos_vivos      -= 1
+	_subir_dificultad()
+	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
+	await get_tree().create_timer(1.2).timeout
+	_mantener_vikingos()
+
+func _mantener_vikingos() -> void:
+	if jefe_activo: return
+	while vikingos_vivos < max_vikingos_simultaneos and PlayerRegistry.any_player_alive():
+		_spawnear_un_vikingo()
+		await get_tree().create_timer(0.8).timeout
+
+func _spawnear_un_vikingo() -> void:
+	if not vikingo_scene or not PlayerRegistry.any_player_alive() or jefe_activo: return
+	if vikingos_vivos >= max_vikingos_simultaneos: return
+	var nuevo = vikingo_scene.instantiate()
+	nuevo.name = "Vikingo_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
+	add_child(nuevo, true)
+	nuevo.global_position = _pos_aleatoria_lejos_del_player()
+	nuevo.add_to_group("enemigos")
+	vikingos_vivos += 1
+	# El vikingo tiene stats propios elevados; el escenario solo escala daño y vida base
+	_aplicar_stats_vikingo(nuevo)
+	if not nuevo.murio.is_connected(_on_vikingo_murio):
+		nuevo.murio.connect(_on_vikingo_murio)
+
+func _aplicar_stats_vikingo(node: Node) -> void:
+	# El vikingo multiplica los stats del escenario × su factor de mejora inherente
+	if "poder_ataque" in node: node.poder_ataque = max(2, int(fuerza_actual * 1.5))
+	if "vida_maxima"  in node:
+		node.vida_maxima  = max(22, int(vida_actual * 2.2))
+		if "salud_actual" in node:
+			node.salud_actual = node.vida_maxima
+	# La velocidad base del vikingo (115) se preserva; solo la escala si supera el mínimo
+	if "speed" in node:
+		node.speed = max(115.0, velocidad_actual * 1.35)
+
+# ─────────────────────────────────────────────────────────────
 #  LANCERS — Solo host
 # ─────────────────────────────────────────────────────────────
 func _mantener_lanceros() -> void:
@@ -478,7 +529,7 @@ func _on_lancero_murio(_pos) -> void:
 # ─────────────────────────────────────────────────────────────
 func _subir_dificultad() -> void:
 	oleada_actual += 1
-	var muertes_totales = enemigos_derrotados + arqueros_derrotados + lanceros_derrotados
+	var muertes_totales = enemigos_derrotados + arqueros_derrotados + lanceros_derrotados + vikingos_derrotados
 
 	# Escalar multiplicador por cantidad de jugadores vivos
 	var alive_players_count = max(1, PlayerRegistry.get_alive_players().size())
@@ -495,24 +546,48 @@ func _subir_dificultad() -> void:
 	vida_actual      = int((3 + floor(muertes_totales / 8.0) + (tiempo_factor * 2)) * map_multiplier)
 	velocidad_actual = min(velocidad_actual + 0.1, 100.0)
 
-	# Cantidad de enemigos simultáneos escala según jugadores vivos (reducido para que sea más fácil)
-	max_caballeros_simultaneos = min(5 + alive_players_count, (2 + int(floor(muertes_totales / 12.0))) * alive_players_count)
+	# ── Caballeros Malos ──────────────────────────────────────────
+	# Base normal hasta kill 50; luego se vuelven más raros (cap reducido)
+	var cap_base_caballero = (2 + int(floor(muertes_totales / 12.0))) * alive_players_count
+	if muertes_totales >= 50:
+		# A partir de 50 kills los caballeros bajan al 40% de su cap normal, mínimo 1
+		var reduccion = 0.4 - clampf(float(muertes_totales - 50) / 200.0, 0.0, 0.35)
+		cap_base_caballero = max(1, int(cap_base_caballero * reduccion))
+	max_caballeros_simultaneos = min(5 + alive_players_count, cap_base_caballero)
 
+	# ── Arqueros ─────────────────────────────────────────────────
 	if muertes_totales >= 15:
-		max_arqueros_simultaneos = min(3 + alive_players_count, (1 + int(floor((muertes_totales - 15) / 15.0))) * alive_players_count)
+		var cap_arquero = (1 + int(floor((muertes_totales - 15) / 15.0))) * alive_players_count
+		if muertes_totales >= 50:
+			# A partir de kill 50 se limita el cap de arqueros para aliviar la presión
+			cap_arquero = min(cap_arquero, 2 * alive_players_count)
+		max_arqueros_simultaneos = min(3 + alive_players_count, cap_arquero)
 	else:
 		max_arqueros_simultaneos = 0
 
+	# ── Lanceros ─────────────────────────────────────────────────
 	if muertes_totales >= 50:
 		max_lanceros_simultaneos = min(2 + alive_players_count, (1 + int(floor((muertes_totales - 50) / 15.0))) * alive_players_count)
 	else:
 		max_lanceros_simultaneos = 0
 
+	# ── Vikingos ─────────────────────────────────────────────────
+	# Aparecen a partir de kill 70; escalan gradualmente
+	if muertes_totales >= 70:
+		max_vikingos_simultaneos = min(3 + alive_players_count, (1 + int(floor((muertes_totales - 70) / 20.0))) * alive_players_count)
+	else:
+		max_vikingos_simultaneos = 0
+
 	_mantener_caballeros.call_deferred()
 	_mantener_lanceros.call_deferred()
+	_mantener_vikingos.call_deferred()
 
 	if muertes_totales >= 15 and is_instance_valid(timer_arqueros):
-		tiempo_entre_arqueros = max(3.0, 10.0 - floor((muertes_totales - 15) / 5.0))
+		if muertes_totales >= 50:
+			# Después de kill 50 el timer baja más lento: mínimo 6s en vez de 3s
+			tiempo_entre_arqueros = max(6.0, 14.0 - floor((muertes_totales - 50) / 8.0))
+		else:
+			tiempo_entre_arqueros = max(6.0, 10.0 - floor((muertes_totales - 15) / 5.0))
 		timer_arqueros.wait_time = tiempo_entre_arqueros
 
 	if is_instance_valid(label_contador_muertes):
@@ -631,6 +706,7 @@ func _cambiar_mapa(config: Dictionary) -> void:
 	caballeros_vivos = 0
 	lanceros_vivos   = 0
 	arqueros_vivos   = 0
+	vikingos_vivos   = 0
 
 	await get_tree().create_timer(3.0).timeout
 

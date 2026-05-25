@@ -245,9 +245,8 @@ y_sort_enabled = true
 position = Vector2(5, 5)
 scale = Vector2(1.342, 1.354)
 sprite_frames = SubResource("SpriteFrames_7y38a")
-animation = &"idle"
+animation = &"attack"
 autoplay = "idle"
-frame_progress = 0.64237994
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=559062799]
 shape = SubResource("CircleShape2D_1r5sp")

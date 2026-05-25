@@ -143,7 +143,10 @@ func crear_explosion(pos: Vector2, scale_factor: float = 1.0) -> void:
 	
 	# Configurar SpriteFrames
 	var frames = SpriteFrames.new()
-	frames.add_animation("default")
+	# Godot 4 ya crea "default" automáticamente en SpriteFrames.new();
+	# solo añadirla si todavía no existe.
+	if not frames.has_animation("default"):
+		frames.add_animation("default")
 	frames.set_animation_speed("default", 24.0)
 	frames.set_animation_loop("default", false)
 	
