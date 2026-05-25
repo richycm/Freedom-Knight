@@ -603,55 +603,71 @@ func _on_lancero_murio(_pos) -> void:
 # ─────────────────────────────────────────────────────────────
 #  DIFFICULTY SCALING
 # ─────────────────────────────────────────────────────────────
+func _get_umbral_adaptativo(umbral_base: int) -> int:
+	var num_jugadores = max(1, PlayerRegistry.get_all_players().size())
+	return int(umbral_base * (0.7 + 0.3 * num_jugadores))
+
 func _subir_dificultad() -> void:
 	oleada_actual += 1
 	var muertes_totales = enemigos_derrotados + arqueros_derrotados + lanceros_derrotados + vikingos_derrotados
 
+	# Obtener umbrales adaptativos en base a la cantidad de jugadores en la partida
+	var umbral_50 = _get_umbral_adaptativo(50)
+	var umbral_70 = _get_umbral_adaptativo(70)
+	var umbral_15 = _get_umbral_adaptativo(15)
+
 	# Escalar multiplicador por cantidad de jugadores vivos
 	var alive_players_count = max(1, PlayerRegistry.get_alive_players().size())
 	
-	# Si estamos en el Mapa 2 ("Tierras Oscuras"), aplicar multiplicador 1.5 a las estadísticas base
+	# Si estamos en el Mapa 2 ("Tierras Oscuras"), aplicar un multiplicador mucho más suave
 	var map_multiplier = 1.0
-	if get_tree().get_nodes_in_group("zona_spawn_activa").size() > 0:
-		map_multiplier = 1.5
+	var is_mapa_2 = get_tree().get_nodes_in_group("zona_spawn_activa").size() > 0
+	if is_mapa_2:
+		map_multiplier = 1.15 # Nerfeado de 1.2 a 1.15 para que sea más justo y equilibrado
 		
-	# Factor de tiempo de supervivencia (cada minuto aumenta estadísticas)
-	var tiempo_factor = floor(tiempo_partida / 60.0)
+	# Factor de tiempo de supervivencia (cada 120 segundos aumenta estadísticas, antes 90s)
+	var tiempo_factor = floor(tiempo_partida / 120.0)
 
-	fuerza_actual    = int((1 + floor(muertes_totales / 12.0) + tiempo_factor) * map_multiplier)
-	vida_actual      = int((3 + floor(muertes_totales / 8.0) + (tiempo_factor * 2)) * map_multiplier)
+	# Recalculo de estadísticas de dificultad más progresivo y balanceado
+	fuerza_actual    = int((1 + floor(muertes_totales / 20.0) + (tiempo_factor * 0.4)) * map_multiplier)
+	vida_actual      = int((3 + floor(muertes_totales / 12.0) + (tiempo_factor * 1.0)) * map_multiplier)
+	
+	# Límites máximos (Caps) para evitar que los enemigos hagan one-shot al jugador
+	var max_fuerza = 4 if is_mapa_2 else 3
+	var max_vida = 11 if is_mapa_2 else 8
+	fuerza_actual = min(fuerza_actual, max_fuerza)
+	vida_actual = min(vida_actual, max_vida)
+
 	velocidad_actual = min(velocidad_actual + 0.1, 100.0)
 
 	# ── Caballeros Malos ──────────────────────────────────────────
-	# Base normal hasta kill 50; luego se vuelven más raros (cap reducido)
+	# Base normal hasta el umbral adaptativo; luego se vuelven más raros (cap reducido)
 	var cap_base_caballero = (2 + int(floor(muertes_totales / 12.0))) * alive_players_count
-	if muertes_totales >= 50:
-		# A partir de 50 kills los caballeros bajan al 40% de su cap normal, mínimo 1
-		var reduccion = 0.4 - clampf(float(muertes_totales - 50) / 200.0, 0.0, 0.35)
+	if muertes_totales >= umbral_50:
+		# A partir del umbral los caballeros bajan al 40% de su cap normal, mínimo 1
+		var reduccion = 0.4 - clampf(float(muertes_totales - umbral_50) / 200.0, 0.0, 0.35)
 		cap_base_caballero = max(1, int(cap_base_caballero * reduccion))
 	max_caballeros_simultaneos = min(5 + alive_players_count, cap_base_caballero)
 
 	# ── Arqueros ─────────────────────────────────────────────────
-	if muertes_totales >= 15:
-		# Aumentamos el número de arqueros: empieza en 2 y escala cada 10 muertes (antes 1 y 15)
-		var cap_arquero = (2 + int(floor((muertes_totales - 15) / 10.0))) * alive_players_count
-		if muertes_totales >= 50:
-			# Límite más generoso a partir de kill 50 (hasta 4 por jugador)
+	if muertes_totales >= umbral_15:
+		# Aumentamos el número de arqueros adaptativamente
+		var cap_arquero = (2 + int(floor((muertes_totales - umbral_15) / 10.0))) * alive_players_count
+		if muertes_totales >= umbral_50:
 			cap_arquero = min(cap_arquero, 4 * alive_players_count)
 		max_arqueros_simultaneos = min(5 + alive_players_count, cap_arquero)
 	else:
 		max_arqueros_simultaneos = 0
 
 	# ── Lanceros ─────────────────────────────────────────────────
-	if muertes_totales >= 50:
-		max_lanceros_simultaneos = min(2 + alive_players_count, (1 + int(floor((muertes_totales - 50) / 15.0))) * alive_players_count)
+	if muertes_totales >= umbral_50:
+		max_lanceros_simultaneos = min(2 + alive_players_count, (1 + int(floor((muertes_totales - umbral_50) / 15.0))) * alive_players_count)
 	else:
 		max_lanceros_simultaneos = 0
 
 	# ── Vikingos ─────────────────────────────────────────────────
-	# Aparecen a partir de kill 70; escalan gradualmente
-	if muertes_totales >= 70:
-		max_vikingos_simultaneos = min(3 + alive_players_count, (1 + int(floor((muertes_totales - 70) / 20.0))) * alive_players_count)
+	if muertes_totales >= umbral_70:
+		max_vikingos_simultaneos = min(3 + alive_players_count, (1 + int(floor((muertes_totales - umbral_70) / 20.0))) * alive_players_count)
 	else:
 		max_vikingos_simultaneos = 0
 
@@ -659,12 +675,11 @@ func _subir_dificultad() -> void:
 	_mantener_lanceros.call_deferred()
 	_mantener_vikingos.call_deferred()
 
-	if muertes_totales >= 15 and is_instance_valid(timer_arqueros):
-		if muertes_totales >= 50:
-			# Después de kill 50 el timer baja más lento: mínimo 6s en vez de 3s
-			tiempo_entre_arqueros = max(6.0, 14.0 - floor((muertes_totales - 50) / 8.0))
+	if muertes_totales >= umbral_15 and is_instance_valid(timer_arqueros):
+		if muertes_totales >= umbral_50:
+			tiempo_entre_arqueros = max(6.0, 14.0 - floor((muertes_totales - umbral_50) / 8.0))
 		else:
-			tiempo_entre_arqueros = max(6.0, 10.0 - floor((muertes_totales - 15) / 5.0))
+			tiempo_entre_arqueros = max(6.0, 10.0 - floor((muertes_totales - umbral_15) / 5.0))
 		timer_arqueros.wait_time = tiempo_entre_arqueros
 
 	if is_instance_valid(label_contador_muertes):
@@ -674,7 +689,8 @@ func _subir_dificultad() -> void:
 
 	if indice_mapa_actual < progresion_mapas.size():
 		var siguiente = progresion_mapas[indice_mapa_actual]
-		if muertes_totales >= siguiente["umbral"]:
+		var umbral_cambio_mapa = _get_umbral_adaptativo(siguiente["umbral"])
+		if muertes_totales >= umbral_cambio_mapa:
 			indice_mapa_actual += 1
 			_cambiar_mapa.call_deferred(siguiente)
 

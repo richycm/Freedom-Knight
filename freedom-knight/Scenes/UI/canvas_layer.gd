@@ -44,10 +44,25 @@ var posicion_inicial_joystick : Vector2 = Vector2.ZERO
 #  READY
 # ─────────────────────────────────────────────────────────────
 func _ready() -> void:
-	if palo:
+	# Calcular centro del joystick dinámicamente con la textura del palo para evitar desalineación visual
+	if palo and palo.texture_normal:
+		var size = palo.texture_normal.get_size() * palo.scale
+		centro_palo = -size / 2.0
 		palo.position = centro_palo
+		print("[Joystick] Centro palo calculado dinámicamente: ", centro_palo)
+	elif palo:
+		palo.position = centro_palo
+
 	if joystick_node:
 		posicion_inicial_joystick = joystick_node.position
+
+	# Estilizar el temporizador del escudo para que coincida con las demás estadísticas
+	if guard_timer_label:
+		guard_timer_label.add_theme_font_size_override("font_size", 16)
+		guard_timer_label.add_theme_color_override("font_color", Color(0.4, 0.7, 1.0)) # Azul claro estético
+		guard_timer_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		guard_timer_label.add_theme_constant_override("outline_size", 4)
+		guard_timer_label.position = Vector2(20, 200) # Alineado verticalmente bajo el contador de muertes
 
 	controles_tactiles.show()
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -140,7 +155,7 @@ func _procesar_joystick(event: InputEvent) -> void:
 		var vector         = event.position - centro_global
 		var limit          = radio * joystick_node.scale.x
 		var vector_limitado = vector.limit_length(limit)
-		palo.global_position = centro_global + vector_limitado
+		palo.global_position = centro_global + vector_limitado + (centro_palo * joystick_node.scale)
 		direccion = vector_limitado.normalized()
 
 # ─────────────────────────────────────────────────────────────
@@ -190,6 +205,13 @@ func _toggle_hud(visible_state: bool) -> void:
 	if joystick_node:        joystick_node.visible = visible_state
 	if guard_timer_label:    guard_timer_label.visible = visible_state
 	if boton_menu:           boton_menu.visible    = visible_state
+
+	# Ocultar también el contador de estadísticas del escenario si existe
+	var escenario = get_tree().current_scene
+	if escenario and "label_contador_muertes" in escenario:
+		var lbl = escenario.label_contador_muertes
+		if is_instance_valid(lbl):
+			lbl.visible = visible_state
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:

@@ -76,6 +76,15 @@ func _process(delta: float) -> void:
 	# Interpolación de posición siempre activa (incluso muerto, para mantener el fantasma en lugar correcto)
 	global_position = global_position.lerp(net_position, INTERP_SPEED * delta)
 
+	# Ocultar etiquetas sobre la cabeza si está en pausa
+	var ui = get_tree().current_scene.find_child("Botones", true)
+	var is_paused = false
+	if ui and ui.get("menu_pausa") and ui.menu_pausa.visible:
+		is_paused = true
+		
+	if is_instance_valid(label_nombre): label_nombre.visible = not is_paused
+	if is_instance_valid(label_nivel): label_nivel.visible = not is_paused
+
 	if is_dead:
 		# Muerto: solo mantener posición, no actualizar animación
 		return

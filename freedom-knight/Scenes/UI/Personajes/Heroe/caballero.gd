@@ -145,9 +145,16 @@ func _setup_labels() -> void:
 func _physics_process(delta: float) -> void:
 	# Congelar controles si el menú de pausa está visible
 	var ui = get_tree().current_scene.find_child("Botones", true)
+	var is_paused = false
 	if ui and ui.get("menu_pausa") and ui.menu_pausa.visible:
+		is_paused = true
 		velocity = Vector2.ZERO
 		_update_animations(Vector2.ZERO)
+		
+	if is_instance_valid(label_nombre): label_nombre.visible = not is_paused
+	if is_instance_valid(label_nivel): label_nivel.visible = not is_paused
+	
+	if is_paused:
 		return
 
 	if is_dead:
