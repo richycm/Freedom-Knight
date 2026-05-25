@@ -189,6 +189,7 @@ func _toggle_hud(visible_state: bool) -> void:
 	if boton_interact:       boton_interact.visible = visible_state
 	if joystick_node:        joystick_node.visible = visible_state
 	if guard_timer_label:    guard_timer_label.visible = visible_state
+	if boton_menu:           boton_menu.visible    = visible_state
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:

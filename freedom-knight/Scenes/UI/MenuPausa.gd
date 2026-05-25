@@ -5,7 +5,7 @@ func _ready() -> void:
 	_conectar_botones_recursivo(self)
 	
 	# Ocultar Guardar en cualquier sesión multijugador (tanto para host como clientes)
-	var guardar_node = get_node_or_null("Guardar")
+	var guardar_node = find_child("Guardar", true)
 	if guardar_node:
 		if NetworkManager.is_multiplayer_active():
 			guardar_node.visible = false
