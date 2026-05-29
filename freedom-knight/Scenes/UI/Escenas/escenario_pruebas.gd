@@ -19,6 +19,7 @@ var pocion_scene    : PackedScene = preload("res://Scenes/UI/PocionesHechizos/Po
 var curandero_scene : PackedScene = preload("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
 var gata_scene      : PackedScene = preload("res://Scenes/UI/Personajes/Gata/gata.tscn")
 var jefe_scene      : PackedScene = preload("res://Scenes/UI/Personajes/Villanos/jefe/jefe_piso.tscn")
+var dragon_scene    : PackedScene = preload("res://Scenes/UI/Personajes/Villanos/dragon/dragon.tscn")
 var remoto_scene    : PackedScene = preload("res://Scenes/UI/Personajes/Heroe/caballero_remoto.tscn")
 
 # ─────────────────────────────────────────────────────────────
@@ -66,6 +67,7 @@ var tiempo_entre_arqueros: float = 15.0
 var timer_arqueros : Timer
 var timer_pociones : Timer
 var jefe_activo    : bool = false
+var dragon_spawned : bool = false
 
 const SYNC_RATE_REMOTE: float = 0.05  # 20Hz para jugadores remotos
 
@@ -188,6 +190,7 @@ func _setup_multiplayer() -> void:
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/NPC/monje_npc.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Gata/gata.tscn")
 	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/jefe/jefe_piso.tscn")
+	spawner.add_spawnable_scene("res://Scenes/UI/Personajes/Villanos/dragon/dragon.tscn")
 
 # ─────────────────────────────────────────────────────────────
 #  PROCESO (sincronización de remotos)
@@ -694,6 +697,10 @@ func _subir_dificultad() -> void:
 			indice_mapa_actual += 1
 			_cambiar_mapa.call_deferred(siguiente)
 
+	if muertes_totales >= 75 and not dragon_spawned:
+		dragon_spawned = true
+		_spawnear_jefe_dragon.call_deferred()
+
 @rpc("authority", "reliable", "call_remote")
 func rpc_sync_difficulty(muertes: int, oleada: int) -> void:
 	if is_instance_valid(label_contador_muertes):
@@ -855,6 +862,100 @@ func _cambiar_mapa(config: Dictionary) -> void:
 		if jefe.has_signal("murio"):
 			jefe.murio.connect(func(_pos_jefe): _cargar_siguiente_escena_real(config))
 		print("[JEFE] ¡El Lord Caballero de la Sombra ha aparecido!")
+
+func _spawnear_jefe_dragon() -> void:
+	jefe_activo = true
+	print("[EVENTO] ¡75 muertes! Preparando al Dragón como Jefe.")
+
+	# Flash visual rojo de fuego
+	var canvas = CanvasLayer.new()
+	canvas.layer = 99
+	add_child(canvas)
+	var flash = ColorRect.new()
+	flash.color = Color(1.0, 0.2, 0.2, 0.0)
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(flash)
+	
+	var tween = create_tween()
+	tween.tween_property(flash, "color:a", 0.7, 0.12)
+	tween.tween_property(flash, "color:a", 0.0, 0.30)
+	tween.tween_callback(canvas.queue_free)
+
+	# Limpiar enemigos pequeños
+	for n in get_tree().get_nodes_in_group("enemigos"):
+		if is_instance_valid(n):
+			if n.has_method("desvanecer_y_morir"):
+				n.desvanecer_y_morir()
+			else:
+				n.queue_free()
+
+	caballeros_vivos = 0
+	lanceros_vivos   = 0
+	arqueros_vivos   = 0
+	vikingos_vivos   = 0
+
+	await get_tree().create_timer(3.0).timeout
+
+	if dragon_scene and PlayerRegistry.any_player_alive():
+		var dragon = dragon_scene.instantiate()
+		dragon.name = "Dragon_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
+		add_child(dragon, true)
+		dragon.global_position = _pos_aleatoria_lejos_del_player()
+		if dragon.has_signal("murio"):
+			dragon.murio.connect(_on_dragon_murio)
+		print("[JEFE] ¡El Dragón de Fuego ha aparecido!")
+
+func _on_dragon_murio(_posicion) -> void:
+	print("[DRAGON] ¡El Dragón ha sido derrotado!")
+	
+	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+		rpc_mostrar_banner_victoria.rpc()
+	else:
+		_mostrar_banner_victoria()
+	
+	# Spawnear recompensa (pociones)
+	for i in range(3):
+		_spawnear_pocion()
+		
+	# Permitir que el juego siga
+	jefe_activo = false
+	_mantener_caballeros()
+
+@rpc("authority", "reliable", "call_local")
+func rpc_mostrar_banner_victoria() -> void:
+	_mostrar_banner_victoria()
+
+func _mostrar_banner_victoria() -> void:
+	var canvas = CanvasLayer.new()
+	canvas.layer = 99
+	add_child(canvas)
+	
+	var label = Label.new()
+	label.text = "¡DRAGÓN DERROTADO!\nLa aventura continúa..."
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 32)
+	label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2)) # Dorado
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 8)
+	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	canvas.add_child(label)
+	
+	# Animación suave
+	label.scale = Vector2(0.5, 0.5)
+	label.pivot_offset = get_viewport_rect().size / 2.0
+	label.modulate.a = 0.0
+	
+	var tween = create_tween()
+	tween.tween_property(label, "scale", Vector2(1.0, 1.0), 1.0).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 1.0, 0.5)
+	
+	# Desvanecer después de 3 segundos
+	await get_tree().create_timer(3.0).timeout
+	var tween_fade = create_tween()
+	tween_fade.tween_property(label, "modulate:a", 0.0, 0.8)
+	tween_fade.tween_callback(canvas.queue_free)
 
 func _cargar_siguiente_escena_real(config: Dictionary) -> void:
 	print("[RECOMPENSA] Jefe derrotado. Pasando a: %s" % config["nombre"])

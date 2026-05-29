@@ -1,0 +1,53 @@
+[gd_scene load_steps=7 format=3 uid="uid://4yfjpvcraray"]
+
+[ext_resource type="Script" path="res://Scenes/UI/Personajes/Villanos/dragon/dragon.gd" id="1_dragon_script"]
+[ext_resource type="Texture2D" uid="uid://b53ewuwcaihxo" path="res://Scenes/UI/Personajes/Villanos/dragon/vuelo/vuela-1.png" id="1_fed6i"]
+[ext_resource type="Texture2D" uid="uid://cpihygqc5j07o" path="res://Scenes/UI/Personajes/Villanos/dragon/vuelo/vuela-2.png" id="2_5kots"]
+[ext_resource type="Texture2D" uid="uid://myppj4gh1ndq" path="res://Scenes/UI/Personajes/Villanos/dragon/vuelo/vuela-3.png" id="3_suo6k"]
+[ext_resource type="Texture2D" uid="uid://bk7scli22shpl" path="res://Scenes/UI/Personajes/Villanos/dragon/vuelo/vuela-4.png" id="4_4h3oj"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0bvc8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_fed6i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_5kots")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_suo6k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_4h3oj")
+}],
+"loop": true,
+"name": &"vuelo",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fc0df"]
+size = Vector2(372, 174)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nklv2"]
+size = Vector2(627, 173.5)
+
+[node name="Dragon" type="CharacterBody2D" unique_id=567249622]
+script = ExtResource("1_dragon_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1262186099]
+sprite_frames = SubResource("SpriteFrames_0bvc8")
+animation = &"vuelo"
+frame = 3
+frame_progress = 0.22402024
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=734749039]
+position = Vector2(-32, -18)
+shape = SubResource("RectangleShape2D_fc0df")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1994783558]
+position = Vector2(-1, 2)
+
+[node name="Area_ataque" type="CollisionShape2D" parent="Area2D" unique_id=1310544188]
+position = Vector2(96.5, -20.75)
+shape = SubResource("RectangleShape2D_nklv2")
