@@ -247,6 +247,11 @@ func rpc_register_player(gamertag: String) -> void:
 	if not multiplayer.is_server():
 		return
 	var sender_id = multiplayer.get_remote_sender_id()
+	if game_running:
+		print("[NetworkManager] Rechazando registro de peer %d: partida en curso." % sender_id)
+		if peer:
+			peer.disconnect_peer(sender_id)
+		return
 	_register_player_entry(sender_id, gamertag)
 	# Confirm back to the sender and broadcast to all
 	rpc_player_joined.rpc(sender_id, gamertag)
@@ -348,6 +353,10 @@ func _unregister_player(peer_id: int) -> void:
 		player_unregistered.emit(peer_id)
 		print("[NetworkManager] Jugador desconectado — ID:%d" % peer_id)
 		force_broadcast()
+		if game_running and multiplayer.is_server():
+			if not any_player_alive():
+				print("[NetworkManager] No quedan jugadores vivos tras desconexión. Iniciando Game Over...")
+				_trigger_game_over()
 
 # ─────────────────────────────────────────────────────────────
 #  UTILITY QUERIES

@@ -21,6 +21,9 @@ func _ready() -> void:
 	if not body_exited.is_connected(_on_body_exited):
 		body_exited.connect(_on_body_exited)
 
+	if NetworkManager.is_multiplayer_active() and not NetworkManager.is_server():
+		rpc_request_position.rpc_id(1)
+
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("jugador"):
 		# Solo registrar jugador_cerca si es el jugador LOCAL de este cliente
@@ -93,6 +96,12 @@ func rpc_request_use_potion() -> void:
 	if not NetworkManager.is_server(): return
 	var sender_id = multiplayer.get_remote_sender_id()
 	_usar_pocion_server(sender_id)
+
+@rpc("any_peer", "reliable")
+func rpc_request_position() -> void:
+	if not NetworkManager.is_server(): return
+	var sender_id = multiplayer.get_remote_sender_id()
+	rpc_set_position.rpc_id(sender_id, global_position)
 
 @rpc("authority", "call_local", "reliable")
 func rpc_set_position(pos: Vector2) -> void:

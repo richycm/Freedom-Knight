@@ -24,6 +24,32 @@ func _ready():
 			boton.focus_entered.connect(_oscurecer_boton.bind(boton))
 			boton.focus_exited.connect(_aclarar_boton.bind(boton))
 
+	# Configurar vecinos de foco explícitos para navegación con mando/teclado en cuadrícula 2x2 perfecta
+	if btn_nuevo and btn_continuar and btn_prueba and btn_config:
+		# Top-Left: Modo Historia (btn_nuevo)
+		btn_nuevo.focus_neighbor_right = btn_prueba.get_path()
+		btn_nuevo.focus_neighbor_bottom = btn_continuar.get_path()
+		btn_nuevo.focus_neighbor_left = btn_prueba.get_path() # Wrap horizontal
+		btn_nuevo.focus_neighbor_top = btn_continuar.get_path() # Wrap vertical
+		
+		# Bottom-Left: Continuar Partida (btn_continuar)
+		btn_continuar.focus_neighbor_right = btn_config.get_path()
+		btn_continuar.focus_neighbor_top = btn_nuevo.get_path()
+		btn_continuar.focus_neighbor_left = btn_config.get_path() # Wrap horizontal
+		btn_continuar.focus_neighbor_bottom = btn_nuevo.get_path() # Wrap vertical
+		
+		# Top-Right: Arcade (btn_prueba)
+		btn_prueba.focus_neighbor_left = btn_nuevo.get_path()
+		btn_prueba.focus_neighbor_bottom = btn_config.get_path()
+		btn_prueba.focus_neighbor_right = btn_nuevo.get_path() # Wrap horizontal
+		btn_prueba.focus_neighbor_top = btn_config.get_path() # Wrap vertical
+		
+		# Bottom-Right: Configuración (btn_config)
+		btn_config.focus_neighbor_left = btn_continuar.get_path()
+		btn_config.focus_neighbor_top = btn_prueba.get_path()
+		btn_config.focus_neighbor_right = btn_continuar.get_path() # Wrap horizontal
+		btn_config.focus_neighbor_bottom = btn_prueba.get_path() # Wrap vertical
+
 	# Desactivar salir directo
 	get_tree().quit_on_go_back = false
 
@@ -179,7 +205,15 @@ func _mostrar_menu_configuracion() -> void:
 	btn_guardar.text = "Guardar y Salir"
 	btn_guardar.custom_minimum_size = Vector2(200, 50)
 	btn_guardar.add_theme_stylebox_override("normal", _crear_estilo_boton(Color(0.2, 0.2, 0.2)))
+	btn_guardar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(0.3, 0.3, 0.3)))
+	btn_guardar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(0.1, 0.1, 0.1)))
+	btn_guardar.focus_entered.connect(func(): btn_guardar.modulate = Color(0.75, 0.75, 1.0))
+	btn_guardar.focus_exited.connect(func(): btn_guardar.modulate = Color(1.0, 1.0, 1.0))
 	vbox.add_child(btn_guardar)
+	
+	# Establecer enlaces de navegación explícitos para el mando
+	input.focus_neighbor_bottom = btn_guardar.get_path()
+	btn_guardar.focus_neighbor_top = input.get_path()
 	
 	btn_guardar.pressed.connect(func():
 		var nombre = input.text.strip_edges()
@@ -190,6 +224,7 @@ func _mostrar_menu_configuracion() -> void:
 		mostrando_configuracion = false
 		overlay.queue_free()
 	)
+	input.text_submitted.connect(func(_t): btn_guardar.emit_signal("pressed"))
 	
 	add_child(overlay)
 	input.grab_focus()

@@ -213,9 +213,11 @@ func _explotar() -> void:
 		rotation = 0
 		sprite.play("death")
 		await sprite.animation_finished
+		visible = false
 
 	if is_instance_valid(self):
-		queue_free()
+		if not _is_client_only():
+			queue_free()
 
 func _destruccion_por_tiempo() -> void:
 	if not is_destroyed:

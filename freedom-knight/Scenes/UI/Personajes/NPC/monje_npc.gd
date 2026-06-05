@@ -44,6 +44,8 @@ func _ready():
 	# Si es multijugador, por defecto lo ocultamos hasta recibir su dueño oficial
 	if NetworkManager.is_multiplayer_active():
 		visible = false
+		if not NetworkManager.is_server():
+			rpc_request_setup.rpc_id(1)
 
 func _on_body_entered(body):
 	# ¡Atrapamos al caballero exacto que entró en la zona!
@@ -127,6 +129,12 @@ func ejecutar_curacion():
 			print("[ERROR] El nodo que está enfrente no tiene método 'curar'")
 	else:
 		print("[ERROR] No hay nadie cerca para curar.")
+
+@rpc("any_peer", "reliable")
+func rpc_request_setup() -> void:
+	if not NetworkManager.is_server(): return
+	var sender_id = multiplayer.get_remote_sender_id()
+	rpc_setup_monje.rpc_id(sender_id, global_position, owner_peer_id)
 
 @rpc("authority", "reliable", "call_local")
 func rpc_setup_monje(pos: Vector2, p_owner_id: int) -> void:

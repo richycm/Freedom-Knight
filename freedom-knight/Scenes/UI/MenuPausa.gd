@@ -17,7 +17,14 @@ func _conectar_botones_recursivo(nodo: Node) -> void:
 		if child is TextureButton or child is Button:
 			child.button_down.connect(func(): child.modulate = Color(0.6, 0.6, 0.6, 1.0))
 			child.button_up.connect(func(): child.modulate = Color(1.0, 1.0, 1.0, 1.0))
+			child.focus_entered.connect(func(): child.modulate = Color(0.75, 0.75, 1.0))
+			child.focus_exited.connect(func(): child.modulate = Color(1.0, 1.0, 1.0))
 		_conectar_botones_recursivo(child)
+
+func focus_first_button() -> void:
+	var regresar_node = find_child("Regresar", true)
+	if regresar_node and regresar_node.visible:
+		regresar_node.grab_focus()
 
 # --- ESTILOS MINIMALISTAS ---
 func _crear_estilo_panel() -> StyleBoxFlat:
@@ -121,6 +128,8 @@ func _on_texture_button_pressed_guardar() -> void:
 	btn_cancelar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(0.3, 0.3, 0.3)))
 	btn_cancelar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(0.1, 0.1, 0.1)))
 	hbox.add_child(btn_cancelar)
+	btn_cancelar.focus_entered.connect(func(): btn_cancelar.modulate = Color(0.75, 0.75, 1.0))
+	btn_cancelar.focus_exited.connect(func(): btn_cancelar.modulate = Color(1.0, 1.0, 1.0))
 	
 	var btn_guardar = Button.new()
 	btn_guardar.text = "Guardar"
@@ -130,6 +139,8 @@ func _on_texture_button_pressed_guardar() -> void:
 	btn_guardar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(1, 1, 1, 0.2)))
 	btn_guardar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(1, 1, 1, 0.05)))
 	hbox.add_child(btn_guardar)
+	btn_guardar.focus_entered.connect(func(): btn_guardar.modulate = Color(0.75, 0.75, 1.0))
+	btn_guardar.focus_exited.connect(func(): btn_guardar.modulate = Color(1.0, 1.0, 1.0))
 	
 	var btn_action = func():
 		var nombre_partida = input.text.strip_edges()

@@ -19,6 +19,7 @@ extends CanvasLayer
 
 var escena_menu = preload("res://Scenes/UI/MenuPausa.tscn")
 var menu_pausa  = null
+var _usando_mando_o_teclado_pausa: bool = false
 
 # ─────────────────────────────────────────────────────────────
 #  TEXTURAS DE CORAZONES
@@ -129,6 +130,26 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu"):
 		if SaveManager.escribiendo_texto: return
 		_on_menu_pressed()
+		
+	if menu_pausa and menu_pausa.visible:
+		if event is InputEventMouseMotion or event is InputEventMouseButton or event is InputEventScreenTouch:
+			if _usando_mando_o_teclado_pausa:
+				_usando_mando_o_teclado_pausa = false
+				var focused = get_viewport().gui_get_focus_owner()
+				if focused:
+					focused.release_focus()
+		elif event is InputEventKey or event is InputEventJoypadButton or event is InputEventJoypadMotion:
+			if event is InputEventJoypadMotion and abs(event.axis_value) < 0.2:
+				return
+			if not _usando_mando_o_teclado_pausa:
+				_usando_mando_o_teclado_pausa = true
+				if menu_pausa.has_method("focus_first_button"):
+					menu_pausa.focus_first_button()
+
+		if event.is_action_pressed("interact"):
+			var focused = get_viewport().gui_get_focus_owner()
+			if focused and focused is BaseButton:
+				focused.emit_signal("pressed")
 
 func _procesar_joystick(event: InputEvent) -> void:
 	if get_tree().paused or (menu_pausa and menu_pausa.visible): return
@@ -182,6 +203,9 @@ func _on_resume_pressed() -> void:
 	_toggle_hud(true)
 	if not NetworkManager.is_multiplayer_active():
 		get_tree().paused = false
+	var focused = get_viewport().gui_get_focus_owner()
+	if focused:
+		focused.release_focus()
 
 func _on_menu_pressed() -> void:
 	if menu_pausa.visible:
@@ -190,12 +214,19 @@ func _on_menu_pressed() -> void:
 		if not NetworkManager.is_multiplayer_active():
 			get_tree().paused = false
 		if boton_menu: boton_menu.z_index = 0
+		_usando_mando_o_teclado_pausa = false
+		var focused = get_viewport().gui_get_focus_owner()
+		if focused:
+			focused.release_focus()
 	else:
 		menu_pausa.show()
 		_toggle_hud(false)
 		if not NetworkManager.is_multiplayer_active():
 			get_tree().paused = true
 		if boton_menu: boton_menu.z_index = 100
+		_usando_mando_o_teclado_pausa = true
+		if menu_pausa.has_method("focus_first_button"):
+			menu_pausa.focus_first_button()
 
 func _toggle_hud(visible_state: bool) -> void:
 	if contenedor_corazones: contenedor_corazones.visible = visible_state

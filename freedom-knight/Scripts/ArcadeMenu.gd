@@ -40,6 +40,13 @@ var _discovery_active    : bool             = false
 var _connecting          : bool             = false
 var _transitioning       : bool             = false
 
+var _btn_solo            : Button           = null
+var _btn_mp              : Button           = null
+var _btn_back            : Button           = null
+var _btn_host            : Button           = null
+var _btn_join            : Button           = null
+var _usando_mando_o_teclado: bool           = false
+
 # ─────────────────────────────────────────────────────────────
 #  LIFECYCLE
 # ─────────────────────────────────────────────────────────────
@@ -97,27 +104,30 @@ func _build_ui() -> void:
 	_add_section_label(panel_inner, "SELECCIONA MODO DE JUEGO")
 
 	# Solitario button
-	var btn_solo = _make_mode_button(
+	_btn_solo = _make_mode_button(
 		"⚔  SOLITARIO",
 		"Juega solo contra oleadas de enemigos",
 		COL_ACCENT
 	)
-	btn_solo.pressed.connect(_on_solo_pressed)
-	panel_inner.add_child(btn_solo)
+	_btn_solo.pressed.connect(_on_solo_pressed)
+	panel_inner.add_child(_btn_solo)
+	_connect_focus_feedback(_btn_solo)
 
 	# Multijugador button
-	var btn_mp = _make_mode_button(
+	_btn_mp = _make_mode_button(
 		"🌐  MULTIJUGADOR",
 		"Juega en LAN con amigos en la misma red",
 		COL_ACCENT2
 	)
-	btn_mp.pressed.connect(_on_multiplayer_pressed)
-	panel_inner.add_child(btn_mp)
+	_btn_mp.pressed.connect(_on_multiplayer_pressed)
+	panel_inner.add_child(_btn_mp)
+	_connect_focus_feedback(_btn_mp)
 
 	# Back button
-	var btn_back = _make_small_button("← Volver al Menú")
-	btn_back.pressed.connect(_on_back_pressed)
-	panel_inner.add_child(btn_back)
+	_btn_back = _make_small_button("← Volver al Menú")
+	_btn_back.pressed.connect(_on_back_pressed)
+	panel_inner.add_child(_btn_back)
+	_connect_focus_feedback(_btn_back)
 
 	# Multiplayer sub-panel (hidden initially)
 	_panel_mp = _build_multiplayer_panel()
@@ -281,15 +291,17 @@ func _build_multiplayer_panel() -> Control:
 	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_child(hbox)
 
-	var btn_host = _make_action_btn("🛡  SER HOST", COL_ACCENT)
-	btn_host.pressed.connect(_on_host_pressed)
-	btn_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(btn_host)
+	_btn_host = _make_action_btn("🛡  SER HOST", COL_ACCENT)
+	_btn_host.pressed.connect(_on_host_pressed)
+	_btn_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(_btn_host)
+	_connect_focus_feedback(_btn_host)
 
-	var btn_join = _make_action_btn("🔍  UNIRSE", COL_ACCENT2)
-	btn_join.pressed.connect(_on_join_pressed)
-	btn_join.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(btn_join)
+	_btn_join = _make_action_btn("🔍  UNIRSE", COL_ACCENT2)
+	_btn_join.pressed.connect(_on_join_pressed)
+	_btn_join.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(_btn_join)
+	_connect_focus_feedback(_btn_join)
 
 	# Status label
 	_status_label = Label.new()
@@ -318,6 +330,7 @@ func _build_multiplayer_panel() -> Control:
 	_start_btn.pressed.connect(_on_start_game_pressed)
 	_start_btn.visible = false
 	vbox.add_child(_start_btn)
+	_connect_focus_feedback(_start_btn)
 
 	# Gamertag info
 	var gt_label = Label.new()
@@ -426,6 +439,7 @@ func _make_host_entry(ip: String, info: Dictionary) -> Control:
 		btn.add_theme_font_size_override("font_size", 13)
 		btn.pressed.connect(_on_connect_to_host.bind(ip))
 		hbox.add_child(btn)
+		_connect_focus_feedback(btn)
 	else:
 		var lbl = Label.new()
 		lbl.text = "Lleno" if not is_lobby else ""
@@ -550,3 +564,51 @@ func _transition_to(scene_path: String) -> void:
 	var t = create_tween()
 	t.tween_property(self, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
 	t.tween_callback(func(): get_tree().change_scene_to_file(scene_path))
+
+func _connect_focus_feedback(btn: Button) -> void:
+	if not btn: return
+	btn.focus_entered.connect(func():
+		var t = create_tween()
+		t.tween_property(btn, "modulate", Color(0.75, 0.75, 1.0), 0.1)
+	)
+	btn.focus_exited.connect(func():
+		var t = create_tween()
+		t.tween_property(btn, "modulate", Color(1.0, 1.0, 1.0), 0.1)
+	)
+
+func _dar_foco_inicial() -> void:
+	var focused = get_viewport().gui_get_focus_owner()
+	if focused and focused.visible and focused.is_inside_tree():
+		return
+		
+	if _panel_mp and _panel_mp.visible:
+		if _start_btn and _start_btn.visible:
+			_start_btn.grab_focus()
+		elif _btn_host:
+			_btn_host.grab_focus()
+	else:
+		if _btn_solo:
+			_btn_solo.grab_focus()
+
+func _input(event: InputEvent) -> void:
+	if _transitioning: return
+	
+	if event is InputEventMouseMotion or event is InputEventMouseButton or event is InputEventScreenTouch:
+		if _usando_mando_o_teclado:
+			_usando_mando_o_teclado = false
+			var focused = get_viewport().gui_get_focus_owner()
+			if focused:
+				focused.release_focus()
+				
+	elif event is InputEventKey or event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		if event is InputEventJoypadMotion and abs(event.axis_value) < 0.2:
+			return
+			
+		if not _usando_mando_o_teclado:
+			_usando_mando_o_teclado = true
+			_dar_foco_inicial()
+
+	if event.is_action_pressed("interact"):
+		var focused = get_viewport().gui_get_focus_owner()
+		if focused and focused is BaseButton:
+			focused.emit_signal("pressed")
