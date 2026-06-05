@@ -860,7 +860,7 @@ func _cambiar_mapa(config: Dictionary) -> void:
 		add_child(jefe, true)
 		jefe.global_position = _pos_aleatoria_lejos_del_player()
 		if jefe.has_signal("murio"):
-			jefe.murio.connect(func(_pos_jefe): _cargar_siguiente_escena_real(config))
+			jefe.murio.connect(func(_pos_jefe): _cargar_siguiente_escena_real.call_deferred(config))
 		print("[JEFE] ¡El Lord Caballero de la Sombra ha aparecido!")
 
 func _spawnear_jefe_dragon() -> void:
@@ -903,7 +903,7 @@ func _spawnear_jefe_dragon() -> void:
 		add_child(dragon, true)
 		dragon.global_position = _pos_aleatoria_lejos_del_player()
 		if dragon.has_signal("murio"):
-			dragon.murio.connect(_on_dragon_murio)
+			dragon.murio.connect(func(pos): _on_dragon_murio.call_deferred(pos))
 		print("[JEFE] ¡El Dragón de Fuego ha aparecido!")
 
 func _on_dragon_murio(_posicion) -> void:

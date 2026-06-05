@@ -259,7 +259,7 @@ func _on_rango_ataque_body_entered(body: Node2D) -> void:
 	if body.is_in_group("jugador") or body.is_in_group("Jugador"):
 		player = body
 		if not is_attacking and not is_dead and not is_spawning and attack_timer <= 0:
-			_atacar()
+			_atacar.call_deferred()
 
 func _process(delta: float) -> void:
 	if _is_client_only():

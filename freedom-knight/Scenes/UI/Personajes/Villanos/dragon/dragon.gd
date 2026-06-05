@@ -29,7 +29,9 @@ signal murio(posicion)
 func _ready() -> void:
 	add_to_group("jefe")
 	add_to_group("enemigos")
-	salud_actual = vida_maxima
+	
+	# Ajustar estadísticas dinámicamente según la fuerza del jugador
+	_escalar_stats_jefe()
 	
 	# Configurar colisiones para que sea un enemigo de Capa 3 y choque con el mapa (Capa 1)
 	set_collision_layer_value(1, false)
@@ -44,6 +46,41 @@ func _ready() -> void:
 	
 	# Crear barra de vida flotante sobre la cabeza del dragón
 	_crear_barra_vida()
+
+func _escalar_stats_jefe() -> void:
+	# Obtener stats del caballero
+	var player_dmg = 2
+	var player_lvl = 1
+	var num_jugadores = 1
+	
+	var jugadores = PlayerRegistry.get_all_players()
+	if jugadores.size() > 0:
+		num_jugadores = jugadores.size()
+		for p in jugadores:
+			if is_instance_valid(p):
+				if p.get("nivel") > player_lvl:
+					player_lvl = p.get("nivel")
+				if p.get("poder_ataque") > player_dmg:
+					player_dmg = p.get("poder_ataque")
+	else:
+		var local_player = PlayerRegistry.get_local_player()
+		if is_instance_valid(local_player):
+			player_lvl = local_player.get("nivel")
+			player_dmg = local_player.get("poder_ataque")
+			
+	# Multiplicador por cantidad de jugadores en multijugador
+	var mult_jugadores = 0.6 + 0.4 * num_jugadores
+	
+	# Escalar vida del Dragón: aprox 50 golpes del caballero. Rango: de 100 a 1500 HP.
+	vida_maxima = clampf(player_dmg * 50.0 * mult_jugadores, 100.0, 1500.0)
+	salud_actual = vida_maxima
+	
+	# Escalar daño del Dragón: defensa del caballero (nivel / 3) + 4 puntos (2 corazones enteros de daño real constante)
+	# Mínimo de 5 para que siga siendo un combate de jefe final.
+	var defensa_estimada = floor(player_lvl / 3.0)
+	poder_ataque = clampi(int(defensa_estimada + 4), 5, 30)
+	
+	print("[DRAGÓN ESCALADO] Jugadores: %d | DMG Caballero: %d | LVL Caballero: %d | Vida: %d | Poder Ataque: %d" % [num_jugadores, player_dmg, player_lvl, vida_maxima, poder_ataque])
 
 	# En modo cliente: deshabilitar IA
 	if _is_client_only():
@@ -171,7 +208,7 @@ func _physics_process(delta: float) -> void:
 	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
 		var anim = animated_sprite.animation if animated_sprite else "vuelo"
 		var flip = animated_sprite.flip_h if animated_sprite else false
-		_rpc_sync_enemy.rpc(global_position, anim, flip, salud_actual, is_dead)
+		_rpc_sync_enemy.rpc(global_position, anim, flip, salud_actual, is_dead, vida_maxima)
 	
 	# Voltear sprite y área de ataque según dirección
 	if direccion.x < 0:
@@ -266,7 +303,7 @@ func _morir() -> void:
 		PlayerRegistry.crear_explosion(global_position, 3.5) # Explosión más grande!
 		
 	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
-		_rpc_sync_enemy.rpc(global_position, "muerte", false, 0, true)
+		_rpc_sync_enemy.rpc(global_position, "muerte", false, 0, true, vida_maxima)
 	
 	if animated_sprite.sprite_frames.has_animation("muerte"):
 		animated_sprite.play("muerte")
@@ -315,7 +352,7 @@ func _morir_client() -> void:
 	queue_free()
 
 @rpc("authority", "unreliable_ordered")
-func _rpc_sync_enemy(pos: Vector2, anim: String, flip: bool, salud: float, dead: bool) -> void:
+func _rpc_sync_enemy(pos: Vector2, anim: String, flip: bool, salud: float, dead: bool, v_max: float) -> void:
 	if NetworkManager.is_server(): return
 	net_position = pos
 	net_anim = anim
@@ -324,8 +361,11 @@ func _rpc_sync_enemy(pos: Vector2, anim: String, flip: bool, salud: float, dead:
 	if salud < salud_actual:
 		_efecto_dano()
 	salud_actual = salud
+	vida_maxima = v_max
 	
 	if is_instance_valid(barra_vida):
+		if barra_vida.max_value != v_max:
+			barra_vida.max_value = v_max
 		barra_vida.value = salud_actual
 		
 	if dead and not is_dead:

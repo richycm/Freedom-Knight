@@ -58,6 +58,9 @@ func _physics_process(delta: float) -> void:
 
 # Esta función se activa automáticamente cuando un CaballeroMalo muere
 func _on_enemigo_murio(posicion_muerte: Vector2) -> void:
+	_do_on_enemigo_murio.call_deferred(posicion_muerte)
+
+func _do_on_enemigo_murio(posicion_muerte: Vector2) -> void:
 	enemigos_muertos += 1
 	print("Enemigo muerto. Total derrotados: ", enemigos_muertos)
 	
