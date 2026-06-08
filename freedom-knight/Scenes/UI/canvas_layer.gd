@@ -126,9 +126,9 @@ func _actualizar_feedback_boton(boton: TouchScreenButton, accion: String) -> voi
 #  INPUT
 # ─────────────────────────────────────────────────────────────
 func _input(event: InputEvent) -> void:
+	if SaveManager.escribiendo_texto: return
 	_procesar_joystick(event)
 	if event.is_action_pressed("menu"):
-		if SaveManager.escribiendo_texto: return
 		_on_menu_pressed()
 		
 	if menu_pausa and menu_pausa.visible:

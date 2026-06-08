@@ -161,6 +161,31 @@ func cargar_y_posicionar_datos(datos: Dictionary) -> void:
 			escenario.arqueros_derrotados = datos["arqueros_derrotados"]
 		if datos.has("lanceros_derrotados") and "lanceros_derrotados" in escenario:
 			escenario.lanceros_derrotados = datos["lanceros_derrotados"]
+		if datos.has("vikingos_derrotados") and "vikingos_derrotados" in escenario:
+			escenario.vikingos_derrotados = datos["vikingos_derrotados"]
+		if datos.has("tiempo_partida") and "tiempo_partida" in escenario:
+			escenario.tiempo_partida = datos["tiempo_partida"]
+		if datos.has("dragon_spawned") and "dragon_spawned" in escenario:
+			escenario.dragon_spawned = datos["dragon_spawned"]
+
+		# Cargar el mapa correcto si el índice es mayor a 0
+		if datos.has("indice_mapa_actual") and "indice_mapa_actual" in escenario:
+			var idx = datos["indice_mapa_actual"]
+			escenario.indice_mapa_actual = idx
+			if idx > 0 and idx <= escenario.progresion_mapas.size():
+				var config = escenario.progresion_mapas[idx - 1]
+				var tilemap_viejo = escenario.get_node_or_null("TileMapLayer")
+				if tilemap_viejo:
+					tilemap_viejo.queue_free()
+				var nuevo_mapa = config["escena"].instantiate()
+				nuevo_mapa.name = "TileMapLayer"
+				escenario.add_child(nuevo_mapa)
+				escenario.move_child(nuevo_mapa, 0)
+				# Esperamos un frame para que se inicialice la zona de spawn
+				await escenario.get_tree().process_frame
+				if escenario.has_method("_calcular_limites"):
+					escenario._calcular_limites()
+
 		if datos.has("oleada_actual") and "oleada_actual" in escenario:
 			# Restamos 1 porque _subir_dificultad() incrementa la oleada en 1
 			escenario.oleada_actual = datos["oleada_actual"] - 1

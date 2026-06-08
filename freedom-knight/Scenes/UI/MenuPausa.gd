@@ -181,8 +181,16 @@ func _on_texture_button_pressed_guardar() -> void:
 				datos_a_guardar["arqueros_derrotados"] = escenario.arqueros_derrotados
 			if "lanceros_derrotados" in escenario:
 				datos_a_guardar["lanceros_derrotados"] = escenario.lanceros_derrotados
+			if "vikingos_derrotados" in escenario:
+				datos_a_guardar["vikingos_derrotados"] = escenario.vikingos_derrotados
 			if "oleada_actual" in escenario:
 				datos_a_guardar["oleada_actual"] = escenario.oleada_actual
+			if "indice_mapa_actual" in escenario:
+				datos_a_guardar["indice_mapa_actual"] = escenario.indice_mapa_actual
+			if "tiempo_partida" in escenario:
+				datos_a_guardar["tiempo_partida"] = escenario.tiempo_partida
+			if "dragon_spawned" in escenario:
+				datos_a_guardar["dragon_spawned"] = escenario.dragon_spawned
 		
 		SaveManager.guardar_datos_con_nombre(nombre_partida, datos_a_guardar)
 		print("Partida guardada con éxito: " + nombre_partida)
