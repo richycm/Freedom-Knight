@@ -513,7 +513,15 @@ func _spawnear_un_vikingo() -> void:
 
 func _aplicar_stats_vikingo(node: Node) -> void:
 	# El vikingo multiplica los stats del escenario × su factor de mejora inherente
-	if "poder_ataque" in node: node.poder_ataque = max(2, int(fuerza_actual * 1.5))
+	if "poder_ataque" in node:
+		var dmg = int(fuerza_actual * 1.5)
+		if SaveManager.dificultad_juego == 0:
+			dmg = max(1, int(dmg * 0.5)) # Más débil en fácil
+		elif SaveManager.dificultad_juego == 2:
+			dmg = max(2, dmg + 1) # Aún más fuerte en difícil
+		else:
+			dmg = max(2, dmg)
+		node.poder_ataque = dmg
 	if "vida_maxima"  in node:
 		node.vida_maxima  = max(22, int(vida_actual * 2.2))
 		if "salud_actual" in node:
@@ -525,7 +533,14 @@ func _aplicar_stats_vikingo(node: Node) -> void:
 func _aplicar_stats_lancero(node: Node) -> void:
 	# Nerfear estadísticas del lancero para que no sea injusto con su gran rango de ataque
 	if "poder_ataque" in node:
-		node.poder_ataque = max(1, int(fuerza_actual * 0.65))
+		var dmg = int(fuerza_actual * 0.65)
+		if SaveManager.dificultad_juego == 0:
+			dmg = 1 # Fijo a medio corazón inicialmente
+		elif SaveManager.dificultad_juego == 2:
+			dmg = max(2, dmg + 1) # Al menos un corazón completo en difícil
+		else:
+			dmg = max(1, dmg)
+		node.poder_ataque = dmg
 	if "vida_maxima" in node:
 		node.vida_maxima = max(6, int(vida_actual * 0.80))
 		if "salud_actual" in node:
@@ -556,7 +571,13 @@ func _spawnear_un_lancero() -> void:
 		nuevo.murio.connect(_on_lancero_murio)
 
 func _aplicar_stats_enemigo(node: Node, speed_mult: float = 1.0) -> void:
-	if "poder_ataque" in node: node.poder_ataque = fuerza_actual
+	if "poder_ataque" in node:
+		var dmg = fuerza_actual
+		if SaveManager.dificultad_juego == 0:
+			dmg = max(1, dmg - 1) # Asegurar medio corazón en fácil
+		elif SaveManager.dificultad_juego == 2:
+			dmg = max(2, dmg + 1) # Asegurar un corazón completo en difícil
+		node.poder_ataque = dmg
 	if "vida_maxima"  in node:
 		node.vida_maxima = vida_actual
 		if "salud_actual" in node:
@@ -631,13 +652,33 @@ func _subir_dificultad() -> void:
 	# Factor de tiempo de supervivencia (cada 120 segundos aumenta estadísticas, antes 90s)
 	var tiempo_factor = floor(tiempo_partida / 120.0)
 
+	# Modificador de dificultad elegida
+	var diff_idx = SaveManager.dificultad_juego
+	var dmg_mod = 0
+	var vida_mod = 1.0
+	
+	if diff_idx == 0: # Facil
+		dmg_mod = -1
+		vida_mod = 0.7
+	elif diff_idx == 2: # Dificil
+		dmg_mod = 1
+		vida_mod = 1.4
+
 	# Recalculo de estadísticas de dificultad más progresivo y balanceado
-	fuerza_actual    = int((1 + floor(muertes_totales / 20.0) + (tiempo_factor * 0.4)) * map_multiplier)
-	vida_actual      = int((3 + floor(muertes_totales / 12.0) + (tiempo_factor * 1.0)) * map_multiplier)
+	fuerza_actual    = max(1, int(((1 + floor(muertes_totales / 20.0) + (tiempo_factor * 0.4)) * map_multiplier) + dmg_mod))
+	vida_actual      = max(2, int(((3 + floor(muertes_totales / 12.0) + (tiempo_factor * 1.0)) * map_multiplier) * vida_mod))
 	
 	# Límites máximos (Caps) para evitar que los enemigos hagan one-shot al jugador
 	var max_fuerza = 4 if is_mapa_2 else 3
 	var max_vida = 11 if is_mapa_2 else 8
+	
+	if diff_idx == 0:
+		max_fuerza = max(1, max_fuerza - 1)
+		max_vida = int(max_vida * 0.7)
+	elif diff_idx == 2:
+		max_fuerza += 1
+		max_vida = int(max_vida * 1.4)
+		
 	fuerza_actual = min(fuerza_actual, max_fuerza)
 	vida_actual = min(vida_actual, max_vida)
 
@@ -651,6 +692,11 @@ func _subir_dificultad() -> void:
 		var reduccion = 0.4 - clampf(float(muertes_totales - umbral_50) / 200.0, 0.0, 0.35)
 		cap_base_caballero = max(1, int(cap_base_caballero * reduccion))
 	max_caballeros_simultaneos = min(5 + alive_players_count, cap_base_caballero)
+	
+	if diff_idx == 0:
+		max_caballeros_simultaneos = max(1, max_caballeros_simultaneos - 1)
+	elif diff_idx == 2:
+		max_caballeros_simultaneos += 1
 
 	# ── Arqueros ─────────────────────────────────────────────────
 	if muertes_totales >= umbral_15:

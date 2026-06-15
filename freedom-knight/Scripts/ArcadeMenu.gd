@@ -40,6 +40,19 @@ var _discovery_active    : bool             = false
 var _connecting          : bool             = false
 var _transitioning       : bool             = false
 
+var _panel_diff          : Control          = null
+var _panel_main          : Control          = null
+var _diff_knight_tex     : TextureRect      = null
+var _btn_facil           : Button           = null
+var _btn_medio           : Button           = null
+var _btn_dificil         : Button           = null
+var _btn_start_solo      : Button           = null
+var _selected_diff       : int              = 1
+
+var _tex_facil = preload("res://Imagenes/Dificultad facil.png")
+var _tex_medio = preload("res://Imagenes/Dificultad medio.png")
+var _tex_dificil = preload("res://Imagenes/Dificultad dificil.png")
+
 var _btn_solo            : Button           = null
 var _btn_mp              : Button           = null
 var _btn_back            : Button           = null
@@ -95,11 +108,11 @@ func _build_ui() -> void:
 	vbox.add_child(panels_hbox)
 
 	# Main panel
-	var main_panel = _make_glass_panel(Vector2(450, 0))
-	panels_hbox.add_child(main_panel)
+	_panel_main = _make_glass_panel(Vector2(450, 0))
+	panels_hbox.add_child(_panel_main)
 	var panel_inner = VBoxContainer.new()
 	panel_inner.add_theme_constant_override("separation", 20)
-	main_panel.add_child(panel_inner)
+	_panel_main.add_child(panel_inner)
 
 	_add_section_label(panel_inner, "SELECCIONA MODO DE JUEGO")
 
@@ -133,6 +146,11 @@ func _build_ui() -> void:
 	_panel_mp = _build_multiplayer_panel()
 	_panel_mp.visible = false
 	panels_hbox.add_child(_panel_mp)
+	
+	# Difficulty sub-panel (hidden initially)
+	_panel_diff = _build_difficulty_panel()
+	_panel_diff.visible = false
+	add_child(_panel_diff)
 
 	# Connect network signals
 	NetworkManager.connection_succeeded.connect(_on_connection_succeeded)
@@ -359,6 +377,67 @@ func _make_action_btn(text: String, accent: Color) -> Button:
 	return btn
 
 # ─────────────────────────────────────────────────────────────
+#  DIFFICULTY PANEL (FULL SCREEN IMAGE)
+# ─────────────────────────────────────────────────────────────
+func _build_difficulty_panel() -> Control:
+	var panel = Control.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	_diff_knight_tex = TextureRect.new()
+	_diff_knight_tex.texture = _tex_medio
+	_diff_knight_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_diff_knight_tex.stretch_mode = TextureRect.STRETCH_SCALE
+	_diff_knight_tex.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.add_child(_diff_knight_tex)
+
+	# Basado en las proporciones de la imagen 16:9
+	_btn_facil = _make_inv_btn(0.35, 0.65, 0.38, 0.52)
+	_btn_facil.pressed.connect(_on_diff_facil_pressed)
+
+	_btn_medio = _make_inv_btn(0.35, 0.65, 0.54, 0.68)
+	_btn_medio.pressed.connect(_on_diff_medio_pressed)
+
+	_btn_dificil = _make_inv_btn(0.35, 0.65, 0.70, 0.84)
+	_btn_dificil.pressed.connect(_on_diff_dificil_pressed)
+
+	_btn_start_solo = _make_inv_btn(0.35, 0.49, 0.86, 0.94)
+	_btn_start_solo.pressed.connect(_on_start_solo_pressed)
+
+	var btn_diff_back = _make_inv_btn(0.51, 0.65, 0.86, 0.94)
+	btn_diff_back.pressed.connect(_on_diff_back_pressed)
+
+	return panel
+
+func _make_inv_btn(left: float, right: float, top: float, bottom: float) -> Button:
+	var b = Button.new()
+	b.flat = true
+	# Para que no tenga fondo ni bordes por defecto, solo el outline de focus
+	b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	b.anchor_left = left
+	b.anchor_right = right
+	b.anchor_top = top
+	b.anchor_bottom = bottom
+	b.offset_left = 0
+	b.offset_right = 0
+	b.offset_top = 0
+	b.offset_bottom = 0
+	
+	# Cursor de click
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_diff_knight_tex.add_child(b)
+	return b
+
+func _actualizar_imagen_dificultad(idx: int) -> void:
+	if not _diff_knight_tex: return
+	_selected_diff = idx
+	if idx == 0:
+		_diff_knight_tex.texture = _tex_facil
+	elif idx == 1:
+		_diff_knight_tex.texture = _tex_medio
+	elif idx == 2:
+		_diff_knight_tex.texture = _tex_dificil
+
+# ─────────────────────────────────────────────────────────────
 #  HOST LIST ENTRIES
 # ─────────────────────────────────────────────────────────────
 func _rebuild_host_list() -> void:
@@ -453,6 +532,46 @@ func _make_host_entry(ip: String, info: Dictionary) -> Control:
 # ─────────────────────────────────────────────────────────────
 func _on_solo_pressed() -> void:
 	if _transitioning: return
+	if _panel_mp and _panel_mp.visible:
+		_panel_mp.visible = false
+		
+	if _panel_main:
+		_panel_main.visible = false
+		
+	_panel_diff.visible = false
+	_panel_diff.modulate.a = 0.0
+	_panel_diff.visible = true
+	var t = create_tween()
+	t.tween_property(_panel_diff, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_SINE)
+	_actualizar_imagen_dificultad(1)
+
+func _on_diff_back_pressed() -> void:
+	if _transitioning: return
+	_panel_diff.visible = false
+	if _panel_main:
+		_panel_main.modulate.a = 0.0
+		_panel_main.visible = true
+		var t = create_tween()
+		t.tween_property(_panel_main, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_SINE)
+
+func _on_diff_facil_pressed() -> void:
+	if _transitioning: return
+	_actualizar_imagen_dificultad(0)
+
+func _on_diff_medio_pressed() -> void:
+	if _transitioning: return
+	_actualizar_imagen_dificultad(1)
+
+func _on_diff_dificil_pressed() -> void:
+	if _transitioning: return
+	_actualizar_imagen_dificultad(2)
+
+func _on_start_solo_pressed() -> void:
+	if _transitioning: return
+	SaveManager.dificultad_juego = _selected_diff
+	_iniciar_partida_solitario()
+
+func _iniciar_partida_solitario() -> void:
 	NetworkManager.cleanup()
 	PlayerRegistry.clear()
 	PlayerRegistry.set_local_peer_id(1)
@@ -460,6 +579,9 @@ func _on_solo_pressed() -> void:
 
 func _on_multiplayer_pressed() -> void:
 	if _transitioning: return
+	if _panel_diff and _panel_diff.visible:
+		_panel_diff.visible = false
+
 	if _panel_mp.visible:
 		_panel_mp.visible = false
 		return

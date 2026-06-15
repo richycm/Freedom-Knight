@@ -4,6 +4,7 @@ const SAVE_DIR = "user://saves/"
 var nombre_jugador: String = ""
 var partida_actual: String = ""
 var escribiendo_texto: bool = false
+var dificultad_juego: int = 1 # 0 = Facil, 1 = Medio, 2 = Dificil
 
 func _ready():
 	var dir = DirAccess.open("user://")
