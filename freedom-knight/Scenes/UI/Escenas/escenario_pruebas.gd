@@ -68,6 +68,7 @@ var timer_arqueros : Timer
 var timer_pociones : Timer
 var jefe_activo    : bool = false
 var dragon_spawned : bool = false
+var es_boss_rush   : bool = false
 
 const SYNC_RATE_REMOTE: float = 0.05  # 20Hz para jugadores remotos
 
@@ -100,6 +101,7 @@ var _remote_players_container: Node2D = null
 #  READY
 # ─────────────────────────────────────────────────────────────
 func _ready() -> void:
+	es_boss_rush = (SaveManager.modo_juego == "BossRush")
 	y_sort_enabled = true
 	_calcular_limites()
 
@@ -119,25 +121,32 @@ func _ready() -> void:
 	# Solo el HOST corre la lógica del juego
 	if _should_run_host_logic():
 		_iniciar_timer_pociones()
-		_iniciar_timer_arqueros()
+		
+		if es_boss_rush:
+			for n in get_tree().get_nodes_in_group("enemigos"):
+				n.queue_free()
+			await get_tree().create_timer(1.5).timeout
+			_mantener_jefes.call_deferred()
+		else:
+			_iniciar_timer_arqueros()
 
-		if player and player.has_signal("nivel_subido"):
-			player.nivel_subido.connect(_spawnear_curandero)
+			if player and player.has_signal("nivel_subido"):
+				player.nivel_subido.connect(_spawnear_curandero)
 
-		var timer_gata = Timer.new()
-		timer_gata.wait_time = 60.0
-		timer_gata.one_shot  = false
-		timer_gata.timeout.connect(_spawnear_gata)
-		add_child(timer_gata)
-		timer_gata.start()
+			var timer_gata = Timer.new()
+			timer_gata.wait_time = 60.0
+			timer_gata.one_shot  = false
+			timer_gata.timeout.connect(_spawnear_gata)
+			add_child(timer_gata)
+			timer_gata.start()
 
-		# Limpiar enemigos previos
-		for n in get_tree().get_nodes_in_group("enemigos"):
-			n.queue_free()
+			# Limpiar enemigos previos
+			for n in get_tree().get_nodes_in_group("enemigos"):
+				n.queue_free()
 
-		await get_tree().create_timer(1.5).timeout
-		_mantener_caballeros()
-		_spawnear_gatas_iniciales()
+			await get_tree().create_timer(1.5).timeout
+			_mantener_caballeros()
+			_spawnear_gatas_iniciales()
 
 func _should_run_host_logic() -> bool:
 	# Solitario: siempre corre lógica
@@ -447,7 +456,10 @@ func _crear_ui_contador() -> void:
 	label_contador_muertes.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 	label_contador_muertes.add_theme_color_override("font_outline_color", Color.BLACK)
 	label_contador_muertes.add_theme_constant_override("outline_size", 4)
-	label_contador_muertes.text = "Enemigos Derrotados: 0\nNivel de Dificultad: 1"
+	if es_boss_rush:
+		label_contador_muertes.text = "Jefes Derrotados: 0\nNivel de Dificultad: 1"
+	else:
+		label_contador_muertes.text = "Enemigos Derrotados: 0\nNivel de Dificultad: 1"
 	label_contador_muertes.position = Vector2(20, 150)
 	canvas.add_child(label_contador_muertes)
 
@@ -463,7 +475,7 @@ func _on_enemigo_murio(_pos) -> void:
 	_mantener_caballeros()
 
 func _mantener_caballeros() -> void:
-	if jefe_activo: return
+	if jefe_activo or es_boss_rush: return
 	while caballeros_vivos < max_caballeros_simultaneos and PlayerRegistry.any_player_alive():
 		_spawnear_un_enemigo()
 		await get_tree().create_timer(0.5).timeout
@@ -492,7 +504,7 @@ func _on_vikingo_murio(_pos) -> void:
 	_mantener_vikingos()
 
 func _mantener_vikingos() -> void:
-	if jefe_activo: return
+	if jefe_activo or es_boss_rush: return
 	while vikingos_vivos < max_vikingos_simultaneos and PlayerRegistry.any_player_alive():
 		_spawnear_un_vikingo()
 		await get_tree().create_timer(0.8).timeout
@@ -552,7 +564,7 @@ func _aplicar_stats_lancero(node: Node) -> void:
 #  LANCERS — Solo host
 # ─────────────────────────────────────────────────────────────
 func _mantener_lanceros() -> void:
-	if jefe_activo: return
+	if jefe_activo or es_boss_rush: return
 	while lanceros_vivos < max_lanceros_simultaneos and PlayerRegistry.any_player_alive():
 		_spawnear_un_lancero()
 		await get_tree().create_timer(0.5).timeout
@@ -684,6 +696,13 @@ func _subir_dificultad() -> void:
 
 	velocidad_actual = min(velocidad_actual + 0.1, 100.0)
 
+	if es_boss_rush:
+		if is_instance_valid(label_contador_muertes):
+			label_contador_muertes.text = "Jefes Derrotados: %d\nNivel de Dificultad: %d" % [muertes_totales, oleada_actual]
+			if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+				rpc_sync_difficulty.rpc(muertes_totales, oleada_actual)
+		return
+
 	# ── Caballeros Malos ──────────────────────────────────────────
 	# Base normal hasta el umbral adaptativo; luego se vuelven más raros (cap reducido)
 	var cap_base_caballero = (2 + int(floor(muertes_totales / 12.0))) * alive_players_count
@@ -743,9 +762,55 @@ func _subir_dificultad() -> void:
 			indice_mapa_actual += 1
 			_cambiar_mapa.call_deferred(siguiente)
 
-	if muertes_totales >= 75 and not dragon_spawned:
+	if muertes_totales >= 75 and not dragon_spawned and not es_boss_rush:
 		dragon_spawned = true
 		_spawnear_jefe_dragon.call_deferred()
+
+func _mantener_jefes() -> void:
+	if jefe_activo or not PlayerRegistry.any_player_alive(): return
+	jefe_activo = true
+
+	var es_dragon = (randi() % 2 == 0)
+	var canvas = CanvasLayer.new()
+	canvas.layer = 99
+	add_child(canvas)
+	var flash = ColorRect.new()
+	flash.color = Color(1.0, 0.2, 0.2, 0.0) if es_dragon else Color(1.0, 1.0, 1.0, 0.0)
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(flash)
+
+	var tween = create_tween()
+	tween.tween_property(flash, "color:a", 0.7, 0.12)
+	tween.tween_property(flash, "color:a", 0.0, 0.30)
+	tween.tween_callback(canvas.queue_free)
+
+	await get_tree().create_timer(2.0).timeout
+
+	if es_dragon and dragon_scene:
+		var dragon = dragon_scene.instantiate()
+		dragon.name = "Dragon_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
+		add_child(dragon, true)
+		dragon.global_position = _pos_aleatoria_lejos_del_player()
+		if dragon.has_signal("murio"):
+			dragon.murio.connect(_on_jefe_boss_rush_murio)
+		print("[BOSS RUSH] Apareció el Dragón")
+	elif jefe_scene:
+		var jefe = jefe_scene.instantiate()
+		jefe.name = "Jefe_" + str(Time.get_ticks_msec()) + "_" + str(randi() % 1000)
+		add_child(jefe, true)
+		jefe.global_position = _pos_aleatoria_lejos_del_player()
+		if jefe.has_signal("murio"):
+			jefe.murio.connect(_on_jefe_boss_rush_murio)
+		print("[BOSS RUSH] Apareció el Lord Caballero")
+
+func _on_jefe_boss_rush_murio(_pos) -> void:
+	enemigos_derrotados += 1
+	jefe_activo = false
+	_subir_dificultad()
+	get_tree().call_group("mascotas", "registrar_muerte_enemigo")
+	await get_tree().create_timer(3.0).timeout
+	_mantener_jefes.call_deferred()
 
 @rpc("authority", "reliable", "call_remote")
 func rpc_sync_difficulty(muertes: int, oleada: int) -> void:

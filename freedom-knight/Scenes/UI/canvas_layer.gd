@@ -79,6 +79,10 @@ func _ready() -> void:
 	menu_pausa.process_mode = Node.PROCESS_MODE_ALWAYS
 	menu_pausa.hide()
 
+	if SaveManager.dificultad_juego == 2:
+		if boton_guard: boton_guard.hide()
+		if guard_timer_label: guard_timer_label.hide()
+
 # ─────────────────────────────────────────────────────────────
 #  PROCESS
 # ─────────────────────────────────────────────────────────────
@@ -231,10 +235,10 @@ func _on_menu_pressed() -> void:
 func _toggle_hud(visible_state: bool) -> void:
 	if contenedor_corazones: contenedor_corazones.visible = visible_state
 	if boton_attack:         boton_attack.visible  = visible_state
-	if boton_guard:          boton_guard.visible   = visible_state
+	if boton_guard:          boton_guard.visible   = visible_state and SaveManager.dificultad_juego != 2
 	if boton_interact:       boton_interact.visible = visible_state
 	if joystick_node:        joystick_node.visible = visible_state
-	if guard_timer_label:    guard_timer_label.visible = visible_state
+	if guard_timer_label:    guard_timer_label.visible = visible_state and SaveManager.dificultad_juego != 2
 	if boton_menu:           boton_menu.visible    = visible_state
 
 	# Ocultar también el contador de estadísticas del escenario si existe

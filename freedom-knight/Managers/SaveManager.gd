@@ -5,6 +5,7 @@ var nombre_jugador: String = ""
 var partida_actual: String = ""
 var escribiendo_texto: bool = false
 var dificultad_juego: int = 1 # 0 = Facil, 1 = Medio, 2 = Dificil
+var modo_juego: String = "Arcade"
 
 func _ready():
 	var dir = DirAccess.open("user://")

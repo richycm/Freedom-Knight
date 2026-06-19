@@ -257,6 +257,7 @@ func _execute_attack() -> void:
 func _start_guard() -> void:
 	if is_dead or is_guarding: return
 	if guard_energy <= 0.0: return
+	if SaveManager.dificultad_juego == 2: return
 	if is_attacking:
 		is_attacking = false
 		hitbox.set_deferred("monitoring", false)

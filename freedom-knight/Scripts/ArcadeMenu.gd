@@ -55,6 +55,7 @@ var _tex_dificil = preload("res://Imagenes/Dificultad dificil.png")
 
 var _btn_solo            : Button           = null
 var _btn_mp              : Button           = null
+var _btn_boss_rush       : Button           = null
 var _btn_back            : Button           = null
 var _btn_host            : Button           = null
 var _btn_join            : Button           = null
@@ -135,6 +136,16 @@ func _build_ui() -> void:
 	_btn_mp.pressed.connect(_on_multiplayer_pressed)
 	panel_inner.add_child(_btn_mp)
 	_connect_focus_feedback(_btn_mp)
+
+	# Boss Rush button
+	_btn_boss_rush = _make_mode_button(
+		"🐲  BOSS RUSH",
+		"Enfrenta a jefes continuamente en el mapa de pruebas",
+		COL_DANGER
+	)
+	_btn_boss_rush.pressed.connect(_on_boss_rush_pressed)
+	panel_inner.add_child(_btn_boss_rush)
+	_connect_focus_feedback(_btn_boss_rush)
 
 	# Back button
 	_btn_back = _make_small_button("← Volver al Menú")
@@ -532,6 +543,15 @@ func _make_host_entry(ip: String, info: Dictionary) -> Control:
 # ─────────────────────────────────────────────────────────────
 func _on_solo_pressed() -> void:
 	if _transitioning: return
+	SaveManager.modo_juego = "Arcade"
+	_show_diff_panel()
+
+func _on_boss_rush_pressed() -> void:
+	if _transitioning: return
+	SaveManager.modo_juego = "BossRush"
+	_show_diff_panel()
+
+func _show_diff_panel() -> void:
 	if _panel_mp and _panel_mp.visible:
 		_panel_mp.visible = false
 		
@@ -579,6 +599,7 @@ func _iniciar_partida_solitario() -> void:
 
 func _on_multiplayer_pressed() -> void:
 	if _transitioning: return
+	SaveManager.modo_juego = "Arcade"
 	if _panel_diff and _panel_diff.visible:
 		_panel_diff.visible = false
 
