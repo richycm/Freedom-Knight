@@ -178,6 +178,7 @@ func cargar_y_posicionar_datos(datos: Dictionary) -> void:
 				var config = escenario.progresion_mapas[idx - 1]
 				var tilemap_viejo = escenario.get_node_or_null("TileMapLayer")
 				if tilemap_viejo:
+					tilemap_viejo.name = "TileMapLayer_Old"
 					tilemap_viejo.queue_free()
 				var nuevo_mapa = config["escena"].instantiate()
 				nuevo_mapa.name = "TileMapLayer"

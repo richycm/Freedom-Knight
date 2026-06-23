@@ -33,7 +33,9 @@ var remoto_scene    : PackedScene = preload("res://Scenes/UI/Personajes/Heroe/ca
 #  PROGRESIÓN DE MAPAS
 # ─────────────────────────────────────────────────────────────
 var progresion_mapas: Array = [
-	{ "umbral": 50, "escena": preload("res://Scenes/UI/Escenas/mapa_2.tscn"), "nombre": "Tierras Oscuras" },
+	{ "umbral": 50, "escena": preload("res://Scenes/UI/Escenas/mapa_2.tscn"), "nombre": "Tierras Oscuras", "shake_intensity": 0.0, "shake_duration": 0.0, "border_color": Color(0, 0, 0, 0), "direct_transition": false },
+	{ "umbral": 110, "escena": preload("res://Scenes/UI/Escenas/mapa_3.tscn"), "nombre": "Mapa 3", "shake_intensity": 6.0, "shake_duration": 0.6, "border_color": Color(0.4, 0.75, 1.0, 0.7), "direct_transition": true },
+	{ "umbral": 180, "escena": preload("res://Scenes/UI/Escenas/mapa_4.tscn"), "nombre": "Mapa 4", "shake_intensity": 18.0, "shake_duration": 1.2, "border_color": Color(1.0, 0.15, 0.15, 0.85), "direct_transition": true },
 ]
 var indice_mapa_actual: int = 0
 
@@ -760,7 +762,10 @@ func _subir_dificultad() -> void:
 		var umbral_cambio_mapa = _get_umbral_adaptativo(siguiente["umbral"])
 		if muertes_totales >= umbral_cambio_mapa:
 			indice_mapa_actual += 1
-			_cambiar_mapa.call_deferred(siguiente)
+			if siguiente.get("direct_transition", false):
+				_transicion_directa_mapa.call_deferred(siguiente)
+			else:
+				_cambiar_mapa.call_deferred(siguiente)
 
 	if muertes_totales >= 75 and not dragon_spawned and not es_boss_rush:
 		dragon_spawned = true
@@ -1068,10 +1073,54 @@ func _mostrar_banner_victoria() -> void:
 	tween_fade.tween_property(label, "modulate:a", 0.0, 0.8)
 	tween_fade.tween_callback(canvas.queue_free)
 
-func _cargar_siguiente_escena_real(config: Dictionary) -> void:
-	print("[RECOMPENSA] Jefe derrotado. Pasando a: %s" % config["nombre"])
+func _transicion_directa_mapa(config: Dictionary) -> void:
+	print("[TRANSICIÓN DIRECTA] Cambiando a: %s" % config["nombre"])
+	
+	# Efectos de transición (shake + bordes)
+	var shake_intensity = config.get("shake_intensity", 0.0)
+	var shake_duration  = config.get("shake_duration", 0.0)
+	var border_color    = config.get("border_color", Color(0, 0, 0, 0))
+	if shake_intensity > 0.0:
+		_camera_shake(shake_intensity, shake_duration)
+	if border_color.a > 0.0:
+		_border_flash_effect(border_color)
+	
+	# Reemplazar el TileMapLayer actual
 	var tilemap_viejo = get_node_or_null("TileMapLayer")
 	if tilemap_viejo:
+		tilemap_viejo.name = "TileMapLayer_Old"
+		tilemap_viejo.queue_free()
+	var nuevo_mapa = config["escena"].instantiate()
+	nuevo_mapa.name = "TileMapLayer"
+	add_child(nuevo_mapa)
+	move_child(nuevo_mapa, 0)
+	
+	# Sincronizar el cambio de mapa con todos los clientes
+	if NetworkManager.is_multiplayer_active() and NetworkManager.is_server():
+		rpc_cargar_mapa.rpc(indice_mapa_actual - 1)
+	
+	# Recalcular límites del nuevo mapa
+	await get_tree().create_timer(0.1).timeout
+	_calcular_limites()
+	
+	# Teletransportar jugadores a la nueva zona de spawn
+	_teletransportar_jugadores_a_zona_spawn()
+
+func _cargar_siguiente_escena_real(config: Dictionary) -> void:
+	print("[RECOMPENSA] Jefe derrotado. Pasando a: %s" % config["nombre"])
+	
+	# Efectos de transición de mapa (shake + bordes)
+	var shake_intensity = config.get("shake_intensity", 0.0)
+	var shake_duration  = config.get("shake_duration", 0.0)
+	var border_color    = config.get("border_color", Color(0, 0, 0, 0))
+	if shake_intensity > 0.0:
+		_camera_shake(shake_intensity, shake_duration)
+	if border_color.a > 0.0:
+		_border_flash_effect(border_color)
+	
+	var tilemap_viejo = get_node_or_null("TileMapLayer")
+	if tilemap_viejo:
+		tilemap_viejo.name = "TileMapLayer_Old"
 		tilemap_viejo.queue_free()
 	var nuevo_mapa = config["escena"].instantiate()
 	nuevo_mapa.name = "TileMapLayer"
@@ -1126,6 +1175,7 @@ func rpc_cargar_mapa(map_index: int) -> void:
 		var config = progresion_mapas[map_index]
 		var tilemap_viejo = get_node_or_null("TileMapLayer")
 		if tilemap_viejo:
+			tilemap_viejo.name = "TileMapLayer_Old"
 			tilemap_viejo.queue_free()
 		var nuevo_mapa = config["escena"].instantiate()
 		nuevo_mapa.name = "TileMapLayer"
@@ -1140,6 +1190,119 @@ func rpc_cargar_mapa(map_index: int) -> void:
 # ─────────────────────────────────────────────────────────────
 func _hay_jugadores_vivos() -> bool:
 	return PlayerRegistry.any_player_alive()
+
+# ─────────────────────────────────────────────────────────────
+#  EFECTOS DE TRANSICIÓN DE MAPA — Camera Shake + Border Flash
+# ─────────────────────────────────────────────────────────────
+func _camera_shake(intensity: float, duration: float) -> void:
+	var cam = _get_player_camera()
+	if not cam: return
+	var original_offset = cam.offset
+	var shake_tween = create_tween()
+	var steps = int(duration / 0.04)  # ~25fps de shake
+	for i in range(steps):
+		# Atenuar la intensidad progresivamente
+		var factor = 1.0 - (float(i) / float(steps))
+		var offset_x = randf_range(-intensity, intensity) * factor
+		var offset_y = randf_range(-intensity, intensity) * factor
+		shake_tween.tween_property(cam, "offset", original_offset + Vector2(offset_x, offset_y), 0.04)
+	# Restaurar al final
+	shake_tween.tween_property(cam, "offset", original_offset, 0.06).set_trans(Tween.TRANS_SINE)
+
+func _border_flash_effect(color: Color) -> void:
+	var canvas = CanvasLayer.new()
+	canvas.layer = 98
+	add_child(canvas)
+	
+	var viewport_size = get_viewport_rect().size
+	var border_thickness = 6.0
+	
+	# Crear 4 ColorRects para los bordes (arriba, abajo, izquierda, derecha)
+	var borders: Array[ColorRect] = []
+	
+	# Borde superior
+	var top = ColorRect.new()
+	top.color = Color(color.r, color.g, color.b, 0.0)
+	top.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	top.custom_minimum_size = Vector2(0, border_thickness)
+	top.size = Vector2(viewport_size.x, border_thickness)
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(top)
+	borders.append(top)
+	
+	# Borde inferior
+	var bottom = ColorRect.new()
+	bottom.color = Color(color.r, color.g, color.b, 0.0)
+	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	bottom.custom_minimum_size = Vector2(0, border_thickness)
+	bottom.size = Vector2(viewport_size.x, border_thickness)
+	bottom.position.y = viewport_size.y - border_thickness
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(bottom)
+	borders.append(bottom)
+	
+	# Borde izquierdo
+	var left = ColorRect.new()
+	left.color = Color(color.r, color.g, color.b, 0.0)
+	left.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	left.custom_minimum_size = Vector2(border_thickness, 0)
+	left.size = Vector2(border_thickness, viewport_size.y)
+	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(left)
+	borders.append(left)
+	
+	# Borde derecho
+	var right = ColorRect.new()
+	right.color = Color(color.r, color.g, color.b, 0.0)
+	right.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+	right.custom_minimum_size = Vector2(border_thickness, 0)
+	right.size = Vector2(border_thickness, viewport_size.y)
+	right.position.x = viewport_size.x - border_thickness
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(right)
+	borders.append(right)
+	
+	# Animar: fade in rápido → mantener → fade out
+	var tween = create_tween()
+	tween.set_parallel(true)
+	for border in borders:
+		tween.tween_property(border, "color:a", color.a, 0.15).set_trans(Tween.TRANS_SINE)
+	
+	await tween.finished
+	
+	# Pulso breve (2 parpadeos)
+	for _pulse in range(2):
+		var t_down = create_tween()
+		t_down.set_parallel(true)
+		for border in borders:
+			t_down.tween_property(border, "color:a", color.a * 0.3, 0.12)
+		await t_down.finished
+		var t_up = create_tween()
+		t_up.set_parallel(true)
+		for border in borders:
+			t_up.tween_property(border, "color:a", color.a, 0.12)
+		await t_up.finished
+	
+	# Fade out final
+	var tween_out = create_tween()
+	tween_out.set_parallel(true)
+	for border in borders:
+		tween_out.tween_property(border, "color:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
+	await tween_out.finished
+	canvas.queue_free()
+
+func _get_player_camera() -> Camera2D:
+	if is_instance_valid(player):
+		var cam = player.get_node_or_null("Camera2D")
+		if cam is Camera2D:
+			return cam
+	# Fallback: buscar cualquier Camera2D activa
+	var viewport = get_viewport()
+	if viewport:
+		var cam = viewport.get_camera_2d()
+		if cam:
+			return cam
+	return null
 
 func _exit_tree() -> void:
 	if NetworkManager.is_multiplayer_active():
