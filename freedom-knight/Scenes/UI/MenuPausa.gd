@@ -1,16 +1,30 @@
-extends Node
+extends Control
 
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	_conectar_botones_recursivo(self)
+	
+	# Ocultar Guardar en cualquier sesión multijugador (tanto para host como clientes)
+	var guardar_node = find_child("Guardar", true)
+	if guardar_node:
+		if NetworkManager.is_multiplayer_active():
+			guardar_node.visible = false
+		else:
+			guardar_node.visible = true
 
 func _conectar_botones_recursivo(nodo: Node) -> void:
 	for child in nodo.get_children():
 		if child is TextureButton or child is Button:
 			child.button_down.connect(func(): child.modulate = Color(0.6, 0.6, 0.6, 1.0))
 			child.button_up.connect(func(): child.modulate = Color(1.0, 1.0, 1.0, 1.0))
+			child.focus_entered.connect(func(): child.modulate = Color(0.75, 0.75, 1.0))
+			child.focus_exited.connect(func(): child.modulate = Color(1.0, 1.0, 1.0))
 		_conectar_botones_recursivo(child)
+
+func focus_first_button() -> void:
+	var regresar_node = find_child("Regresar", true)
+	if regresar_node and regresar_node.visible:
+		regresar_node.grab_focus()
 
 # --- ESTILOS MINIMALISTAS ---
 func _crear_estilo_panel() -> StyleBoxFlat:
@@ -38,6 +52,8 @@ func _crear_estilo_boton(color_base: Color) -> StyleBoxFlat:
 
 func _on_texture_button_pressed_salir() -> void:
 	get_tree().paused = false
+	if NetworkManager.has_method("cleanup"):
+		NetworkManager.cleanup()
 	get_tree().change_scene_to_file("res://Scenes/UI/MainMenu.tscn")
 
 
@@ -112,6 +128,8 @@ func _on_texture_button_pressed_guardar() -> void:
 	btn_cancelar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(0.3, 0.3, 0.3)))
 	btn_cancelar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(0.1, 0.1, 0.1)))
 	hbox.add_child(btn_cancelar)
+	btn_cancelar.focus_entered.connect(func(): btn_cancelar.modulate = Color(0.75, 0.75, 1.0))
+	btn_cancelar.focus_exited.connect(func(): btn_cancelar.modulate = Color(1.0, 1.0, 1.0))
 	
 	var btn_guardar = Button.new()
 	btn_guardar.text = "Guardar"
@@ -121,6 +139,8 @@ func _on_texture_button_pressed_guardar() -> void:
 	btn_guardar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(1, 1, 1, 0.2)))
 	btn_guardar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(1, 1, 1, 0.05)))
 	hbox.add_child(btn_guardar)
+	btn_guardar.focus_entered.connect(func(): btn_guardar.modulate = Color(0.75, 0.75, 1.0))
+	btn_guardar.focus_exited.connect(func(): btn_guardar.modulate = Color(1.0, 1.0, 1.0))
 	
 	var btn_action = func():
 		var nombre_partida = input.text.strip_edges()
@@ -130,8 +150,47 @@ func _on_texture_button_pressed_guardar() -> void:
 		var datos_a_guardar = {
 			"escena": get_tree().current_scene.scene_file_path,
 			"pos_x": player.global_position.x,
-			"pos_y": player.global_position.y
+			"pos_y": player.global_position.y,
+			"nivel": player.nivel if "nivel" in player else 1,
+			"experiencia": player.experiencia if "experiencia" in player else 0,
+			"fuerza": player.fuerza if "fuerza" in player else 0,
+			"salud_actual": player.salud_actual if "salud_actual" in player else 10,
 		}
+		
+		# Guardar gatos (mascotas) activos
+		var gatos_data = []
+		for m in get_tree().get_nodes_in_group("mascotas"):
+			if is_instance_valid(m) and not m.is_queued_for_deletion():
+				gatos_data.append({
+					"pos_x": m.global_position.x,
+					"pos_y": m.global_position.y,
+					"state": m.state if "state" in m else 0,
+					"target_peer_id": m.target_peer_id if "target_peer_id" in m else 0,
+					"current_health": m.current_health if "current_health" in m else 3,
+					"max_health": m.max_health if "max_health" in m else 3,
+					"enemies_killed_since_heal": m.enemies_killed_since_heal if "enemies_killed_since_heal" in m else 0
+				})
+		datos_a_guardar["gatos"] = gatos_data
+		
+		# Guardar progreso del escenario actual si existe
+		var escenario = get_tree().current_scene
+		if escenario:
+			if "enemigos_derrotados" in escenario:
+				datos_a_guardar["enemigos_derrotados"] = escenario.enemigos_derrotados
+			if "arqueros_derrotados" in escenario:
+				datos_a_guardar["arqueros_derrotados"] = escenario.arqueros_derrotados
+			if "lanceros_derrotados" in escenario:
+				datos_a_guardar["lanceros_derrotados"] = escenario.lanceros_derrotados
+			if "vikingos_derrotados" in escenario:
+				datos_a_guardar["vikingos_derrotados"] = escenario.vikingos_derrotados
+			if "oleada_actual" in escenario:
+				datos_a_guardar["oleada_actual"] = escenario.oleada_actual
+			if "indice_mapa_actual" in escenario:
+				datos_a_guardar["indice_mapa_actual"] = escenario.indice_mapa_actual
+			if "tiempo_partida" in escenario:
+				datos_a_guardar["tiempo_partida"] = escenario.tiempo_partida
+			if "dragon_spawned" in escenario:
+				datos_a_guardar["dragon_spawned"] = escenario.dragon_spawned
 		
 		SaveManager.guardar_datos_con_nombre(nombre_partida, datos_a_guardar)
 		print("Partida guardada con éxito: " + nombre_partida)
@@ -164,3 +223,12 @@ func _on_texture_button_pressed_guardar() -> void:
 	btn_cancelar.mouse_filter = Control.MOUSE_FILTER_STOP
 	
 	input.grab_focus()
+
+func _on_texture_button_pressed_regresar() -> void:
+	var canvas_layer = get_parent()
+	if canvas_layer and canvas_layer.has_method("_on_resume_pressed"):
+		canvas_layer._on_resume_pressed()
+	else:
+		hide()
+		if not NetworkManager.is_multiplayer_active():
+			get_tree().paused = false

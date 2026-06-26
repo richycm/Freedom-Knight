@@ -1,16 +1,19 @@
 extends StaticBody2D
 
-func recibir_dano(cantidad: int) -> void:
-	print("[Saco] ¡Golpe recibido de ", cantidad, " daño!")
-	
-	# Usamos un método de búsqueda profunda para encontrar al Caballero
-	var caballero = encontrar_al_jugador()
-	
-	if caballero:
-		caballero.mejorar_fuerza(1)
+func recibir_dano(cantidad: int, attacker: Node = null) -> void:
+	if not NetworkManager.is_multiplayer_active():
+		print("[Saco] ¡Golpe recibido de ", cantidad, " daño!")
+		var caballero = encontrar_al_jugador()
+		if caballero:
+			caballero.mejorar_fuerza(1)
 		animar_golpe()
 	else:
-		print("[Error] No se encontró al jugador con la función 'mejorar_fuerza'")
+		if NetworkManager.is_server():
+			print("[Saco] (Server) ¡Golpe recibido de ", cantidad, " daño! Atacante: ", attacker)
+			var caballero = attacker if (attacker and attacker.has_method("mejorar_fuerza")) else encontrar_al_jugador()
+			if caballero:
+				caballero.mejorar_fuerza(1)
+			rpc_animar_golpe.rpc()
 
 # --- FUNCIÓN DE BÚSQUEDA ---
 func encontrar_al_jugador() -> Node:
@@ -19,6 +22,11 @@ func encontrar_al_jugador() -> Node:
 		if nodo.has_method("mejorar_fuerza"):
 			return nodo
 	return null
+
+# --- RPC ANIMACIÓN ---
+@rpc("any_peer", "call_local", "reliable")
+func rpc_animar_golpe() -> void:
+	animar_golpe()
 
 # --- ANIMACIÓN ---
 func animar_golpe():

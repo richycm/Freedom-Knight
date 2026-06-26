@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://ddnwv33ipmsii"]
+
+[ext_resource type="Script" uid="uid://bh47wo1fmqbrc" path="res://jefe_piso.gd" id="1_uhtna"]
+[ext_resource type="Texture2D" uid="uid://cvg1mn7vh0sx3" path="res://Scenes/UI/Personajes/Villanos/jefe/boss-neutro.png" id="2_kuie0"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kuo5p"]
+radius = 146.0
+height = 488.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_031ag"]
+radius = 306.86316
+
+[node name="JefePiso" type="CharacterBody2D" unique_id=1848893850]
+position = Vector2(501, 484)
+script = ExtResource("1_uhtna")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=336262297]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1332555811]
+position = Vector2(-2, 6)
+shape = SubResource("CapsuleShape2D_kuo5p")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1350424899]
+position = Vector2(4, 4)
+
+[node name="area_ataque" type="CollisionShape2D" parent="Area2D" unique_id=1854192733]
+position = Vector2(-7, -5)
+shape = SubResource("CircleShape2D_031ag")
+
+[node name="BossNeutro" type="Sprite2D" parent="." unique_id=1056066923]
+position = Vector2(3, -8)
+texture = ExtResource("2_kuie0")

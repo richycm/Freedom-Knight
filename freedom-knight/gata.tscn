@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://ci1ynfnqdf3w1"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_t52m0"]
+radius = 43.011627
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7aftx"]
+radius = 95.047356
+
+[node name="Gata" type="CharacterBody2D" unique_id=936252258]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=579727018]
+visible = false
+shape = SubResource("CircleShape2D_t52m0")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1854787968]
+position_smoothing_enabled = true
+
+[node name="HitboxEspada" type="Area2D" parent="." unique_id=731721306 groups=["Jugador", "jugador"]]
+collision_layer = 0
+collision_mask = 6
+
+[node name="HitboxEspada" type="CollisionShape2D" parent="HitboxEspada" unique_id=2035788108]
+position = Vector2(-2, 0)
+shape = SubResource("CircleShape2D_7aftx")

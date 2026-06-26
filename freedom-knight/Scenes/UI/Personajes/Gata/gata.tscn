@@ -1,0 +1,210 @@
+[gd_scene format=3 uid="uid://dgata1234567"]
+
+[ext_resource type="Script" uid="uid://taw56mc4sjjy" path="res://Scenes/UI/Personajes/Gata/gata.gd" id="1_gata"]
+[ext_resource type="Texture2D" uid="uid://clin7tqv0wrj" path="res://Scenes/Efectos/Explosion_02.png" id="2_explosion"]
+[ext_resource type="Texture2D" uid="uid://bn54lwfsrfnnd" path="res://SpritesDelJuego/Mascotas/Gata/gata.png" id="3_gata_tex"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ilapb"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(568, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_smnot"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(781, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kveyv"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(852, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ulbvy"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(923, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_crgsd"]
+atlas = ExtResource("2_explosion")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w0aet"]
+atlas = ExtResource("2_explosion")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vln3r"]
+atlas = ExtResource("2_explosion")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bmkxf"]
+atlas = ExtResource("2_explosion")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r35xg"]
+atlas = ExtResource("2_explosion")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m07py"]
+atlas = ExtResource("2_explosion")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uo12r"]
+atlas = ExtResource("2_explosion")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f131o"]
+atlas = ExtResource("2_explosion")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_130vx"]
+atlas = ExtResource("2_explosion")
+region = Rect2(1536, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4pov4"]
+atlas = ExtResource("2_explosion")
+region = Rect2(1728, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cxdkm"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(0, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_catqv"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(284, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ks8qt"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(355, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2cyjh"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(426, 0, 71, 81)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hdki6"]
+atlas = ExtResource("3_gata_tex")
+region = Rect2(497, 0, 71, 81)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8g1j8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ilapb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_smnot")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kveyv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ulbvy")
+}],
+"loop": true,
+"name": &"atack",
+"speed": 13.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_crgsd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w0aet")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vln3r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bmkxf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r35xg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m07py")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uo12r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f131o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_130vx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4pov4")
+}],
+"loop": false,
+"name": &"death",
+"speed": 24.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cxdkm")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_catqv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ks8qt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2cyjh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hdki6")
+}],
+"loop": true,
+"name": &"move",
+"speed": 16.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gata_phys"]
+radius = 24.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gata_int"]
+radius = 80.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_lw82i"]
+radius = 55.03635
+
+[node name="Gata" type="CharacterBody2D" unique_id=1060505901]
+y_sort_enabled = true
+collision_layer = 4
+script = ExtResource("1_gata")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="." unique_id=361289466]
+y_sort_enabled = true
+sprite_frames = SubResource("SpriteFrames_8g1j8")
+animation = &"atack"
+autoplay = "idle"
+frame_progress = 0.63587815
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1944649966]
+shape = SubResource("CircleShape2D_gata_phys")
+
+[node name="ZonaInteraccion" type="Area2D" parent="." unique_id=2128973699]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaInteraccion" unique_id=812211492]
+visible = false
+shape = SubResource("CircleShape2D_gata_int")
+
+[node name="ZonaDeAtaque" type="CollisionShape2D" parent="ZonaInteraccion" unique_id=1400538335]
+shape = SubResource("CircleShape2D_lw82i")
+
+[node name="LabelInteract" type="Label" parent="." unique_id=1679463997]
+visible = false
+offset_left = -60.0
+offset_top = -55.0
+offset_right = 60.0
+offset_bottom = -35.0
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 12
+text = "Interactuar para adoptar"
+horizontal_alignment = 1
+vertical_alignment = 1

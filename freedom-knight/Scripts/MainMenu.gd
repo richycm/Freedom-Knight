@@ -13,6 +13,7 @@ extends Control
 # Variable para saber qué estamos usando
 var usando_mando_o_teclado = false
 var mostrando_configuracion = false
+var mostrando_partidas = false
 
 func _ready():
 	if music_player:
@@ -22,6 +23,32 @@ func _ready():
 		if boton != null:
 			boton.focus_entered.connect(_oscurecer_boton.bind(boton))
 			boton.focus_exited.connect(_aclarar_boton.bind(boton))
+
+	# Configurar vecinos de foco explícitos para navegación con mando/teclado en cuadrícula 2x2 perfecta
+	if btn_nuevo and btn_continuar and btn_prueba and btn_config:
+		# Top-Left: Modo Historia (btn_nuevo)
+		btn_nuevo.focus_neighbor_right = btn_prueba.get_path()
+		btn_nuevo.focus_neighbor_bottom = btn_continuar.get_path()
+		btn_nuevo.focus_neighbor_left = btn_prueba.get_path() # Wrap horizontal
+		btn_nuevo.focus_neighbor_top = btn_continuar.get_path() # Wrap vertical
+		
+		# Bottom-Left: Continuar Partida (btn_continuar)
+		btn_continuar.focus_neighbor_right = btn_config.get_path()
+		btn_continuar.focus_neighbor_top = btn_nuevo.get_path()
+		btn_continuar.focus_neighbor_left = btn_config.get_path() # Wrap horizontal
+		btn_continuar.focus_neighbor_bottom = btn_nuevo.get_path() # Wrap vertical
+		
+		# Top-Right: Arcade (btn_prueba)
+		btn_prueba.focus_neighbor_left = btn_nuevo.get_path()
+		btn_prueba.focus_neighbor_bottom = btn_config.get_path()
+		btn_prueba.focus_neighbor_right = btn_nuevo.get_path() # Wrap horizontal
+		btn_prueba.focus_neighbor_top = btn_config.get_path() # Wrap vertical
+		
+		# Bottom-Right: Configuración (btn_config)
+		btn_config.focus_neighbor_left = btn_continuar.get_path()
+		btn_config.focus_neighbor_top = btn_prueba.get_path()
+		btn_config.focus_neighbor_right = btn_continuar.get_path() # Wrap horizontal
+		btn_config.focus_neighbor_bottom = btn_prueba.get_path() # Wrap vertical
 
 	# Desactivar salir directo
 	get_tree().quit_on_go_back = false
@@ -65,16 +92,19 @@ func _input(event):
 # --- FUNCIONES DE LOS BOTONES ---
 
 func _on_texture_button_pressed_nuevojuego() -> void:
-	print("CLICK NUEVA PARTIDA")
+	if mostrando_configuracion or mostrando_partidas: return
+	print("CLICK MODO HISTORIA")
 	if music_player: music_player.stop()
 	get_tree().change_scene_to_file("res://Scenes/Cinematica/C1_inicio.tscn")
 
 func _on_texture_button_pressed_prueba() -> void:
-	print("CLICK PRUEBA")
+	if mostrando_configuracion or mostrando_partidas: return
+	print("CLICK ARCADE → ArcadeMenu")
 	if music_player: music_player.stop()
-	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/escenario_pruebas.tscn")
+	get_tree().change_scene_to_file("res://Scenes/UI/Escenas/ArcadeMenu.tscn")
 
 func _on_texture_button_pressed_continuarjuego() -> void:
+	if mostrando_configuracion or mostrando_partidas: return
 	print("CLICK CONTINUAR")
 	if SaveManager.existe_partida():
 		_mostrar_menu_partidas()
@@ -93,6 +123,7 @@ func _on_texture_button_pressed_continuarjuego() -> void:
 		tween.finished.connect(func(): lbl.queue_free())
 
 func _on_texture_button_pressed_configuracion() -> void:
+	if mostrando_configuracion or mostrando_partidas: return
 	print("CLICK CONFIG")
 	_mostrar_menu_configuracion()
 
@@ -174,7 +205,15 @@ func _mostrar_menu_configuracion() -> void:
 	btn_guardar.text = "Guardar y Salir"
 	btn_guardar.custom_minimum_size = Vector2(200, 50)
 	btn_guardar.add_theme_stylebox_override("normal", _crear_estilo_boton(Color(0.2, 0.2, 0.2)))
+	btn_guardar.add_theme_stylebox_override("hover", _crear_estilo_boton(Color(0.3, 0.3, 0.3)))
+	btn_guardar.add_theme_stylebox_override("pressed", _crear_estilo_boton(Color(0.1, 0.1, 0.1)))
+	btn_guardar.focus_entered.connect(func(): btn_guardar.modulate = Color(0.75, 0.75, 1.0))
+	btn_guardar.focus_exited.connect(func(): btn_guardar.modulate = Color(1.0, 1.0, 1.0))
 	vbox.add_child(btn_guardar)
+	
+	# Establecer enlaces de navegación explícitos para el mando
+	input.focus_neighbor_bottom = btn_guardar.get_path()
+	btn_guardar.focus_neighbor_top = input.get_path()
 	
 	btn_guardar.pressed.connect(func():
 		var nombre = input.text.strip_edges()
@@ -185,11 +224,13 @@ func _mostrar_menu_configuracion() -> void:
 		mostrando_configuracion = false
 		overlay.queue_free()
 	)
+	input.text_submitted.connect(func(_t): btn_guardar.emit_signal("pressed"))
 	
 	add_child(overlay)
 	input.grab_focus()
 
 func _mostrar_menu_partidas() -> void:
+	mostrando_partidas = true
 	var partidas = SaveManager.obtener_lista_partidas()
 	
 	var overlay = ColorRect.new()
@@ -256,6 +297,7 @@ func _mostrar_menu_partidas() -> void:
 		
 		btn.pressed.connect(func():
 			overlay.queue_free()
+			mostrando_partidas = false
 			if music_player: music_player.stop()
 			SaveManager.cargar_y_posicionar_datos(partida)
 		)
@@ -298,7 +340,10 @@ func _mostrar_menu_partidas() -> void:
 	btn_cerrar.pressed.connect(func(): 
 		var t = create_tween()
 		t.tween_property(overlay, "modulate:a", 0.0, 0.2)
-		t.finished.connect(func(): overlay.queue_free())
+		t.finished.connect(func(): 
+			mostrando_partidas = false
+			overlay.queue_free()
+		)
 	)
 	main_vbox.add_child(btn_cerrar)
 	
